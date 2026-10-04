@@ -59,7 +59,6 @@ class Settings:
     news_feeds: tuple[str, ...] = (
         "https://www.coindesk.com/arcade/outboundfeeds/rss/",
         "https://cointelegraph.com/rss",
-        "https://www.federalreserve.gov/feeds/press_all.xml",
     )
 
     @property

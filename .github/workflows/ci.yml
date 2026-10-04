@@ -51,6 +51,8 @@ jobs:
           sudo grep -q "HL_PAPER_EQUITY=777" /opt/hltrader/app/.env
           sudo test -f /opt/hltrader/app/data/state/engine-BTC.pkl
           sudo ls /opt/hltrader/app/data
-          sleep 10
-          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; assert json.load(sys.stdin)['engine']['journal']['start_equity'] in (777.0, None, 0.0)"
-          sudo journalctl -u hltrader -n 6 --no-pager | grep -E "learned state: restored|learned state"
+          sleep 15
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; e = json.load(sys.stdin)['engine']; print(e['mode'], e['ticks']); assert e['mode'] == 'paper'"
+          sudo journalctl -u hltrader --since "-2min" --no-pager | grep -E "stop requested|learned state"
+          sudo journalctl -u hltrader --since "-2min" --no-pager | grep -q "stop requested: shutting down"
+          sudo journalctl -u hltrader --since "-2min" --no-pager | grep -q "learned state: restored"

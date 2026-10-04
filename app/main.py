@@ -7,6 +7,7 @@ import asyncio
 import dataclasses
 import logging
 import os
+import signal
 import time
 from pathlib import Path
 from typing import Any
@@ -160,12 +161,24 @@ async def run(s: Settings, duration: float | None) -> Engine:
 
     runner = await serve(state, s.dashboard_host, s.dashboard_port)
     log.info("dashboard: http://%s:%d", s.dashboard_host, s.dashboard_port)
+    # systemd stops the service with SIGTERM: shut down cleanly so the learned state is saved.
+    stop = asyncio.Event()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            asyncio.get_running_loop().add_signal_handler(sig, stop.set)
+        except NotImplementedError:  # Windows: Ctrl-C still raises KeyboardInterrupt
+            pass
+    stopper = asyncio.create_task(stop.wait())
     tasks = [asyncio.create_task(c) for c in (stream(), ticker(), news.run(), chart_loop())]
     try:
-        done, _ = await asyncio.wait(tasks[:3], timeout=duration, return_when=asyncio.FIRST_EXCEPTION)
+        done, _ = await asyncio.wait([*tasks[:3], stopper], timeout=duration, return_when=asyncio.FIRST_COMPLETED)
         for t in done:
-            t.result()
+            if t is not stopper:
+                t.result()  # the worker loops never return, so a finished one means it raised
+        if stopper in done:
+            log.info("stop requested: shutting down")
     finally:
+        stopper.cancel()
         for t in tasks:
             t.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)

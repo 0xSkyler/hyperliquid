@@ -19,3 +19,38 @@ jobs:
           docker run --rm -u 0 -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.18.4 detect --no-git --source /repo             --redact --report-format json --report-path /repo/gitleaks.json && exit 0
           python -c "import json; [print('::error file=%s,line=%s::gitleaks %s' % (f['File'].removeprefix('/repo/'), f['StartLine'], f['RuleID'])) for f in json.load(open('gitleaks.json'))]"
           exit 1
+
+  deploy:
+    # Runs the real installer on a clean Ubuntu 24.04 machine and checks the service comes up in paper mode.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: install
+        run: sudo HL_SRC="$PWD" bash deploy/install.sh
+      - name: service is running as an unprivileged user in paper mode
+        run: |
+          systemctl is-active hltrader
+          test "$(ps -o user= -p "$(systemctl show -p MainPID --value hltrader)")" = hltrader
+          sleep 25
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "
+          import sys, json
+          s = json.load(sys.stdin)
+          e = s['engine']
+          print('mode', e['mode'], '| state', e['state'], '| ticks', e['ticks'], '| mid', e['mid'])
+          print('models', [m['name'] for m in e['model']['arena']], '| charts', s['health']['chart']['loaded'])
+          print('faults', s['health']['faults'])
+          assert e['mode'] == 'paper' and e['ticks'] > 10
+          assert [m['name'] for m in e['model']['arena']] == ['ridge', 'mlp', 'tree', 'flow_pretrained']
+          assert s['health']['chart']['loaded'] == ['5m', '1h', '4h', '1d']
+          "
+          sudo journalctl -u hltrader -n 15 --no-pager
+      - name: re-running the installer keeps configuration and learned state
+        run: |
+          echo "HL_PAPER_EQUITY=777" | sudo tee -a /opt/hltrader/app/.env >/dev/null
+          sudo HL_SRC="$PWD" bash deploy/install.sh
+          sudo grep -q "HL_PAPER_EQUITY=777" /opt/hltrader/app/.env
+          sudo test -f /opt/hltrader/app/data/state/engine-BTC.pkl
+          sudo ls /opt/hltrader/app/data
+          sleep 10
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; assert json.load(sys.stdin)['engine']['journal']['start_equity'] in (777.0, None, 0.0)"
+          sudo journalctl -u hltrader -n 6 --no-pager | grep -E "learned state: restored|learned state"

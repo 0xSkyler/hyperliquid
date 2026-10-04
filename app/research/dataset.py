@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import glob
+import gzip
 import json
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
@@ -38,7 +39,8 @@ def expand_paths(paths: list[str]) -> list[str]:
 
 def read_events(paths: list[str]) -> Iterator[Event]:
     for path in expand_paths(paths):
-        with open(path, encoding="utf-8") as f:
+        opener = gzip.open if path.endswith(".gz") else open  # the VPS gzips recordings from previous days
+        with opener(path, "rt", encoding="utf-8") as f:
             for line in f:
                 r = json.loads(line)
                 ev = parse_event(r["ch"], r["d"], r["t"])

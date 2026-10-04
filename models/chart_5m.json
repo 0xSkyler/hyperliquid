@@ -1,0 +1,220 @@
+{
+ "timeframe": "5m",
+ "features": [
+  "ret_1",
+  "ret_3",
+  "ret_12",
+  "ret_48",
+  "ret_288",
+  "rsi_14",
+  "rsi_48",
+  "macd_hist",
+  "boll_20",
+  "boll_96",
+  "donch_48",
+  "donch_288",
+  "adx_14",
+  "atr_14",
+  "eff_48",
+  "stoch_14",
+  "rel_volume",
+  "vol_ratio",
+  "body",
+  "upper_wick",
+  "lower_wick",
+  "hour_sin",
+  "hour_cos",
+  "ma_cross(5,20)",
+  "ma_cross(10,50)",
+  "ma_cross(20,100)",
+  "ma_cross(50,200)",
+  "tsmom(6)",
+  "tsmom(24)",
+  "tsmom(96)",
+  "tsmom(288)",
+  "macd(12,26)",
+  "macd(24,52)",
+  "donchian_breakout(20)",
+  "breakout_fade(20)",
+  "donchian_breakout(55)",
+  "breakout_fade(55)",
+  "donchian_breakout(200)",
+  "breakout_fade(200)",
+  "keltner_breakout(20,1.5)",
+  "keltner_breakout(20,2.5)",
+  "keltner_breakout(50,2.0)",
+  "bollinger_reversion(20,1.5)",
+  "range_trade(20,1.5)",
+  "bollinger_reversion(20,2.5)",
+  "range_trade(20,2.5)",
+  "bollinger_reversion(96,2.0)",
+  "range_trade(96,2.0)",
+  "rsi_reversion(14,20)",
+  "rsi_reversion(14,30)",
+  "rsi_reversion(48,15)",
+  "stochastic_reversion(14)",
+  "stochastic_reversion(48)",
+  "vwap_reversion(48,1.5)",
+  "vwap_reversion(288,2.0)",
+  "trend_pullback(20,100)",
+  "trend_pullback(50,200)",
+  "adx_trend(14,25)",
+  "adx_trend(28,20)"
+ ],
+ "horizon_bars": 1,
+ "source": "Bitstamp BTC/USD",
+ "trained_from": "2016-10-06",
+ "trained_to": "2026-10-04",
+ "bars": 1051055,
+ "trees": 15,
+ "num_leaves": 7,
+ "cost_bps_round_trip": 9.0,
+ "out_of_sample": {
+  "bars": 1026283,
+  "ic": 0.06498257314460074,
+  "t_stat": 65.83100296646063,
+  "top_decile_gross_bps": 3.223709799373892,
+  "top_decile_net_bps": -5.776290200626108
+ },
+ "by_regime": {
+  "bull/high_vol": {
+   "bars": 198144,
+   "ic": 0.07255817705237129,
+   "t_stat": 32.298088930191476,
+   "top_decile_gross_bps": 4.630545800938152,
+   "top_decile_net_bps": -4.369454199061848
+  },
+  "bull/low_vol": {
+   "bars": 161280,
+   "ic": 0.07104524266202975,
+   "t_stat": 28.531543013152145,
+   "top_decile_gross_bps": 3.2733227507042066,
+   "top_decile_net_bps": -5.726677249295793
+  },
+  "bear/high_vol": {
+   "bars": 129888,
+   "ic": 0.049370830573998575,
+   "t_stat": 17.793236379746826,
+   "top_decile_gross_bps": 3.74847263457064,
+   "top_decile_net_bps": -5.25152736542936
+  },
+  "bear/low_vol": {
+   "bars": 92736,
+   "ic": 0.06825020055787644,
+   "t_stat": 20.78395108631631,
+   "top_decile_gross_bps": 2.3232033293262306,
+   "top_decile_net_bps": -6.676796670673769
+  },
+  "range/high_vol": {
+   "bars": 170496,
+   "ic": 0.05566590021248931,
+   "t_stat": 22.985096635707375,
+   "top_decile_gross_bps": 3.1522806168385715,
+   "top_decile_net_bps": -5.8477193831614285
+  },
+  "range/low_vol": {
+   "bars": 273739,
+   "ic": 0.0676937492889148,
+   "t_stat": 35.417418793875505,
+   "top_decile_gross_bps": 2.1375051174842614,
+   "top_decile_net_bps": -6.862494882515739
+  }
+ },
+ "walk_forward": [
+  {
+   "year": 2017,
+   "bars": 105120,
+   "ic": 0.1342463320116394,
+   "t_stat": 43.52563386637647,
+   "top_decile_gross_bps": 6.975858268418391,
+   "top_decile_net_bps": -2.024141731581609
+  },
+  {
+   "year": 2018,
+   "bars": 105120,
+   "ic": 0.08649688559898099,
+   "t_stat": 28.044205876974573,
+   "top_decile_gross_bps": 3.235702550056863,
+   "top_decile_net_bps": -5.764297449943137
+  },
+  {
+   "year": 2019,
+   "bars": 105120,
+   "ic": 0.12091031335470043,
+   "t_stat": 39.20180127744015,
+   "top_decile_gross_bps": 2.801136648965978,
+   "top_decile_net_bps": -6.1988633510340225
+  },
+  {
+   "year": 2020,
+   "bars": 105408,
+   "ic": 0.1036845900952961,
+   "t_stat": 33.66285928263051,
+   "top_decile_gross_bps": 3.1691797848134273,
+   "top_decile_net_bps": -5.830820215186573
+  },
+  {
+   "year": 2021,
+   "bars": 105120,
+   "ic": 0.026549457630817893,
+   "t_stat": 8.607922129966749,
+   "top_decile_gross_bps": 2.1271135026165955,
+   "top_decile_net_bps": -6.872886497383405
+  },
+  {
+   "year": 2022,
+   "bars": 105120,
+   "ic": 0.01644271016387257,
+   "t_stat": 5.331090776481057,
+   "top_decile_gross_bps": 0.9891636818860701,
+   "top_decile_net_bps": -8.01083631811393
+  },
+  {
+   "year": 2023,
+   "bars": 105120,
+   "ic": 0.014204906935662768,
+   "t_stat": 4.605545411356219,
+   "top_decile_gross_bps": 0.5424410360708791,
+   "top_decile_net_bps": -8.45755896392912
+  },
+  {
+   "year": 2024,
+   "bars": 105408,
+   "ic": 0.00014558493853210463,
+   "t_stat": 0.0472664770625253,
+   "top_decile_gross_bps": 0.2603419479542822,
+   "top_decile_net_bps": -8.739658052045717
+  },
+  {
+   "year": 2025,
+   "bars": 105120,
+   "ic": -0.002642215750647706,
+   "t_stat": -0.8566648610458425,
+   "top_decile_gross_bps": 0.04133594477530232,
+   "top_decile_net_bps": -8.958664055224698
+  },
+  {
+   "year": 2026,
+   "bars": 79627,
+   "ic": -0.004879806801194748,
+   "t_stat": -1.3769963999522241,
+   "top_decile_gross_bps": 0.1449945200723987,
+   "top_decile_net_bps": -8.855005479927602
+  }
+ ],
+ "profitable_years_after_costs": "0/10",
+ "top_features": {
+  "ret_1": 7254,
+  "body": 3543,
+  "upper_wick": 3494,
+  "ret_3": 3119,
+  "stoch_14": 3090,
+  "lower_wick": 2392,
+  "stochastic_reversion(14)": 864,
+  "rsi_14": 644,
+  "boll_20": 451,
+  "macd_hist": 202,
+  "atr_14": 200,
+  "ret_12": 0
+ }
+}

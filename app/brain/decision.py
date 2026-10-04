@@ -162,8 +162,10 @@ def decide(
             "posting has higher expected utility than crossing"
         )
     else:
-        # Marketable limit: cross, but refuse to chase more than the edge is worth (min 5 bps).
-        tol = max(abs(fc.mu_bps), 5.0) * 1e-4
+        # Marketable limit. Opening: refuse to chase more than the edge is worth (min 5 bps).
+        # Reducing: getting out matters more than the price, so allow up to 1% through the touch;
+        # a tight limit here simply fails to fill in a fast market and leaves the risk on.
+        tol = 0.01 if reduce_only else max(abs(fc.mu_bps), 5.0) * 1e-4
         px = meta.round_px(book.best_ask * (1 + tol) if is_buy else book.best_bid * (1 - tol))
         intent = OrderIntent(meta.coin, is_buy, sz, px, "Ioc", reduce_only)
         d.exec_style = "taker"

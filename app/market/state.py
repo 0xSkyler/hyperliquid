@@ -17,7 +17,8 @@ FEATURE_NAMES = (
     "ofi_1s", "ofi_5s", "ofi_30s",
     "tfi_5s", "tfi_30s",
     "ret_5s", "ret_30s", "ret_300s",
-    "rsi_15s", "z_300s", "premium_bps", "spread_bps", "news_llm", "chart_ctx",
+    "rsi_15s", "z_300s", "premium_bps", "spread_bps", "news_llm",
+    "chart_5m", "chart_1h", "chart_4h", "chart_1d",
     "bias",
 )  # fmt: skip
 REGIMES = ("trend", "range", "chaos")
@@ -28,7 +29,7 @@ _FLOW_KEEP_S = 30.0
 @dataclass(slots=True)
 class Features:
     values: np.ndarray  # raw, without the bias term
-    sigma_tick: float  # std of per-tick log returns
+    sigma_tick: float  # std of per-tick log returns used for risk (max of 5-minute and 30-second)
     regime: np.ndarray  # probabilities over REGIMES
     sell_rate: float  # aggressor-sell volume per second (fills resting bids)
     buy_rate: float
@@ -40,7 +41,8 @@ class MarketState:
         self.n_look = round(LOOKBACK_S / interval_s)
         self.book: Book | None = None
         self.ctx: AssetCtx | None = None
-        self.chart_score = 0.0  # chart model's forecast for the current 5-minute bar; 0 if no model
+        # Chart models' forecasts for the current bar of each timeframe; 0 where there is no model.
+        self.chart_scores = {"5m": 0.0, "1h": 0.0, "4h": 0.0, "1d": 0.0}
         self.news_score = 0.0  # decayed LLM-scored news pressure; 0 unless HL_LLM_NEWS is enabled
         self.feed_ts = 0.0  # last message of any kind: liveness of the market-data connection
         self.mids: deque[float] = deque(maxlen=self.n_look + 1)
@@ -134,7 +136,7 @@ class MarketState:
             self.ctx.premium * 1e4 if self.ctx else 0.0,
             (b.best_ask - b.best_bid) / mid * 1e4,
             self.news_score,
-            self.chart_score,
+            *self.chart_scores.values(),
         ])  # fmt: skip
 
         # Soft regime: heuristics expressed as probabilities, never as a single hard label.
@@ -143,4 +145,8 @@ class MarketState:
         vol_ratio = float(lr[-n60:].std()) / sig
         logits = np.array([6.0 * (er - 0.25), 6.0 * (0.25 - er), 3.0 * (vol_ratio - 1.5)])
         p = np.exp(logits - logits.max())
-        return Features(vals, sig, p / p.sum(), sell30 / _FLOW_KEEP_S, buy30 / _FLOW_KEEP_S)
+        # Risk uses the larger of the 5-minute and 30-second volatility, so sizing reacts to a
+        # volatility expansion within seconds instead of minutes.
+        n30 = max(5, round(30 / self.interval_s))
+        sig_risk = max(sig, float(lr[-n30:].std()))
+        return Features(vals, sig_risk, p / p.sum(), sell30 / _FLOW_KEEP_S, buy30 / _FLOW_KEEP_S)

@@ -16,7 +16,7 @@ from app.config.settings import Mode, Settings
 from app.exchange.base import Venue
 from app.exchange.hyperliquid import HyperliquidData, HyperliquidLive, parse_event
 from app.exchange.paper import PaperVenue
-from app.models.chart import ChartModel
+from app.models.chart import TIMEFRAMES, ChartModel
 from app.monitoring.dashboard import serve
 from app.news.monitor import NewsMonitor, RssSource
 from app.persistence.sink import JsonlSink, PostgresSink
@@ -63,8 +63,8 @@ async def run(s: Settings, duration: float | None) -> Engine:
         tmp.write_bytes(blob)
         tmp.replace(state_file)
 
-    chart = ChartModel.load(s.chart_model_path)
-    log.info("chart model: %s", f"loaded (trained to {chart.meta['trained_to']})" if chart else "none")
+    charts = {tf: m for tf in TIMEFRAMES if (m := ChartModel.load(s.chart_model_dir, tf)) is not None}
+    log.info("chart models: %s", ", ".join(f"{tf} (to {m.meta['trained_to']})" for tf, m in charts.items()) or "none")
     analyst = None
     if s.llm_news:
         from app.news.llm import LlmAnalyst
@@ -81,7 +81,7 @@ async def run(s: Settings, duration: float | None) -> Engine:
         b = engine.market.book
         age = time.time() - engine.market.feed_ts if b else None
         faults = engine.last.get("faults", ["starting"])
-        chart_info = {"loaded": chart is not None, "score": engine.market.chart_score}
+        chart_info = {"loaded": list(charts), "scores": engine.market.chart_scores}
         health = {"ok": not faults, "chart": chart_info, "faults": faults, "feed_age_s": age,
                   "ws_reconnects": data.reconnects,
                   "sink_dropped": sink.dropped, "loop_lag_ms": loop_lag}  # fmt: skip
@@ -106,22 +106,25 @@ async def run(s: Settings, duration: float | None) -> Engine:
 
     async def chart_loop() -> None:
         """Score each newly closed 5-minute bar. One REST call per bar, never on the decision path."""
-        last_bar = 0.0
-        while chart is not None:
-            try:
-                c = await data.candles(s.coin)
-                if len(c) and c[-1, 0] != last_bar:
-                    score = chart.score(c)
-                    last_bar = c[-1, 0]
-                    if score is not None:
-                        engine.on_chart(score)
+        last_bar = dict.fromkeys(charts, 0.0)
+        while charts:
+            for tf, model in charts.items():
+                step = TIMEFRAMES[tf]
+                now = time.time()
+                if now < last_bar[tf] + 2 * step + 3:
+                    continue  # the bar after the one we scored has not closed yet
+                try:
+                    c = await data.candles(s.coin, tf, step)
+                    if len(c) and c[-1, 0] != last_bar[tf]:
+                        last_bar[tf] = c[-1, 0]
+                        score = model.score(c) or 0.0
+                        engine.on_chart((tf, score))
                         if s.record_raw:
-                            now = time.time()
-                            sink.put(raw_stream_name(now), {"t": now, "ch": "chart", "d": {"score": score}})
-                elif len(c) and time.time() - last_bar > 1200:
-                    engine.on_chart(0.0)  # candles have stopped updating: an old score is not context
-            except Exception as e:  # noqa: BLE001 - context feature only; never stop trading for it
-                log.warning("chart update failed: %s", e)
+                            sink.put(raw_stream_name(now), {"t": now, "ch": "chart", "d": {"tf": tf, "score": score}})
+                    elif now - last_bar[tf] > 4 * step:
+                        engine.on_chart((tf, 0.0))  # candles stopped updating: an old score is not context
+                except Exception as e:  # noqa: BLE001 - context feature only; never stop trading for it
+                    log.warning("chart update (%s) failed: %s", tf, e)
             await asyncio.sleep(20)
 
     async def ticker() -> None:

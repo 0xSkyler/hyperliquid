@@ -39,7 +39,7 @@ class Settings:
     tree_min_train: int = 3000
     tree_refit_every: int = 1500
     discovered_path: str = "data/discovered_features.json"
-    chart_model_path: str = "models/chart_model.txt"  # python -m app.research.chart_train
+    chart_model_dir: str = "models"  # chart_<timeframe>.txt, from python -m app.research.chart_train
     state_path: str = ""  # learned state, saved every few minutes; default <data_dir>/state/engine-<coin>.pkl
 
     # LLM news analysis: off unless HL_LLM_NEWS=1 (each new headline cluster is one paid API call)
@@ -109,7 +109,7 @@ class Settings:
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
             models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
             discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),
-            chart_model_path=env.get("HL_CHART_MODEL_PATH", d.chart_model_path),
+            chart_model_dir=env.get("HL_CHART_MODEL_DIR", d.chart_model_dir),
             state_path=env.get("HL_STATE_PATH", ""),
             llm_news=env.get("HL_LLM_NEWS", "0") == "1",
             llm_model=env.get("HL_LLM_MODEL", d.llm_model),

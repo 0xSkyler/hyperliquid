@@ -79,7 +79,7 @@ def build_dataset(events: Iterable[Event], interval_s: float, horizon_ticks: int
         elif kind == "news":
             market.news_score = payload
         elif kind == "chart":
-            market.chart_score = payload
+            market.chart_scores[payload[0]] = payload[1]
         else:
             market.on_ctx(payload)
 

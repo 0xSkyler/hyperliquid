@@ -1,10 +1,12 @@
-"""Chart model: what ten years of BTC candles say about the next bar.
+"""Chart models: what ten years of BTC candles say about the next bar, per timeframe.
 
-A LightGBM model trained offline (python -m app.research.chart_train) on scale-free chart
-features built from the indicator library. Live, it scores the latest closed 5-minute bar and
-the result reaches the trading models as one feature, "chart_ctx": higher-timeframe context
-for the second-scale order-flow models. It has no authority of its own; like every feature
-it matters only if the models find, out of sample, that it predicts something.
+One LightGBM model per timeframe (5m, 1h, 4h, 1d), trained offline by
+`python -m app.research.chart_train`. Inputs are scale-free chart features from the
+indicator library plus the current position of every classic strategy variant
+(app/strategies/library.py), so the model can learn in which conditions each strategy has
+worked. Live, each model scores its latest closed candle and the result reaches the trading
+models as one feature per timeframe ("chart_5m" ... "chart_1d"). None of them has authority
+of its own; like every feature they matter only if they prove predictive out of sample.
 """
 
 from __future__ import annotations
@@ -17,15 +19,19 @@ from typing import Any
 import numpy as np
 
 from app.indicators import library as ind
+from app.strategies.library import NAMES as STRATEGY_NAMES
+from app.strategies.library import all_signals
 
-VOL_WINDOW = 288  # one day of 5-minute bars
-MIN_BARS = 3 * VOL_WINDOW  # history needed before a live score is meaningful
+TIMEFRAMES = {"5m": 300, "1h": 3600, "4h": 14400, "1d": 86400}
+VOL_WINDOW = 288
+MIN_BARS = 3 * VOL_WINDOW  # history needed before a score is meaningful
 RET_LAGS = (1, 3, 12, 48, 288)
-FEATURES = (
+CHART_FEATURES = (
     *(f"ret_{k}" for k in RET_LAGS),
     "rsi_14", "rsi_48", "macd_hist", "boll_20", "boll_96", "donch_48", "donch_288", "adx_14", "atr_14",
     "eff_48", "stoch_14", "rel_volume", "vol_ratio", "body", "upper_wick", "lower_wick", "hour_sin", "hour_cos",
 )  # fmt: skip
+FEATURES = CHART_FEATURES + STRATEGY_NAMES
 
 
 def _shift_diff(x: np.ndarray, k: int) -> np.ndarray:
@@ -54,13 +60,13 @@ def chart_features(candles: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         cols.append(ind.atr(h, lo, c, 14) / c / vol)
         cols.append(np.abs(_shift_diff(c, 48)) / np.maximum(ind.sma(np.abs(np.diff(c, prepend=c[0])), 48) * 48, 1e-12))
         cols.append(ind.stochastic(h, lo, c, 14) / 100 - 0.5)
-        rel_v = v / np.maximum(ind.sma(v, VOL_WINDOW), 1e-12)  # relative to its own daily mean: venue-independent
+        rel_v = v / np.maximum(ind.sma(v, VOL_WINDOW), 1e-12)  # relative to its own mean: venue-independent
         cols.append(np.log(rel_v + 0.01))
         cols.append(ind.rolling_std(lr, 12) / vol)
         cols += [(c - o) / rng, (h - np.maximum(o, c)) / rng, (np.minimum(o, c) - lo) / rng]
         hour = (ts % 86400) / 86400 * 2 * math.pi
         cols += [np.sin(hour), np.cos(hour)]
-    return np.column_stack(cols), vol
+    return np.column_stack([np.column_stack(cols), all_signals(candles)]), vol
 
 
 class ChartModel:
@@ -69,8 +75,8 @@ class ChartModel:
         self.meta = meta
 
     @classmethod
-    def load(cls, path: str) -> ChartModel | None:
-        p = Path(path)
+    def load(cls, model_dir: str, timeframe: str) -> ChartModel | None:
+        p = Path(model_dir) / f"chart_{timeframe}.txt"
         meta_p = p.with_suffix(".json")
         if not p.is_file() or not meta_p.is_file():
             return None

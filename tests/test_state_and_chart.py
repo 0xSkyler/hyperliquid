@@ -105,21 +105,22 @@ def test_chart_model_learns_planted_momentum_and_round_trips_through_disk(tmp_pa
     import json
 
     c = candles(30_000, seed=1, momentum=0.3)
-    X, y, y_bps, ts = make_xy(c, horizon=1)
+    X, y, _, _ = make_xy(c, horizon=1)
     cut = 24_000
-    booster = fit(X[:cut], y[:cut], purge=300)
+    booster, chosen = fit(X[:cut], y[:cut], purge=300)
+    assert chosen["num_leaves"] in (7, 31) and chosen["rounds"] >= 10
     assert np.corrcoef(booster.predict(X[cut:]), y[cut:])[0, 1] > 0.2  # out of sample
     noise_X, noise_y, _, _ = make_xy(candles(30_000, seed=2), horizon=1)
-    nb = fit(noise_X[:cut], noise_y[:cut], purge=300)
+    nb, _ = fit(noise_X[:cut], noise_y[:cut], purge=300)
     assert abs(np.corrcoef(nb.predict(noise_X[cut:]), noise_y[cut:])[0, 1]) < 0.05  # nothing to find in a random walk
 
-    path = tmp_path / "chart_model.txt"
+    path = tmp_path / "chart_1h.txt"
     booster.save_model(str(path))
-    assert ChartModel.load(str(path)) is None  # no metadata => not trusted
+    assert ChartModel.load(str(tmp_path), "1h") is None  # no metadata => not trusted
     path.with_suffix(".json").write_text(json.dumps({"features": list(FEATURES), "trained_to": "x"}))
-    m = ChartModel.load(str(path))
+    m = ChartModel.load(str(tmp_path), "1h")
     assert m is not None and m.score(c[:100]) is None  # too little history for a meaningful score
     s = m.score(c[:5000])
     assert s is not None and abs(s - float(booster.predict(chart_features(c[:5000])[0][-1:])[0])) < 1e-6
     path.with_suffix(".json").write_text(json.dumps({"features": ["something_else"]}))
-    assert ChartModel.load(str(path)) is None  # trained on a different feature set
+    assert ChartModel.load(str(tmp_path), "1h") is None  # trained on a different feature set

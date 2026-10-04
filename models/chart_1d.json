@@ -1,0 +1,188 @@
+{
+ "timeframe": "1d",
+ "features": [
+  "ret_1",
+  "ret_3",
+  "ret_12",
+  "ret_48",
+  "ret_288",
+  "rsi_14",
+  "rsi_48",
+  "macd_hist",
+  "boll_20",
+  "boll_96",
+  "donch_48",
+  "donch_288",
+  "adx_14",
+  "atr_14",
+  "eff_48",
+  "stoch_14",
+  "rel_volume",
+  "vol_ratio",
+  "body",
+  "upper_wick",
+  "lower_wick",
+  "hour_sin",
+  "hour_cos",
+  "ma_cross(5,20)",
+  "ma_cross(10,50)",
+  "ma_cross(20,100)",
+  "ma_cross(50,200)",
+  "tsmom(6)",
+  "tsmom(24)",
+  "tsmom(96)",
+  "tsmom(288)",
+  "macd(12,26)",
+  "macd(24,52)",
+  "donchian_breakout(20)",
+  "breakout_fade(20)",
+  "donchian_breakout(55)",
+  "breakout_fade(55)",
+  "donchian_breakout(200)",
+  "breakout_fade(200)",
+  "keltner_breakout(20,1.5)",
+  "keltner_breakout(20,2.5)",
+  "keltner_breakout(50,2.0)",
+  "bollinger_reversion(20,1.5)",
+  "range_trade(20,1.5)",
+  "bollinger_reversion(20,2.5)",
+  "range_trade(20,2.5)",
+  "bollinger_reversion(96,2.0)",
+  "range_trade(96,2.0)",
+  "rsi_reversion(14,20)",
+  "rsi_reversion(14,30)",
+  "rsi_reversion(48,15)",
+  "stochastic_reversion(14)",
+  "stochastic_reversion(48)",
+  "vwap_reversion(48,1.5)",
+  "vwap_reversion(288,2.0)",
+  "trend_pullback(20,100)",
+  "trend_pullback(50,200)",
+  "adx_trend(14,25)",
+  "adx_trend(28,20)"
+ ],
+ "horizon_bars": 1,
+ "source": "Bitstamp BTC/USD",
+ "trained_from": "2019-02-15",
+ "trained_to": "2026-10-02",
+ "bars": 2787,
+ "trees": 10,
+ "num_leaves": 31,
+ "cost_bps_round_trip": 9.0,
+ "out_of_sample": {
+  "bars": 2101,
+  "ic": 0.01920509036568695,
+  "t_stat": 0.8802973230674838,
+  "top_decile_gross_bps": 26.52521589061893,
+  "top_decile_net_bps": 17.52521589061893
+ },
+ "by_regime": {
+  "bull/high_vol": {
+   "bars": 289,
+   "ic": -0.006973928517696751,
+   "t_stat": -0.11855678480084476,
+   "top_decile_gross_bps": 93.91211435112932,
+   "top_decile_net_bps": 84.91211435112932
+  },
+  "bull/low_vol": {
+   "bars": 323,
+   "ic": 0.023185429848013812,
+   "t_stat": 0.4166931998336496,
+   "top_decile_gross_bps": 10.961538934903814,
+   "top_decile_net_bps": 1.961538934903814
+  },
+  "bear/high_vol": {
+   "bars": 263,
+   "ic": -0.017804142358552755,
+   "t_stat": -0.2887346681427606,
+   "top_decile_gross_bps": 15.563977360079368,
+   "top_decile_net_bps": 6.5639773600793685
+  },
+  "bear/low_vol": {
+   "bars": 179,
+   "ic": 0.14310872036453726,
+   "t_stat": 1.9146641862590899,
+   "top_decile_gross_bps": 13.134948321970162,
+   "top_decile_net_bps": 4.134948321970162
+  },
+  "range/high_vol": {
+   "bars": 414,
+   "ic": -0.0013634633467324068,
+   "t_stat": -0.027742375012306576,
+   "top_decile_gross_bps": 11.133302151506038,
+   "top_decile_net_bps": 2.1333021515060384
+  },
+  "range/low_vol": {
+   "bars": 633,
+   "ic": 0.017670582837822413,
+   "t_stat": 0.4445828743050521,
+   "top_decile_gross_bps": 5.251069605546615,
+   "top_decile_net_bps": -3.748930394453385
+  }
+ },
+ "walk_forward": [
+  {
+   "year": 2021,
+   "bars": 365,
+   "ic": 0.050659160467700824,
+   "t_stat": 0.9678419017802833,
+   "top_decile_gross_bps": 60.74144008522036,
+   "top_decile_net_bps": 51.74144008522036
+  },
+  {
+   "year": 2022,
+   "bars": 365,
+   "ic": 0.056367280609459815,
+   "t_stat": 1.0768953839656563,
+   "top_decile_gross_bps": -4.780906431343522,
+   "top_decile_net_bps": -13.78090643134352
+  },
+  {
+   "year": 2023,
+   "bars": 365,
+   "ic": 0.0429735355443738,
+   "t_stat": 0.821008243790523,
+   "top_decile_gross_bps": -6.921141365595539,
+   "top_decile_net_bps": -15.921141365595538
+  },
+  {
+   "year": 2024,
+   "bars": 366,
+   "ic": -0.02152785946427804,
+   "t_stat": -0.4118522020332248,
+   "top_decile_gross_bps": 53.704704240879856,
+   "top_decile_net_bps": 44.704704240879856
+  },
+  {
+   "year": 2025,
+   "bars": 365,
+   "ic": 0.038023669832155854,
+   "t_stat": 0.7264411921410099,
+   "top_decile_gross_bps": -23.587154486277278,
+   "top_decile_net_bps": -32.58715448627728
+  },
+  {
+   "year": 2026,
+   "bars": 275,
+   "ic": 0.08765344368727,
+   "t_stat": 1.4535679214661037,
+   "top_decile_gross_bps": 91.41324895095211,
+   "top_decile_net_bps": 82.41324895095211
+  }
+ ],
+ "profitable_years_after_costs": "3/6",
+ "top_features": {
+  "atr_14": 65,
+  "ret_3": 51,
+  "rel_volume": 48,
+  "ret_1": 46,
+  "adx_14": 44,
+  "lower_wick": 42,
+  "macd_hist": 39,
+  "upper_wick": 36,
+  "ret_288": 35,
+  "donch_288": 35,
+  "donch_48": 34,
+  "ret_48": 31
+ }
+}

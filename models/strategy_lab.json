@@ -1,0 +1,2685 @@
+{
+ "source": "Bitstamp BTC/USD",
+ "cost_per_unit_turn": 0.00045,
+ "funding_modelled": false,
+ "from": "2016-10-03",
+ "to": "2026-10-04",
+ "timeframes": {
+  "5m": {
+   "bars": 1051920,
+   "variants_tested": 36,
+   "buy_and_hold_sharpe": 0.6533656898319649,
+   "variants_with_positive_net_sharpe": 0,
+   "best_in_sample": [
+    {
+     "name": "donchian_breakout(200)",
+     "net_sharpe": -0.09141306221583623,
+     "net_return_pct_per_year": -6.908032495162679
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "net_sharpe": -0.2910195939956666,
+     "net_return_pct_per_year": -21.99810199888476
+    },
+    {
+     "name": "rsi_reversion(48,15)",
+     "net_sharpe": -0.581687026040282,
+     "net_return_pct_per_year": -24.51475164176087
+    },
+    {
+     "name": "rsi_reversion(14,30)",
+     "net_sharpe": -0.6050783594880679,
+     "net_return_pct_per_year": -19.723739576815174
+    },
+    {
+     "name": "rsi_reversion(14,20)",
+     "net_sharpe": -1.236618502066822,
+     "net_return_pct_per_year": -62.37953664169492
+    }
+   ],
+   "best_by_regime": {
+    "bull/high_vol": [
+     2.419098317674944,
+     "rsi_reversion(48,15)"
+    ],
+    "bull/low_vol": [
+     0.5698871964133824,
+     "ma_cross(50,200)"
+    ],
+    "bear/high_vol": [
+     0.5812519833521358,
+     "rsi_reversion(14,20)"
+    ],
+    "bear/low_vol": [
+     0.151689256231204,
+     "ma_cross(50,200)"
+    ],
+    "range/high_vol": [
+     -0.4844985548172933,
+     "rsi_reversion(14,30)"
+    ],
+    "range/low_vol": [
+     1.6232684318591217,
+     "donchian_breakout(200)"
+    ]
+   },
+   "walk_forward": [
+    {
+     "year": 2018,
+     "picked": "rsi_reversion(48,15)",
+     "picked_past_sharpe": 2.142004956858687,
+     "net_return_pct": -100.03881393647247,
+     "net_sharpe": -2.012160487506182
+    },
+    {
+     "year": 2019,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 1.3018054082991286,
+     "net_return_pct": -27.574246551408958,
+     "net_sharpe": -0.37048774837097403
+    },
+    {
+     "year": 2020,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 0.8845486448296711,
+     "net_return_pct": -29.130016129190096,
+     "net_sharpe": -0.37025062673586834
+    },
+    {
+     "year": 2021,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 0.6269696968998053,
+     "net_return_pct": -110.41483811060304,
+     "net_sharpe": -1.1519869937182838
+    },
+    {
+     "year": 2022,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 0.27385810567105257,
+     "net_return_pct": -68.39738566046249,
+     "net_sharpe": -1.0283387244753912
+    },
+    {
+     "year": 2023,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 0.11560089980153361,
+     "net_return_pct": -27.883142368917536,
+     "net_sharpe": -0.6523371848862135
+    },
+    {
+     "year": 2024,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": 0.059387845165359845,
+     "net_return_pct": -41.34226517242522,
+     "net_sharpe": -0.7739418486681446
+    },
+    {
+     "year": 2025,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": -0.008027410922789253,
+     "net_return_pct": -45.93859596373054,
+     "net_sharpe": -1.0248699192345228
+    },
+    {
+     "year": 2026,
+     "picked": "donchian_breakout(200)",
+     "picked_past_sharpe": -0.07151437901705016,
+     "net_return_pct": -17.805351426115063,
+     "net_sharpe": -0.5301627558871199
+    }
+   ],
+   "walk_forward_net_sharpe": -0.8345681785906948,
+   "walk_forward_net_return_pct_per_year": -53.50300873932382,
+   "walk_forward_profitable_years": "0/9",
+   "variants": [
+    {
+     "name": "ma_cross(5,20)",
+     "family": "ma_cross",
+     "net_sharpe": -10.314165782578781,
+     "net_return_pct_per_year": -783.4034678634554,
+     "turns_per_year": 14359.7,
+     "by_regime": {
+      "bull/high_vol": -8.394261890587426,
+      "bull/low_vol": -11.386279528705629,
+      "bear/high_vol": -6.45613617456214,
+      "bear/low_vol": -13.17812125958407,
+      "range/high_vol": -12.645943090958735,
+      "range/low_vol": -16.068483759171254
+     }
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "family": "ma_cross",
+     "net_sharpe": -4.568105986723827,
+     "net_return_pct_per_year": -346.00873132610474,
+     "turns_per_year": 6347.3,
+     "by_regime": {
+      "bull/high_vol": -4.482246044207393,
+      "bull/low_vol": -5.066778751499213,
+      "bear/high_vol": -2.9004170454554186,
+      "bear/low_vol": -4.306630522219875,
+      "range/high_vol": -6.007558669406366,
+      "range/low_vol": -6.178373585332834
+     }
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "family": "ma_cross",
+     "net_sharpe": -1.6261748928022972,
+     "net_return_pct_per_year": -123.00645579804876,
+     "turns_per_year": 3058.9,
+     "by_regime": {
+      "bull/high_vol": -2.0394367255103427,
+      "bull/low_vol": -1.0865137006066017,
+      "bear/high_vol": -1.5894795868597729,
+      "bear/low_vol": -0.6321172351436786,
+      "range/high_vol": -2.839515104353988,
+      "range/low_vol": -1.1937688747889397
+     }
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "family": "ma_cross",
+     "net_sharpe": -0.2910195939956666,
+     "net_return_pct_per_year": -21.99810199888476,
+     "turns_per_year": 1308.5,
+     "by_regime": {
+      "bull/high_vol": -0.9971985327706687,
+      "bull/low_vol": 0.5698871964133824,
+      "bear/high_vol": -0.4686364464774338,
+      "bear/low_vol": 0.151689256231204,
+      "range/high_vol": -1.798505567145464,
+      "range/low_vol": 1.462458809813703
+     }
+    },
+    {
+     "name": "tsmom(6)",
+     "family": "tsmom",
+     "net_sharpe": -29.260893687288977,
+     "net_return_pct_per_year": -2237.643010553158,
+     "turns_per_year": 43336.9,
+     "by_regime": {
+      "bull/high_vol": -23.16172168928207,
+      "bull/low_vol": -35.280456838673366,
+      "bear/high_vol": -20.224139600371103,
+      "bear/low_vol": -36.588657716777014,
+      "range/high_vol": -31.229070216025672,
+      "range/low_vol": -46.36004458759706
+     }
+    },
+    {
+     "name": "tsmom(24)",
+     "family": "tsmom",
+     "net_sharpe": -15.891350008433484,
+     "net_return_pct_per_year": -1209.8332616511036,
+     "turns_per_year": 22998.1,
+     "by_regime": {
+      "bull/high_vol": -13.47760180725587,
+      "bull/low_vol": -18.897722073756405,
+      "bear/high_vol": -10.143942718304222,
+      "bear/low_vol": -19.630092791413638,
+      "range/high_vol": -17.914149279632365,
+      "range/low_vol": -24.317555395880877
+     }
+    },
+    {
+     "name": "tsmom(96)",
+     "family": "tsmom",
+     "net_sharpe": -7.837660998395272,
+     "net_return_pct_per_year": -594.6175852031798,
+     "turns_per_year": 11902.1,
+     "by_regime": {
+      "bull/high_vol": -7.247324005309345,
+      "bull/low_vol": -8.752851004898531,
+      "bear/high_vol": -5.439339197768933,
+      "bear/low_vol": -9.179012702831931,
+      "range/high_vol": -9.329520746868656,
+      "range/low_vol": -10.866814916627623
+     }
+    },
+    {
+     "name": "tsmom(288)",
+     "family": "tsmom",
+     "net_sharpe": -3.2043220404954087,
+     "net_return_pct_per_year": -242.6178764690809,
+     "turns_per_year": 6258.9,
+     "by_regime": {
+      "bull/high_vol": -2.639169789073587,
+      "bull/low_vol": -3.0935386245010172,
+      "bear/high_vol": -2.0465040426477956,
+      "bear/low_vol": -2.7417417801194293,
+      "range/high_vol": -4.531460282661963,
+      "range/low_vol": -5.268400828261963
+     }
+    },
+    {
+     "name": "macd(12,26)",
+     "family": "macd",
+     "net_sharpe": -11.063726488062384,
+     "net_return_pct_per_year": -840.9707787601434,
+     "turns_per_year": 17153.1,
+     "by_regime": {
+      "bull/high_vol": -8.319424792610063,
+      "bull/low_vol": -13.306446345812306,
+      "bear/high_vol": -6.880702495985301,
+      "bear/low_vol": -14.324023592516575,
+      "range/high_vol": -12.271149397816261,
+      "range/low_vol": -18.5845215885343
+     }
+    },
+    {
+     "name": "macd(24,52)",
+     "family": "macd",
+     "net_sharpe": -7.25025514102192,
+     "net_return_pct_per_year": -550.1156299440122,
+     "turns_per_year": 11519.9,
+     "by_regime": {
+      "bull/high_vol": -4.884090840394384,
+      "bull/low_vol": -8.041253526166397,
+      "bear/high_vol": -4.306651316912917,
+      "bear/low_vol": -9.706903237080354,
+      "range/high_vol": -9.443736817188741,
+      "range/low_vol": -12.387665619110228
+     }
+    },
+    {
+     "name": "donchian_breakout(20)",
+     "family": "donchian_breakout",
+     "net_sharpe": -4.686920017415505,
+     "net_return_pct_per_year": -354.8015001144919,
+     "turns_per_year": 5082.3,
+     "by_regime": {
+      "bull/high_vol": -4.764945144914546,
+      "bull/low_vol": -4.564576803256235,
+      "bear/high_vol": -4.437843517202419,
+      "bear/low_vol": -3.303435115690417,
+      "range/high_vol": -6.199118029657209,
+      "range/low_vol": -5.4276855736842196
+     }
+    },
+    {
+     "name": "breakout_fade(20)",
+     "family": "breakout_fade",
+     "net_sharpe": -9.302239665094858,
+     "net_return_pct_per_year": -434.81678446189295,
+     "turns_per_year": 11923.0,
+     "by_regime": {
+      "bull/high_vol": -6.167451997999011,
+      "bull/low_vol": -12.37215488849674,
+      "bear/high_vol": -5.610549268930485,
+      "bear/low_vol": -12.50726170037154,
+      "range/high_vol": -9.751112189684214,
+      "range/low_vol": -16.589324565226175
+     }
+    },
+    {
+     "name": "donchian_breakout(55)",
+     "family": "donchian_breakout",
+     "net_sharpe": -2.1660404455395796,
+     "net_return_pct_per_year": -163.79689815680706,
+     "turns_per_year": 2017.1,
+     "by_regime": {
+      "bull/high_vol": -3.6041385508553248,
+      "bull/low_vol": -1.405659225528448,
+      "bear/high_vol": -2.8666678250788378,
+      "bear/low_vol": -0.5161614087094637,
+      "range/high_vol": -2.6631979320102115,
+      "range/low_vol": -0.6247190053390359
+     }
+    },
+    {
+     "name": "breakout_fade(55)",
+     "family": "breakout_fade",
+     "net_sharpe": -5.575621795049706,
+     "net_return_pct_per_year": -218.82794965451558,
+     "turns_per_year": 6155.2,
+     "by_regime": {
+      "bull/high_vol": -3.4537319157480844,
+      "bull/low_vol": -7.827745199980657,
+      "bear/high_vol": -2.1385090065814283,
+      "bear/low_vol": -7.689559803621539,
+      "range/high_vol": -6.422355676840692,
+      "range/low_vol": -10.600855190529732
+     }
+    },
+    {
+     "name": "donchian_breakout(200)",
+     "family": "donchian_breakout",
+     "net_sharpe": -0.09141306221583623,
+     "net_return_pct_per_year": -6.908032495162679,
+     "turns_per_year": 579.5,
+     "by_regime": {
+      "bull/high_vol": -0.41468919494466394,
+      "bull/low_vol": 0.5110829476094416,
+      "bear/high_vol": -0.7238481737438134,
+      "bear/low_vol": -0.8162470249143317,
+      "range/high_vol": -0.8601913059516878,
+      "range/low_vol": 1.6232684318591217
+     }
+    },
+    {
+     "name": "breakout_fade(200)",
+     "family": "breakout_fade",
+     "net_sharpe": -2.700284699947521,
+     "net_return_pct_per_year": -85.80659081988567,
+     "turns_per_year": 2614.4,
+     "by_regime": {
+      "bull/high_vol": -1.871342380863704,
+      "bull/low_vol": -3.9710832253284436,
+      "bear/high_vol": -0.0965150765539493,
+      "bear/low_vol": -3.635724781896216,
+      "range/high_vol": -3.1690648034795044,
+      "range/low_vol": -5.589325159932371
+     }
+    },
+    {
+     "name": "keltner_breakout(20,1.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": -3.6013023557690476,
+     "net_return_pct_per_year": -272.59770829578395,
+     "turns_per_year": 4329.5,
+     "by_regime": {
+      "bull/high_vol": -4.553407455243573,
+      "bull/low_vol": -3.728884807056976,
+      "bear/high_vol": -2.7571977866614454,
+      "bear/low_vol": -2.6117451503843165,
+      "range/high_vol": -4.328238269619631,
+      "range/low_vol": -3.715087991596987
+     }
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": -1.2630456745814338,
+     "net_return_pct_per_year": -95.50555693712236,
+     "turns_per_year": 1731.9,
+     "by_regime": {
+      "bull/high_vol": -2.486937216333668,
+      "bull/low_vol": 0.06677192224585156,
+      "bear/high_vol": -1.5701510193053048,
+      "bear/low_vol": -0.03932782568206459,
+      "range/high_vol": -1.3531153789057608,
+      "range/low_vol": -0.8573266919937379
+     }
+    },
+    {
+     "name": "keltner_breakout(50,2.0)",
+     "family": "keltner_breakout",
+     "net_sharpe": -2.1290688815630996,
+     "net_return_pct_per_year": -161.0409886896863,
+     "turns_per_year": 2525.1,
+     "by_regime": {
+      "bull/high_vol": -3.7731724156847504,
+      "bull/low_vol": -1.0698497491577006,
+      "bear/high_vol": -2.0598428335219534,
+      "bear/low_vol": -0.446758246563091,
+      "range/high_vol": -2.809551753947271,
+      "range/low_vol": -1.1674626455818466
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,1.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -5.578441042575977,
+     "net_return_pct_per_year": -362.19304018029453,
+     "turns_per_year": 10593.8,
+     "by_regime": {
+      "bull/high_vol": -3.657550475565523,
+      "bull/low_vol": -7.8020949864878,
+      "bear/high_vol": -3.1611431610618754,
+      "bear/low_vol": -7.936793729114331,
+      "range/high_vol": -4.729958966591306,
+      "range/low_vol": -10.71881250107491
+     }
+    },
+    {
+     "name": "range_trade(20,1.5)",
+     "family": "range_trade",
+     "net_sharpe": -11.684468072787668,
+     "net_return_pct_per_year": -336.355036732598,
+     "turns_per_year": 7177.8,
+     "by_regime": {
+      "bull/high_vol": -10.899039572887363,
+      "bull/low_vol": -14.434610836611055,
+      "bear/high_vol": -9.275621345940177,
+      "bear/low_vol": -12.139724411512471,
+      "range/high_vol": -11.16755637586354,
+      "range/low_vol": -17.248995391002023
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,2.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -2.3030723281408974,
+     "net_return_pct_per_year": -119.16816700633184,
+     "turns_per_year": 4375.4,
+     "by_regime": {
+      "bull/high_vol": -0.23080124702618704,
+      "bull/low_vol": -4.226853703605102,
+      "bear/high_vol": -0.3340514820048386,
+      "bear/low_vol": -4.582261912885643,
+      "range/high_vol": -1.6592320408815506,
+      "range/low_vol": -6.122203775015886
+     }
+    },
+    {
+     "name": "range_trade(20,2.5)",
+     "family": "range_trade",
+     "net_sharpe": -6.109033091106159,
+     "net_return_pct_per_year": -100.99519156713102,
+     "turns_per_year": 2379.2,
+     "by_regime": {
+      "bull/high_vol": -5.719206412959634,
+      "bull/low_vol": -7.315918580233547,
+      "bear/high_vol": -4.709695444034392,
+      "bear/low_vol": -7.317056509025724,
+      "range/high_vol": -4.861721045381744,
+      "range/low_vol": -9.329369880483004
+     }
+    },
+    {
+     "name": "bollinger_reversion(96,2.0)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.3710192781868378,
+     "net_return_pct_per_year": -86.56080995243975,
+     "turns_per_year": 2213.5,
+     "by_regime": {
+      "bull/high_vol": 0.7118093003843509,
+      "bull/low_vol": -2.576894437793457,
+      "bear/high_vol": -0.44279104009438824,
+      "bear/low_vol": -3.679948538152011,
+      "range/high_vol": -0.7356390111440306,
+      "range/low_vol": -4.536968491160558
+     }
+    },
+    {
+     "name": "range_trade(96,2.0)",
+     "family": "range_trade",
+     "net_sharpe": -4.152139537478005,
+     "net_return_pct_per_year": -108.57266837655376,
+     "turns_per_year": 2805.2,
+     "by_regime": {
+      "bull/high_vol": -2.2118041424071806,
+      "bull/low_vol": -5.801275165184814,
+      "bear/high_vol": -2.886234302908919,
+      "bear/low_vol": -6.988013139118594,
+      "range/high_vol": -3.752864434663656,
+      "range/low_vol": -7.72231876315362
+     }
+    },
+    {
+     "name": "rsi_reversion(14,20)",
+     "family": "rsi_reversion",
+     "net_sharpe": -1.236618502066822,
+     "net_return_pct_per_year": -62.37953664169492,
+     "turns_per_year": 2602.2,
+     "by_regime": {
+      "bull/high_vol": 1.170418566717154,
+      "bull/low_vol": -2.721236754225012,
+      "bear/high_vol": 0.5812519833521358,
+      "bear/low_vol": -4.013292563660069,
+      "range/high_vol": -1.3556652186132734,
+      "range/low_vol": -4.621266564407848
+     }
+    },
+    {
+     "name": "rsi_reversion(14,30)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.6050783594880679,
+     "net_return_pct_per_year": -19.723739576815174,
+     "turns_per_year": 602.4,
+     "by_regime": {
+      "bull/high_vol": 1.436571777513546,
+      "bull/low_vol": -1.06371164603388,
+      "bear/high_vol": -0.41301428789380923,
+      "bear/low_vol": -2.9452810717874898,
+      "range/high_vol": -0.4844985548172933,
+      "range/low_vol": -2.3946242258238755
+     }
+    },
+    {
+     "name": "rsi_reversion(48,15)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.581687026040282,
+     "net_return_pct_per_year": -24.51475164176087,
+     "turns_per_year": 450.7,
+     "by_regime": {
+      "bull/high_vol": 2.419098317674944,
+      "bull/low_vol": -1.7191889726285314,
+      "bear/high_vol": 0.19037270729036718,
+      "bear/low_vol": -2.9050785240337853,
+      "range/high_vol": -1.3077064672719891,
+      "range/low_vol": -3.0337869582768477
+     }
+    },
+    {
+     "name": "stochastic_reversion(14)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -19.659994649510804,
+     "net_return_pct_per_year": -1043.6406416612465,
+     "turns_per_year": 30627.0,
+     "by_regime": {
+      "bull/high_vol": -12.793955814411486,
+      "bull/low_vol": -24.732610530894473,
+      "bear/high_vol": -13.391870217966677,
+      "bear/low_vol": -27.787284515752706,
+      "range/high_vol": -20.174927503772533,
+      "range/low_vol": -34.31883340606479
+     }
+    },
+    {
+     "name": "stochastic_reversion(48)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -10.62962761237513,
+     "net_return_pct_per_year": -559.8254105019223,
+     "turns_per_year": 16943.2,
+     "by_regime": {
+      "bull/high_vol": -6.183418769811344,
+      "bull/low_vol": -14.111905952641138,
+      "bear/high_vol": -6.4560989774023065,
+      "bear/low_vol": -16.427165670090854,
+      "range/high_vol": -10.41402826032414,
+      "range/low_vol": -19.608480783410336
+     }
+    },
+    {
+     "name": "vwap_reversion(48,1.5)",
+     "family": "vwap_reversion",
+     "net_sharpe": -10.912125509376558,
+     "net_return_pct_per_year": -501.3668346689463,
+     "turns_per_year": 14108.6,
+     "by_regime": {
+      "bull/high_vol": -6.6392774845789715,
+      "bull/low_vol": -14.046911539389646,
+      "bear/high_vol": -7.169600521585659,
+      "bear/low_vol": -16.549024562735365,
+      "range/high_vol": -10.590798188243634,
+      "range/low_vol": -18.845791364670678
+     }
+    },
+    {
+     "name": "vwap_reversion(288,2.0)",
+     "family": "vwap_reversion",
+     "net_sharpe": -3.280577925725283,
+     "net_return_pct_per_year": -118.239943983614,
+     "turns_per_year": 3554.7,
+     "by_regime": {
+      "bull/high_vol": -1.1496508553662546,
+      "bull/low_vol": -5.2809740659280395,
+      "bear/high_vol": -0.8065139825621888,
+      "bear/low_vol": -5.953018583326848,
+      "range/high_vol": -2.6747237290421544,
+      "range/low_vol": -7.016075983332449
+     }
+    },
+    {
+     "name": "trend_pullback(20,100)",
+     "family": "trend_pullback",
+     "net_sharpe": -8.264768726399065,
+     "net_return_pct_per_year": -179.69756904960377,
+     "turns_per_year": 5594.4,
+     "by_regime": {
+      "bull/high_vol": -4.408008430946353,
+      "bull/low_vol": -9.890566265657332,
+      "bear/high_vol": -4.985368086153443,
+      "bear/low_vol": -12.454043956203765,
+      "range/high_vol": -10.09922376262256,
+      "range/low_vol": -16.236492081082673
+     }
+    },
+    {
+     "name": "trend_pullback(50,200)",
+     "family": "trend_pullback",
+     "net_sharpe": -8.178178212027083,
+     "net_return_pct_per_year": -236.32891938192523,
+     "turns_per_year": 7443.6,
+     "by_regime": {
+      "bull/high_vol": -3.9783897149310987,
+      "bull/low_vol": -9.96459476879039,
+      "bear/high_vol": -5.391328683304782,
+      "bear/low_vol": -12.936265761464114,
+      "range/high_vol": -10.078121801764716,
+      "range/low_vol": -15.534546778567375
+     }
+    },
+    {
+     "name": "adx_trend(14,25)",
+     "family": "adx_trend",
+     "net_sharpe": -4.054197542989651,
+     "net_return_pct_per_year": -233.03730334200137,
+     "turns_per_year": 4331.4,
+     "by_regime": {
+      "bull/high_vol": -4.468285669285029,
+      "bull/low_vol": -4.219394110263878,
+      "bear/high_vol": -4.01966510157821,
+      "bear/low_vol": -2.004032546642794,
+      "range/high_vol": -5.201794168605347,
+      "range/low_vol": -4.280415796116716
+     }
+    },
+    {
+     "name": "adx_trend(28,20)",
+     "family": "adx_trend",
+     "net_sharpe": -1.7239215942033301,
+     "net_return_pct_per_year": -92.17625399075277,
+     "turns_per_year": 1853.1,
+     "by_regime": {
+      "bull/high_vol": -2.6097388397734775,
+      "bull/low_vol": -1.2108040395578852,
+      "bear/high_vol": -2.5263065388659873,
+      "bear/low_vol": 0.08972904602730075,
+      "range/high_vol": -2.7815653559836604,
+      "range/low_vol": -0.24853767612039682
+     }
+    }
+   ]
+  },
+  "1h": {
+   "bars": 87659,
+   "variants_tested": 36,
+   "buy_and_hold_sharpe": 0.6969126425401446,
+   "variants_with_positive_net_sharpe": 13,
+   "best_in_sample": [
+    {
+     "name": "adx_trend(28,20)",
+     "net_sharpe": 0.7621825134469606,
+     "net_return_pct_per_year": 42.100360239206566
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "net_sharpe": 0.6697017932726611,
+     "net_return_pct_per_year": 47.45552864454581
+    },
+    {
+     "name": "donchian_breakout(200)",
+     "net_sharpe": 0.6425863685332116,
+     "net_return_pct_per_year": 45.51873107212543
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "net_sharpe": 0.636776936102045,
+     "net_return_pct_per_year": 45.11908867603339
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "net_sharpe": 0.6085481964414905,
+     "net_return_pct_per_year": 43.12185739087946
+    }
+   ],
+   "best_by_regime": {
+    "bull/high_vol": [
+     1.1738877889660893,
+     "breakout_fade(55)"
+    ],
+    "bull/low_vol": [
+     1.9222864319010555,
+     "keltner_breakout(20,2.5)"
+    ],
+    "bear/high_vol": [
+     1.1626800827095614,
+     "vwap_reversion(48,1.5)"
+    ],
+    "bear/low_vol": [
+     1.6223759791230001,
+     "macd(24,52)"
+    ],
+    "range/high_vol": [
+     1.2586316872316496,
+     "keltner_breakout(20,2.5)"
+    ],
+    "range/low_vol": [
+     2.454189654477847,
+     "adx_trend(28,20)"
+    ]
+   },
+   "walk_forward": [
+    {
+     "year": 2018,
+     "picked": "trend_pullback(20,100)",
+     "picked_past_sharpe": 2.555743936104416,
+     "net_return_pct": -20.84864967524029,
+     "net_sharpe": -0.9719567599257476
+    },
+    {
+     "year": 2019,
+     "picked": "ma_cross(50,200)",
+     "picked_past_sharpe": 1.7108500405622296,
+     "net_return_pct": 26.67269995296718,
+     "net_sharpe": 0.3867131811873284
+    },
+    {
+     "year": 2020,
+     "picked": "ma_cross(50,200)",
+     "picked_past_sharpe": 1.3717827253238633,
+     "net_return_pct": 56.68700293843989,
+     "net_sharpe": 0.7367646045295193
+    },
+    {
+     "year": 2021,
+     "picked": "ma_cross(20,100)",
+     "picked_past_sharpe": 1.2834024697369713,
+     "net_return_pct": 25.140393066519103,
+     "net_sharpe": 0.2869647283144845
+    },
+    {
+     "year": 2022,
+     "picked": "ma_cross(10,50)",
+     "picked_past_sharpe": 1.1585070805359756,
+     "net_return_pct": -15.119005929045311,
+     "net_sharpe": -0.2353689948834747
+    },
+    {
+     "year": 2023,
+     "picked": "ma_cross(10,50)",
+     "picked_past_sharpe": 0.9789986008439462,
+     "net_return_pct": 13.51626865241322,
+     "net_sharpe": 0.3180194021762089
+    },
+    {
+     "year": 2024,
+     "picked": "ma_cross(10,50)",
+     "picked_past_sharpe": 0.9140198763353915,
+     "net_return_pct": 21.925838763665006,
+     "net_sharpe": 0.41449387923642195
+    },
+    {
+     "year": 2025,
+     "picked": "ma_cross(20,100)",
+     "picked_past_sharpe": 0.8925546849396436,
+     "net_return_pct": -77.9862740191193,
+     "net_sharpe": -1.7498968224315545
+    },
+    {
+     "year": 2026,
+     "picked": "adx_trend(28,20)",
+     "picked_past_sharpe": 0.7933709610535518,
+     "net_return_pct": 4.81700746193396,
+     "net_sharpe": 0.20370218087846695
+    }
+   ],
+   "walk_forward_net_sharpe": 0.06760737947999665,
+   "walk_forward_net_return_pct_per_year": 3.9746114027470023,
+   "walk_forward_profitable_years": "6/9",
+   "variants": [
+    {
+     "name": "ma_cross(5,20)",
+     "family": "ma_cross",
+     "net_sharpe": -0.2133654212756703,
+     "net_return_pct_per_year": -15.126791895493497,
+     "turns_per_year": 1084.1123672412416,
+     "by_regime": {
+      "bull/high_vol": -0.37146953150551243,
+      "bull/low_vol": 0.5149927605637268,
+      "bear/high_vol": -0.8439177794619365,
+      "bear/low_vol": -0.5896301857994644,
+      "range/high_vol": -1.5463131894672968,
+      "range/low_vol": 1.4621154502579514
+     }
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6085481964414905,
+     "net_return_pct_per_year": 43.12185739087946,
+     "turns_per_year": 438.90500690174423,
+     "by_regime": {
+      "bull/high_vol": 0.24867350086821097,
+      "bull/low_vol": 1.8171980664054626,
+      "bear/high_vol": 0.16723914846747134,
+      "bear/low_vol": -0.6404733528105584,
+      "range/high_vol": -0.03134329671426914,
+      "range/low_vol": 1.968089172060014
+     }
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6697017932726611,
+     "net_return_pct_per_year": 47.45552864454581,
+     "turns_per_year": 213.70243785578205,
+     "by_regime": {
+      "bull/high_vol": 0.41147359948285983,
+      "bull/low_vol": 1.9059579017504236,
+      "bear/high_vol": -0.43879968877761627,
+      "bear/low_vol": -1.1341342946495048,
+      "range/high_vol": 0.6784255135349744,
+      "range/low_vol": 2.2423394277886715
+     }
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6078798254955342,
+     "net_return_pct_per_year": 43.0705981015169,
+     "turns_per_year": 101.90116245907437,
+     "by_regime": {
+      "bull/high_vol": 0.5422719464514334,
+      "bull/low_vol": 1.799855393355225,
+      "bear/high_vol": 0.3745831672601234,
+      "bear/low_vol": -2.541680604839707,
+      "range/high_vol": 0.6085600412991731,
+      "range/low_vol": 1.558331947108396
+     }
+    },
+    {
+     "name": "tsmom(6)",
+     "family": "tsmom",
+     "net_sharpe": -2.506446260060899,
+     "net_return_pct_per_year": -177.74370173649646,
+     "turns_per_year": 3658.541735589044,
+     "by_regime": {
+      "bull/high_vol": -3.2957241761224547,
+      "bull/low_vol": -2.7018747724830225,
+      "bear/high_vol": -2.355591596443813,
+      "bear/low_vol": -1.817492112800289,
+      "range/high_vol": -3.2949512171938826,
+      "range/low_vol": -1.6155539688167577
+     }
+    },
+    {
+     "name": "tsmom(24)",
+     "family": "tsmom",
+     "net_sharpe": -0.4275670586770394,
+     "net_return_pct_per_year": -30.306314607077162,
+     "turns_per_year": 1737.919825688178,
+     "by_regime": {
+      "bull/high_vol": 0.09174730999696701,
+      "bull/low_vol": -0.37315833379922625,
+      "bear/high_vol": -0.4801956738771998,
+      "bear/low_vol": -0.9168950555245776,
+      "range/high_vol": -1.712114149107325,
+      "range/low_vol": 0.10577483226819685
+     }
+    },
+    {
+     "name": "tsmom(96)",
+     "family": "tsmom",
+     "net_sharpe": 0.19665554891011605,
+     "net_return_pct_per_year": 13.938004579795226,
+     "turns_per_year": 795.9090795012492,
+     "by_regime": {
+      "bull/high_vol": -1.029982796455576,
+      "bull/low_vol": 1.443126649481629,
+      "bear/high_vol": 0.41701933750798126,
+      "bear/low_vol": -2.123381974521039,
+      "range/high_vol": 0.3541093214879769,
+      "range/low_vol": 1.6819988574531548
+     }
+    },
+    {
+     "name": "tsmom(288)",
+     "family": "tsmom",
+     "net_sharpe": 0.27310356906048333,
+     "net_return_pct_per_year": 19.350547971312597,
+     "turns_per_year": 424.3048403472547,
+     "by_regime": {
+      "bull/high_vol": 0.14368771591477492,
+      "bull/low_vol": 0.9114309412690821,
+      "bear/high_vol": 0.4785018398965954,
+      "bear/low_vol": -1.7626866929721274,
+      "range/high_vol": -0.5597232780080459,
+      "range/low_vol": 1.4518240821027217
+     }
+    },
+    {
+     "name": "macd(12,26)",
+     "family": "macd",
+     "net_sharpe": -0.16072563848804905,
+     "net_return_pct_per_year": -11.394375221378478,
+     "turns_per_year": 1328.1151507546288,
+     "by_regime": {
+      "bull/high_vol": -0.6303550927710083,
+      "bull/low_vol": 0.318252082465045,
+      "bear/high_vol": -0.23134502970215895,
+      "bear/low_vol": 0.7748713669876174,
+      "range/high_vol": -1.5257464647244297,
+      "range/low_vol": 1.0319582016965692
+     }
+    },
+    {
+     "name": "macd(24,52)",
+     "family": "macd",
+     "net_sharpe": 0.3888655238749497,
+     "net_return_pct_per_year": 27.56037009339093,
+     "turns_per_year": 855.7097616901858,
+     "by_regime": {
+      "bull/high_vol": 0.0729200968336127,
+      "bull/low_vol": 0.44921060407287594,
+      "bear/high_vol": -0.5127773499213871,
+      "bear/low_vol": 1.6223759791230001,
+      "range/high_vol": -0.23674695761346654,
+      "range/low_vol": 1.9085827063661966
+     }
+    },
+    {
+     "name": "donchian_breakout(20)",
+     "family": "donchian_breakout",
+     "net_sharpe": -0.04730163129851405,
+     "net_return_pct_per_year": -3.351887093739568,
+     "turns_per_year": 371.70424029477863,
+     "by_regime": {
+      "bull/high_vol": -0.5419684024674188,
+      "bull/low_vol": 0.42757480704181666,
+      "bear/high_vol": -0.05527908837357278,
+      "bear/low_vol": -0.9633760420633283,
+      "range/high_vol": -0.9468951259491654,
+      "range/low_vol": 1.5072359324315368
+     }
+    },
+    {
+     "name": "breakout_fade(20)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.7836678109534831,
+     "net_return_pct_per_year": -29.88988808474607,
+     "turns_per_year": 905.510329800705,
+     "by_regime": {
+      "bull/high_vol": 0.6446061453715316,
+      "bull/low_vol": -1.7921639792702933,
+      "bear/high_vol": 1.0826681634490931,
+      "bear/low_vol": -2.4947669770839647,
+      "range/high_vol": -0.5955279421201127,
+      "range/low_vol": -3.5840160323195906
+     }
+    },
+    {
+     "name": "donchian_breakout(55)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.3071105070329115,
+     "net_return_pct_per_year": 21.759678718058815,
+     "turns_per_year": 145.70166212254304,
+     "by_regime": {
+      "bull/high_vol": -0.491483369624046,
+      "bull/low_vol": 1.3167406009978695,
+      "bear/high_vol": -0.27514449413699765,
+      "bear/low_vol": -1.5560830498895017,
+      "range/high_vol": 0.8932753128586592,
+      "range/low_vol": 1.6642813034276802
+     }
+    },
+    {
+     "name": "breakout_fade(55)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.5501109395828612,
+     "net_return_pct_per_year": -17.54938490879609,
+     "turns_per_year": 509.605813436156,
+     "by_regime": {
+      "bull/high_vol": 1.1738877889660893,
+      "bull/low_vol": -1.9249970943161947,
+      "bear/high_vol": 1.052121674499481,
+      "bear/low_vol": -0.9807962180092304,
+      "range/high_vol": -1.6572683983152439,
+      "range/low_vol": -2.632044052079956
+     }
+    },
+    {
+     "name": "donchian_breakout(200)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.6425863685332116,
+     "net_return_pct_per_year": 45.51873107212543,
+     "turns_per_year": 40.90046658072759,
+     "by_regime": {
+      "bull/high_vol": 0.4510236374189339,
+      "bull/low_vol": 1.5506755150214628,
+      "bear/high_vol": 0.5517263973832421,
+      "bear/low_vol": -0.5311593959528091,
+      "range/high_vol": 1.0244823298843413,
+      "range/low_vol": 0.6596549102657837
+     }
+    },
+    {
+     "name": "breakout_fade(200)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.5231066979975232,
+     "net_return_pct_per_year": -13.777158188278976,
+     "turns_per_year": 247.40282230004905,
+     "by_regime": {
+      "bull/high_vol": 0.6223752470888207,
+      "bull/low_vol": -1.5735045248790964,
+      "bear/high_vol": 0.9050830212506337,
+      "bear/low_vol": -0.0043436863360034675,
+      "range/high_vol": -1.7272596465980503,
+      "range/low_vol": -2.383252841839832
+     }
+    },
+    {
+     "name": "keltner_breakout(20,1.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.46728277823410447,
+     "net_return_pct_per_year": 33.10943642005636,
+     "turns_per_year": 306.1034919403598,
+     "by_regime": {
+      "bull/high_vol": -0.5032631468938862,
+      "bull/low_vol": 1.391334645422296,
+      "bear/high_vol": 0.18417833452980953,
+      "bear/low_vol": -0.04581695886639071,
+      "range/high_vol": 0.22515469506455316,
+      "range/low_vol": 2.0325978169494245
+     }
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.636776936102045,
+     "net_return_pct_per_year": 45.11908867603339,
+     "turns_per_year": 126.50144309198143,
+     "by_regime": {
+      "bull/high_vol": -1.0353335305844684,
+      "bull/low_vol": 1.9222864319010555,
+      "bear/high_vol": 0.796050031062477,
+      "bear/low_vol": -1.1453881421713041,
+      "range/high_vol": 1.2586316872316496,
+      "range/low_vol": 2.262171538800106
+     }
+    },
+    {
+     "name": "keltner_breakout(50,2.0)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.540812902231855,
+     "net_return_pct_per_year": 38.31799216242396,
+     "turns_per_year": 186.10212299934975,
+     "by_regime": {
+      "bull/high_vol": -0.11189368604913787,
+      "bull/low_vol": 1.7021658636381767,
+      "bear/high_vol": 0.4630303214958303,
+      "bear/low_vol": -1.3467958164441154,
+      "range/high_vol": 0.302094960017956,
+      "range/low_vol": 1.8526662323951593
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,1.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.45402431024287,
+     "net_return_pct_per_year": -87.2929470063387,
+     "turns_per_year": 829.3094605231636,
+     "by_regime": {
+      "bull/high_vol": -0.1764671892398632,
+      "bull/low_vol": -2.465822315575021,
+      "bear/high_vol": -0.5992845172319461,
+      "bear/low_vol": -2.6375517748174,
+      "range/high_vol": -0.35356522390027667,
+      "range/low_vol": -4.299572364624071
+     }
+    },
+    {
+     "name": "range_trade(20,1.5)",
+     "family": "range_trade",
+     "net_sharpe": -2.0707785884309735,
+     "net_return_pct_per_year": -48.78166007728847,
+     "turns_per_year": 484.50552709932805,
+     "by_regime": {
+      "bull/high_vol": -1.9680158008440447,
+      "bull/low_vol": -2.409950800374586,
+      "bear/high_vol": -1.6593270282415555,
+      "bear/low_vol": -1.43848001911809,
+      "range/high_vol": -1.2124334485074264,
+      "range/low_vol": -3.5778075707406436
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,2.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.3459962559100755,
+     "net_return_pct_per_year": -65.5100694590237,
+     "turns_per_year": 422.50481981313953,
+     "by_regime": {
+      "bull/high_vol": -0.15789253137576825,
+      "bull/low_vol": -2.6888504354970055,
+      "bear/high_vol": -0.33610863539772123,
+      "bear/low_vol": -2.1341951927096274,
+      "range/high_vol": -0.9113448584048185,
+      "range/low_vol": -3.4195299386442852
+     }
+    },
+    {
+     "name": "range_trade(20,2.5)",
+     "family": "range_trade",
+     "net_sharpe": -1.3174114709224247,
+     "net_return_pct_per_year": -18.894658460365857,
+     "turns_per_year": 211.70241504009857,
+     "by_regime": {
+      "bull/high_vol": -1.6013177922671025,
+      "bull/low_vol": -1.572344379012191,
+      "bear/high_vol": -1.140712438607331,
+      "bear/low_vol": -0.7550356338064054,
+      "range/high_vol": -0.47390658917238193,
+      "range/low_vol": -1.8833529911894173
+     }
+    },
+    {
+     "name": "bollinger_reversion(96,2.0)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.2901500348187298,
+     "net_return_pct_per_year": -76.21687317898423,
+     "turns_per_year": 155.30177163782383,
+     "by_regime": {
+      "bull/high_vol": -0.40041836268825715,
+      "bull/low_vol": -2.917224685855443,
+      "bear/high_vol": -0.6541818891533795,
+      "bear/low_vol": 0.11297323733475133,
+      "range/high_vol": -1.3492220271181945,
+      "range/low_vol": -2.8685028280369593
+     }
+    },
+    {
+     "name": "range_trade(96,2.0)",
+     "family": "range_trade",
+     "net_sharpe": -0.9287209580429725,
+     "net_return_pct_per_year": -20.85137956241543,
+     "turns_per_year": 197.70225533031405,
+     "by_regime": {
+      "bull/high_vol": -0.18140443791367566,
+      "bull/low_vol": -2.857365347034431,
+      "bear/high_vol": -0.9598971159237469,
+      "bear/low_vol": 1.1151360125505145,
+      "range/high_vol": -0.6802277166962256,
+      "range/low_vol": -1.516314110356446
+     }
+    },
+    {
+     "name": "rsi_reversion(14,20)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.9760259055744128,
+     "net_return_pct_per_year": -47.51505274100468,
+     "turns_per_year": 247.40282230004905,
+     "by_regime": {
+      "bull/high_vol": 0.3319960631841193,
+      "bull/low_vol": -2.116561580448453,
+      "bear/high_vol": 0.11545542768890157,
+      "bear/low_vol": -1.3372767249305562,
+      "range/high_vol": -1.3335881833820908,
+      "range/low_vol": -2.9996845387743023
+     }
+    },
+    {
+     "name": "rsi_reversion(14,30)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.9876171485841533,
+     "net_return_pct_per_year": -31.547148704244904,
+     "turns_per_year": 65.80075063598717,
+     "by_regime": {
+      "bull/high_vol": -0.30944561076609767,
+      "bull/low_vol": -1.566591490494983,
+      "bear/high_vol": 0.0076394278132039615,
+      "bear/low_vol": -1.0509269706457527,
+      "range/high_vol": -1.1450646358296348,
+      "range/low_vol": -2.871579253763272
+     }
+    },
+    {
+     "name": "rsi_reversion(48,15)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.6222585426807741,
+     "net_return_pct_per_year": -27.828011396709083,
+     "turns_per_year": 50.00057039208752,
+     "by_regime": {
+      "bull/high_vol": 0.0663776273406162,
+      "bull/low_vol": -1.9911353491305883,
+      "bear/high_vol": -0.25280162741735357,
+      "bear/low_vol": 1.4879940822298634,
+      "range/high_vol": -0.441945536877686,
+      "range/low_vol": -2.2313831584422985
+     }
+    },
+    {
+     "name": "stochastic_reversion(14)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -1.4863788260943347,
+     "net_return_pct_per_year": -69.57721843511844,
+     "turns_per_year": 2274.925951699198,
+     "by_regime": {
+      "bull/high_vol": 0.5504148158000619,
+      "bull/low_vol": -3.2760134552101787,
+      "bear/high_vol": 0.4709487992414006,
+      "bear/low_vol": -3.933055068320976,
+      "range/high_vol": -0.47723692423594727,
+      "range/low_vol": -5.248876254195797
+     }
+    },
+    {
+     "name": "stochastic_reversion(48)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -1.340980649474774,
+     "net_return_pct_per_year": -65.1869012444908,
+     "turns_per_year": 1277.2145700954836,
+     "by_regime": {
+      "bull/high_vol": 0.37534881735056824,
+      "bull/low_vol": -3.2373298258076626,
+      "bear/high_vol": 0.6630589755823185,
+      "bear/low_vol": -3.819628159820317,
+      "range/high_vol": -0.48276686932944674,
+      "range/low_vol": -4.330570660602438
+     }
+    },
+    {
+     "name": "vwap_reversion(48,1.5)",
+     "family": "vwap_reversion",
+     "net_sharpe": -1.4358703688559258,
+     "net_return_pct_per_year": -57.91763442554668,
+     "turns_per_year": 1066.2121630408742,
+     "by_regime": {
+      "bull/high_vol": 0.16810273541229534,
+      "bull/low_vol": -2.9389186588244125,
+      "bear/high_vol": 1.1626800827095614,
+      "bear/low_vol": -3.564776958723203,
+      "range/high_vol": -1.4938994474851461,
+      "range/low_vol": -4.312678915833582
+     }
+    },
+    {
+     "name": "vwap_reversion(288,2.0)",
+     "family": "vwap_reversion",
+     "net_sharpe": -1.0005465784494283,
+     "net_return_pct_per_year": -33.33075137153173,
+     "turns_per_year": 259.80296375728676,
+     "by_regime": {
+      "bull/high_vol": 0.19958052661330627,
+      "bull/low_vol": -1.6754897942082976,
+      "bear/high_vol": 0.005678272731919325,
+      "bear/low_vol": -0.5100416101747219,
+      "range/high_vol": -1.125957028297391,
+      "range/low_vol": -3.323476196517778
+     }
+    },
+    {
+     "name": "trend_pullback(20,100)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.6110675792718089,
+     "net_return_pct_per_year": -12.226221374112974,
+     "turns_per_year": 454.205181441723,
+     "by_regime": {
+      "bull/high_vol": 0.41236453722098365,
+      "bull/low_vol": -0.49355975648485684,
+      "bear/high_vol": -0.4181710284628041,
+      "bear/low_vol": -3.8358011568817023,
+      "range/high_vol": 0.5285298561818267,
+      "range/low_vol": -1.8994533577420243
+     }
+    },
+    {
+     "name": "trend_pullback(50,200)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.5601080925512514,
+     "net_return_pct_per_year": -15.11257792678245,
+     "turns_per_year": 584.2066644611506,
+     "by_regime": {
+      "bull/high_vol": 0.7627422811936113,
+      "bull/low_vol": -0.7502203705596121,
+      "bear/high_vol": 0.20721851371176123,
+      "bear/low_vol": -3.7493267406832333,
+      "range/high_vol": 0.25854466299776047,
+      "range/low_vol": -2.6171401847263818
+     }
+    },
+    {
+     "name": "adx_trend(14,25)",
+     "family": "adx_trend",
+     "net_sharpe": 0.4320579223384788,
+     "net_return_pct_per_year": 24.32116431041772,
+     "turns_per_year": 388.80443536887253,
+     "by_regime": {
+      "bull/high_vol": -0.28294266420071973,
+      "bull/low_vol": 0.5178123232844528,
+      "bear/high_vol": -0.21317420472354218,
+      "bear/low_vol": 0.7326336894900934,
+      "range/high_vol": 0.34949683497864475,
+      "range/low_vol": 2.206618571963552
+     }
+    },
+    {
+     "name": "adx_trend(28,20)",
+     "family": "adx_trend",
+     "net_sharpe": 0.7621825134469606,
+     "net_return_pct_per_year": 42.100360239206566,
+     "turns_per_year": 180.6020602562201,
+     "by_regime": {
+      "bull/high_vol": 0.4476243111860649,
+      "bull/low_vol": 1.1147293447288964,
+      "bear/high_vol": 0.432102007453038,
+      "bear/low_vol": -1.7579568519458724,
+      "range/high_vol": 0.9348231340836703,
+      "range/low_vol": 2.454189654477847
+     }
+    }
+   ]
+  },
+  "4h": {
+   "bars": 21914,
+   "variants_tested": 36,
+   "buy_and_hold_sharpe": 0.7293053155231687,
+   "variants_with_positive_net_sharpe": 17,
+   "best_in_sample": [
+    {
+     "name": "keltner_breakout(50,2.0)",
+     "net_sharpe": 1.021342458648616,
+     "net_return_pct_per_year": 69.17208408827456
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "net_sharpe": 0.9480332233569677,
+     "net_return_pct_per_year": 64.21288950705282
+    },
+    {
+     "name": "ma_cross(5,20)",
+     "net_sharpe": 0.9428799373060023,
+     "net_return_pct_per_year": 63.87330877014453
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "net_sharpe": 0.9317267103952019,
+     "net_return_pct_per_year": 63.11355686822174
+    },
+    {
+     "name": "keltner_breakout(20,1.5)",
+     "net_sharpe": 0.9108533589239352,
+     "net_return_pct_per_year": 61.70065514037344
+    }
+   ],
+   "best_by_regime": {
+    "bull/high_vol": [
+     1.639289619245047,
+     "tsmom(288)"
+    ],
+    "bull/low_vol": [
+     2.7680021147445024,
+     "tsmom(288)"
+    ],
+    "bear/high_vol": [
+     1.1021016389389864,
+     "keltner_breakout(20,1.5)"
+    ],
+    "bear/low_vol": [
+     2.3022222172672824,
+     "breakout_fade(200)"
+    ],
+    "range/high_vol": [
+     1.2767595531014913,
+     "keltner_breakout(20,2.5)"
+    ],
+    "range/low_vol": [
+     2.2865250391949083,
+     "ma_cross(5,20)"
+    ]
+   },
+   "walk_forward": [
+    {
+     "year": 2018,
+     "picked": "keltner_breakout(50,2.0)",
+     "picked_past_sharpe": 2.8985112760931506,
+     "net_return_pct": 103.38289401890827,
+     "net_sharpe": 1.1857144775962911
+    },
+    {
+     "year": 2019,
+     "picked": "keltner_breakout(50,2.0)",
+     "picked_past_sharpe": 2.138415464114545,
+     "net_return_pct": 49.428140573817274,
+     "net_sharpe": 0.7308415199621909
+    },
+    {
+     "year": 2020,
+     "picked": "keltner_breakout(50,2.0)",
+     "picked_past_sharpe": 1.7665972380578692,
+     "net_return_pct": 83.70172378407155,
+     "net_sharpe": 1.217639051162764
+    },
+    {
+     "year": 2021,
+     "picked": "tsmom(96)",
+     "picked_past_sharpe": 1.7267189255554456,
+     "net_return_pct": -84.88688515527,
+     "net_sharpe": -0.9667188797286664
+    },
+    {
+     "year": 2022,
+     "picked": "ma_cross(5,20)",
+     "picked_past_sharpe": 1.4170573905249046,
+     "net_return_pct": -29.436972509413756,
+     "net_sharpe": -0.4762280386584428
+    },
+    {
+     "year": 2023,
+     "picked": "keltner_breakout(20,2.5)",
+     "picked_past_sharpe": 1.2057266726757865,
+     "net_return_pct": 18.63752897889516,
+     "net_sharpe": 0.4432036592743133
+    },
+    {
+     "year": 2024,
+     "picked": "keltner_breakout(20,1.5)",
+     "picked_past_sharpe": 1.1352458897161577,
+     "net_return_pct": 9.8313542572461,
+     "net_sharpe": 0.18763140495156347
+    },
+    {
+     "year": 2025,
+     "picked": "keltner_breakout(50,2.0)",
+     "picked_past_sharpe": 1.165903664082677,
+     "net_return_pct": -45.99820958588751,
+     "net_sharpe": -1.037943957985665
+    },
+    {
+     "year": 2026,
+     "picked": "keltner_breakout(50,2.0)",
+     "picked_past_sharpe": 1.0047494155130368,
+     "net_return_pct": 46.92274446483919,
+     "net_sharpe": 1.4883092364978816
+    }
+   ],
+   "walk_forward_net_sharpe": 0.269076077330665,
+   "walk_forward_net_return_pct_per_year": 17.31071660811999,
+   "walk_forward_profitable_years": "6/9",
+   "variants": [
+    {
+     "name": "ma_cross(5,20)",
+     "family": "ma_cross",
+     "net_sharpe": 0.9428799373060023,
+     "net_return_pct_per_year": 63.87330877014453,
+     "turns_per_year": 236.71080131422832,
+     "by_regime": {
+      "bull/high_vol": 0.7154253458896387,
+      "bull/low_vol": 1.987100075522023,
+      "bear/high_vol": 0.45885183890925907,
+      "bear/low_vol": -0.9970860660124244,
+      "range/high_vol": 0.5800977989289797,
+      "range/low_vol": 2.2865250391949083
+     }
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6765344852258801,
+     "net_return_pct_per_year": 45.83161592415938,
+     "turns_per_year": 111.90510632472392,
+     "by_regime": {
+      "bull/high_vol": 0.3887154127381279,
+      "bull/low_vol": 2.1145856947294046,
+      "bear/high_vol": 0.5308763258468334,
+      "bear/low_vol": -2.0069649023712928,
+      "range/high_vol": 0.6648719843806956,
+      "range/low_vol": 1.4418218304669903
+     }
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "family": "ma_cross",
+     "net_sharpe": 0.9039039232534287,
+     "net_return_pct_per_year": 61.22855008128548,
+     "turns_per_year": 47.90218581728575,
+     "by_regime": {
+      "bull/high_vol": 1.150990886025905,
+      "bull/low_vol": 2.1011447592991415,
+      "bear/high_vol": -0.18680509066606682,
+      "bear/low_vol": -0.5097452236495632,
+      "range/high_vol": 0.6082251845652377,
+      "range/low_vol": 1.8407753830819074
+     }
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "family": "ma_cross",
+     "net_sharpe": 0.9317267103952019,
+     "net_return_pct_per_year": 63.11355686822174,
+     "turns_per_year": 21.10096285479602,
+     "by_regime": {
+      "bull/high_vol": 1.4612347079998929,
+      "bull/low_vol": 2.3301868841266473,
+      "bear/high_vol": -0.2808202263236914,
+      "bear/low_vol": -0.07800017881925246,
+      "range/high_vol": 0.25012759859709643,
+      "range/low_vol": 1.6531347236057168
+     }
+    },
+    {
+     "name": "tsmom(6)",
+     "family": "tsmom",
+     "net_sharpe": -0.3463655078662561,
+     "net_return_pct_per_year": -23.472902316023536,
+     "turns_per_year": 876.3399881354385,
+     "by_regime": {
+      "bull/high_vol": -0.2265640812404314,
+      "bull/low_vol": 0.02168239666233055,
+      "bear/high_vol": -0.8605982098888291,
+      "bear/low_vol": -0.9961031162450812,
+      "range/high_vol": -1.553698826863797,
+      "range/low_vol": 0.9927247402836913
+     }
+    },
+    {
+     "name": "tsmom(24)",
+     "family": "tsmom",
+     "net_sharpe": 0.36394515557943435,
+     "net_return_pct_per_year": 24.66301816086387,
+     "turns_per_year": 409.5186866843114,
+     "by_regime": {
+      "bull/high_vol": -0.591281265569279,
+      "bull/low_vol": 1.4134261463576205,
+      "bear/high_vol": 0.48902816608845623,
+      "bear/low_vol": -1.9498651017599593,
+      "range/high_vol": 0.23419459510559482,
+      "range/low_vol": 1.8883313055638387
+     }
+    },
+    {
+     "name": "tsmom(96)",
+     "family": "tsmom",
+     "net_sharpe": 0.8578782451143933,
+     "net_return_pct_per_year": 58.113442079841185,
+     "turns_per_year": 177.3080907182623,
+     "by_regime": {
+      "bull/high_vol": 1.072008753688037,
+      "bull/low_vol": 2.710150318137907,
+      "bear/high_vol": 0.33420247254090707,
+      "bear/low_vol": -0.7416188238013587,
+      "range/high_vol": -0.5501850073827689,
+      "range/low_vol": 1.8511538566846442
+     }
+    },
+    {
+     "name": "tsmom(288)",
+     "family": "tsmom",
+     "net_sharpe": 0.8543226167716981,
+     "net_return_pct_per_year": 57.79245009379274,
+     "turns_per_year": 92.50422104590672,
+     "by_regime": {
+      "bull/high_vol": 1.639289619245047,
+      "bull/low_vol": 2.7680021147445024,
+      "bear/high_vol": 0.19090874094029844,
+      "bear/low_vol": -0.1905205389391175,
+      "range/high_vol": 0.2290930506942759,
+      "range/low_vol": 0.294220429917341
+     }
+    },
+    {
+     "name": "macd(12,26)",
+     "family": "macd",
+     "net_sharpe": 0.43233268238362405,
+     "net_return_pct_per_year": 29.290271897262688,
+     "turns_per_year": 322.5147166195126,
+     "by_regime": {
+      "bull/high_vol": -0.26730214174920497,
+      "bull/low_vol": 0.6805242389638941,
+      "bear/high_vol": -0.26352662754842787,
+      "bear/low_vol": 0.8906672407750945,
+      "range/high_vol": 0.14613312802910022,
+      "range/low_vol": 1.9956832881554822
+     }
+    },
+    {
+     "name": "macd(24,52)",
+     "family": "macd",
+     "net_sharpe": 0.3502497662510447,
+     "net_return_pct_per_year": 23.733529193247886,
+     "turns_per_year": 220.11004380761156,
+     "by_regime": {
+      "bull/high_vol": -0.4609555291226562,
+      "bull/low_vol": 1.4540369043962413,
+      "bear/high_vol": -0.00396224856262657,
+      "bear/low_vol": -0.24207478575137398,
+      "range/high_vol": -0.2668256507978872,
+      "range/low_vol": 1.8267942273242759
+     }
+    },
+    {
+     "name": "donchian_breakout(20)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.6162114429746477,
+     "net_return_pct_per_year": 41.74606782835041,
+     "turns_per_year": 84.90387423564843,
+     "by_regime": {
+      "bull/high_vol": -0.15199360416365298,
+      "bull/low_vol": 2.4970770900976236,
+      "bear/high_vol": 0.584796365479134,
+      "bear/low_vol": -1.923076732128027,
+      "range/high_vol": 0.43291108671058626,
+      "range/low_vol": 1.6599427198013212
+     }
+    },
+    {
+     "name": "breakout_fade(20)",
+     "family": "breakout_fade",
+     "net_sharpe": -1.257717192637535,
+     "net_return_pct_per_year": -48.09977057035609,
+     "turns_per_year": 232.8106233458063,
+     "by_regime": {
+      "bull/high_vol": -0.25907828106536696,
+      "bull/low_vol": -2.9372961117613228,
+      "bear/high_vol": -0.6018779111653004,
+      "bear/low_vol": 0.13690207136708277,
+      "range/high_vol": -1.1137292499723381,
+      "range/low_vol": -2.7830285714996936
+     }
+    },
+    {
+     "name": "donchian_breakout(55)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.7724275687445276,
+     "net_return_pct_per_year": 52.31299739500752,
+     "turns_per_year": 33.30151957652642,
+     "by_regime": {
+      "bull/high_vol": 0.5099325851097232,
+      "bull/low_vol": 1.7479015170158894,
+      "bear/high_vol": 0.6800575030580817,
+      "bear/low_vol": -0.9613167903798449,
+      "range/high_vol": 0.664929312224321,
+      "range/low_vol": 1.4849206611263892
+     }
+    },
+    {
+     "name": "breakout_fade(55)",
+     "family": "breakout_fade",
+     "net_sharpe": -1.2394408709382942,
+     "net_return_pct_per_year": -40.5489721862827,
+     "turns_per_year": 132.20603267317696,
+     "by_regime": {
+      "bull/high_vol": -0.5499753746889355,
+      "bull/low_vol": -2.430281750311353,
+      "bear/high_vol": -1.458587666831798,
+      "bear/low_vol": 0.7411277075739707,
+      "range/high_vol": -0.8902378624796783,
+      "range/low_vol": -2.1551047433066617
+     }
+    },
+    {
+     "name": "donchian_breakout(200)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.6136235568453595,
+     "net_return_pct_per_year": 41.52081988122106,
+     "turns_per_year": 11.30051565209455,
+     "by_regime": {
+      "bull/high_vol": 1.5206554831861807,
+      "bull/low_vol": 2.7441942134777046,
+      "bear/high_vol": -0.9565224717877656,
+      "bear/low_vol": -0.1150793478151431,
+      "range/high_vol": 0.02021745716665618,
+      "range/low_vol": 0.43288276666151326
+     }
+    },
+    {
+     "name": "breakout_fade(200)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.9047899943764937,
+     "net_return_pct_per_year": -24.81497467425481,
+     "turns_per_year": 67.20306653281007,
+     "by_regime": {
+      "bull/high_vol": -0.6999832306877702,
+      "bull/low_vol": -2.454298843417709,
+      "bear/high_vol": -0.8439658326960771,
+      "bear/low_vol": 2.3022222172672824,
+      "range/high_vol": -0.3397118783395233,
+      "range/low_vol": -1.9458474628709042
+     }
+    },
+    {
+     "name": "keltner_breakout(20,1.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.9108533589239352,
+     "net_return_pct_per_year": 61.70065514037344,
+     "turns_per_year": 76.10347266587569,
+     "by_regime": {
+      "bull/high_vol": 0.24433148997328966,
+      "bull/low_vol": 2.462037112525413,
+      "bear/high_vol": 1.1021016389389864,
+      "bear/low_vol": -1.2169912641046066,
+      "range/high_vol": 0.24332264780543347,
+      "range/low_vol": 2.1394742466912477
+     }
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.9480332233569677,
+     "net_return_pct_per_year": 64.21288950705282,
+     "turns_per_year": 31.701446563840467,
+     "by_regime": {
+      "bull/high_vol": 0.7831976787428445,
+      "bull/low_vol": 1.911413713002339,
+      "bear/high_vol": 0.3641962884609588,
+      "bear/low_vol": -0.8012811308794717,
+      "range/high_vol": 1.2767595531014913,
+      "range/low_vol": 1.6918552872167363
+     }
+    },
+    {
+     "name": "keltner_breakout(50,2.0)",
+     "family": "keltner_breakout",
+     "net_sharpe": 1.021342458648616,
+     "net_return_pct_per_year": 69.17208408827456,
+     "turns_per_year": 42.50193939947066,
+     "by_regime": {
+      "bull/high_vol": 0.5940877882615796,
+      "bull/low_vol": 2.1226536287792883,
+      "bear/high_vol": 0.9628402659940362,
+      "bear/low_vol": -0.6020140276067705,
+      "range/high_vol": 0.9239124300037931,
+      "range/low_vol": 1.8205554998420743
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,1.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.2020660827482526,
+     "net_return_pct_per_year": -70.23040024183823,
+     "turns_per_year": 192.70879346536458,
+     "by_regime": {
+      "bull/high_vol": -0.7854341281575686,
+      "bull/low_vol": -2.4595720851195573,
+      "bear/high_vol": -0.2418554264505182,
+      "bear/low_vol": 0.05437613255769828,
+      "range/high_vol": -0.7499896483990709,
+      "range/low_vol": -2.949835323724787
+     }
+    },
+    {
+     "name": "range_trade(20,1.5)",
+     "family": "range_trade",
+     "net_sharpe": -1.0715232479125751,
+     "net_return_pct_per_year": -22.753838361283776,
+     "turns_per_year": 112.40512914118827,
+     "by_regime": {
+      "bull/high_vol": -1.4687483833322372,
+      "bull/low_vol": -0.4458626711965079,
+      "bear/high_vol": 0.5194570113230232,
+      "bear/low_vol": -1.7945718863671714,
+      "range/high_vol": -0.6900925785590236,
+      "range/low_vol": -2.2326231112976656
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,2.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -1.1375067470413112,
+     "net_return_pct_per_year": -54.6717340387455,
+     "turns_per_year": 100.70459523592223,
+     "by_regime": {
+      "bull/high_vol": -0.8757458677957085,
+      "bull/low_vol": -2.1567365105894765,
+      "bear/high_vol": -1.0284094362758494,
+      "bear/low_vol": 0.1438899598600385,
+      "range/high_vol": -0.287393319985665,
+      "range/low_vol": -2.2634826635049463
+     }
+    },
+    {
+     "name": "range_trade(20,2.5)",
+     "family": "range_trade",
+     "net_sharpe": -0.7349278690110574,
+     "net_return_pct_per_year": -8.628346007312897,
+     "turns_per_year": 50.20229077302181,
+     "by_regime": {
+      "bull/high_vol": -0.392789317253477,
+      "bull/low_vol": -0.002791215445311198,
+      "bear/high_vol": -0.9921748441482455,
+      "bear/low_vol": -1.8350167212344912,
+      "range/high_vol": -0.6607335540852465,
+      "range/low_vol": -1.008624383467176
+     }
+    },
+    {
+     "name": "bollinger_reversion(96,2.0)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -0.9164897612383012,
+     "net_return_pct_per_year": -52.32093974189633,
+     "turns_per_year": 38.501756867755766,
+     "by_regime": {
+      "bull/high_vol": -1.2819261551358352,
+      "bull/low_vol": -2.0273511754987905,
+      "bear/high_vol": -0.3240028345655322,
+      "bear/low_vol": 1.2490067108255059,
+      "range/high_vol": -0.691616301437246,
+      "range/low_vol": -1.6146263062686899
+     }
+    },
+    {
+     "name": "range_trade(96,2.0)",
+     "family": "range_trade",
+     "net_sharpe": -0.5493944427686858,
+     "net_return_pct_per_year": -12.095835542636921,
+     "turns_per_year": 49.40225426667883,
+     "by_regime": {
+      "bull/high_vol": -0.6328288658828537,
+      "bull/low_vol": -0.37932289300231864,
+      "bear/high_vol": -0.6544067322795041,
+      "bear/low_vol": -0.9845292061605119,
+      "range/high_vol": -0.05742762490925945,
+      "range/low_vol": -0.6742582759585645
+     }
+    },
+    {
+     "name": "rsi_reversion(14,20)",
+     "family": "rsi_reversion",
+     "net_sharpe": -1.0658793155527542,
+     "net_return_pct_per_year": -52.635153046831505,
+     "turns_per_year": 65.00296614036688,
+     "by_regime": {
+      "bull/high_vol": -0.7648910022021354,
+      "bull/low_vol": -2.3240294645123205,
+      "bear/high_vol": -1.0322986045252849,
+      "bear/low_vol": 1.0099049563370017,
+      "range/high_vol": -0.5486679480830496,
+      "range/low_vol": -2.0485464064575214
+     }
+    },
+    {
+     "name": "rsi_reversion(14,30)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.6175997500752136,
+     "net_return_pct_per_year": -19.891350354593758,
+     "turns_per_year": 21.60098567126038,
+     "by_regime": {
+      "bull/high_vol": -0.6171072325149508,
+      "bull/low_vol": -1.084203675539142,
+      "bear/high_vol": -0.3678754484519722,
+      "bear/low_vol": 1.8782026596648702,
+      "range/high_vol": -0.32638566618673437,
+      "range/low_vol": -2.0644738679683305
+     }
+    },
+    {
+     "name": "rsi_reversion(48,15)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.8249458393963659,
+     "net_return_pct_per_year": -34.514455707609464,
+     "turns_per_year": 13.500616044537738,
+     "by_regime": {
+      "bull/high_vol": -1.3445567952530555,
+      "bull/low_vol": -2.1458205408438786,
+      "bear/high_vol": 0.3016680310312893,
+      "bear/low_vol": 1.274341077731893,
+      "range/high_vol": -0.6533955227102832,
+      "range/low_vol": -1.946806353947374
+     }
+    },
+    {
+     "name": "stochastic_reversion(14)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -0.984549873848118,
+     "net_return_pct_per_year": -44.691663741247176,
+     "turns_per_year": 557.625444921055,
+     "by_regime": {
+      "bull/high_vol": 0.3863885312296112,
+      "bull/low_vol": -2.2955652358932057,
+      "bear/high_vol": 0.12702838501506683,
+      "bear/low_vol": -1.907149294522176,
+      "range/high_vol": -0.13691865093360128,
+      "range/low_vol": -3.3042093922822384
+     }
+    },
+    {
+     "name": "stochastic_reversion(48)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -1.1568527349867908,
+     "net_return_pct_per_year": -54.04596780799038,
+     "turns_per_year": 297.41357123300173,
+     "by_regime": {
+      "bull/high_vol": -0.7693908176947676,
+      "bull/low_vol": -2.35768703740972,
+      "bear/high_vol": -0.9470722652400267,
+      "bear/low_vol": 0.9466867913904841,
+      "range/high_vol": 0.12084329477864336,
+      "range/low_vol": -2.8958318508863714
+     }
+    },
+    {
+     "name": "vwap_reversion(48,1.5)",
+     "family": "vwap_reversion",
+     "net_sharpe": -1.2511968436850995,
+     "net_return_pct_per_year": -48.43231074793145,
+     "turns_per_year": 241.01099753582184,
+     "by_regime": {
+      "bull/high_vol": -0.6420303125505534,
+      "bull/low_vol": -2.241001071722618,
+      "bear/high_vol": -0.6096973428192993,
+      "bear/low_vol": -0.16230809213587669,
+      "range/high_vol": -0.5429150108796986,
+      "range/low_vol": -2.845118621140287
+     }
+    },
+    {
+     "name": "vwap_reversion(288,2.0)",
+     "family": "vwap_reversion",
+     "net_sharpe": -1.05696606815493,
+     "net_return_pct_per_year": -36.82727393008193,
+     "turns_per_year": 59.80272884913753,
+     "by_regime": {
+      "bull/high_vol": -1.2913127969665794,
+      "bull/low_vol": -2.992235936879501,
+      "bear/high_vol": -0.487749742155987,
+      "bear/low_vol": 1.6491570085812088,
+      "range/high_vol": -0.37019030564288335,
+      "range/low_vol": -1.7971424929918973
+     }
+    },
+    {
+     "name": "trend_pullback(20,100)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.47238544655776044,
+     "net_return_pct_per_year": -9.646168528458416,
+     "turns_per_year": 115.2052569133887,
+     "by_regime": {
+      "bull/high_vol": 0.7762469544684021,
+      "bull/low_vol": -1.5401816647458915,
+      "bear/high_vol": -1.5132297822260936,
+      "bear/low_vol": -0.452032341091429,
+      "range/high_vol": 0.4987960643251342,
+      "range/low_vol": -1.704825098342226
+     }
+    },
+    {
+     "name": "trend_pullback(50,200)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.25338401244550984,
+     "net_return_pct_per_year": -6.713424327789914,
+     "turns_per_year": 140.80642511636395,
+     "by_regime": {
+      "bull/high_vol": 0.7754598302975609,
+      "bull/low_vol": -0.8149809263866462,
+      "bear/high_vol": -1.492754552108207,
+      "bear/low_vol": 0.2343218112921424,
+      "range/high_vol": 0.5079014150393895,
+      "range/low_vol": -1.295254097942047
+     }
+    },
+    {
+     "name": "adx_trend(14,25)",
+     "family": "adx_trend",
+     "net_sharpe": 0.45639476326141026,
+     "net_return_pct_per_year": 25.184160885756718,
+     "turns_per_year": 103.80473669800126,
+     "by_regime": {
+      "bull/high_vol": 0.5295795957318779,
+      "bull/low_vol": 1.854716545909476,
+      "bear/high_vol": 0.5403284294037519,
+      "bear/low_vol": -3.254213205405312,
+      "range/high_vol": -0.011628487719239659,
+      "range/low_vol": 1.2055739503395544
+     }
+    },
+    {
+     "name": "adx_trend(28,20)",
+     "family": "adx_trend",
+     "net_sharpe": 0.5941396465280605,
+     "net_return_pct_per_year": 31.92696729972045,
+     "turns_per_year": 46.90214018435703,
+     "by_regime": {
+      "bull/high_vol": 1.2677618047597672,
+      "bull/low_vol": 2.0467162817928215,
+      "bear/high_vol": 0.36896871271701837,
+      "bear/low_vol": -3.3216600917727988,
+      "range/high_vol": 0.4047605844347789,
+      "range/low_vol": 0.6201420500538822
+     }
+    }
+   ]
+  },
+  "1d": {
+   "bars": 3652,
+   "variants_tested": 36,
+   "buy_and_hold_sharpe": 0.7231012319604299,
+   "variants_with_positive_net_sharpe": 19,
+   "best_in_sample": [
+    {
+     "name": "macd(24,52)",
+     "net_sharpe": 0.9202172959023582,
+     "net_return_pct_per_year": 62.82951479690141
+    },
+    {
+     "name": "adx_trend(14,25)",
+     "net_sharpe": 0.8819157158898918,
+     "net_return_pct_per_year": 50.46839108418618
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "net_sharpe": 0.8186111517891431,
+     "net_return_pct_per_year": 55.90081759124254
+    },
+    {
+     "name": "donchian_breakout(55)",
+     "net_sharpe": 0.792696851481666,
+     "net_return_pct_per_year": 54.0123491632792
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "net_sharpe": 0.791930136072504,
+     "net_return_pct_per_year": 54.085823395065006
+    }
+   ],
+   "best_by_regime": {
+    "bull/high_vol": [
+     2.570812256894824,
+     "adx_trend(14,25)"
+    ],
+    "bull/low_vol": [
+     2.0873764796026757,
+     "donchian_breakout(20)"
+    ],
+    "bear/high_vol": [
+     1.3500163017145401,
+     "rsi_reversion(14,20)"
+    ],
+    "bear/low_vol": [
+     2.155157881186092,
+     "stochastic_reversion(14)"
+    ],
+    "range/high_vol": [
+     1.2696201624014198,
+     "bollinger_reversion(96,2.0)"
+    ],
+    "range/low_vol": [
+     2.1341863694679324,
+     "macd(12,26)"
+    ]
+   },
+   "walk_forward": [
+    {
+     "year": 2018,
+     "picked": "ma_cross(20,100)",
+     "picked_past_sharpe": 2.935342412376289,
+     "net_return_pct": -1.7593403489303827,
+     "net_sharpe": -0.020755293987566092
+    },
+    {
+     "year": 2019,
+     "picked": "tsmom(96)",
+     "picked_past_sharpe": 1.7601395373544326,
+     "net_return_pct": 84.1482555080605,
+     "net_sharpe": 1.2046667703091485
+    },
+    {
+     "year": 2020,
+     "picked": "tsmom(96)",
+     "picked_past_sharpe": 1.6037524227962152,
+     "net_return_pct": -75.09288679899531,
+     "net_sharpe": -0.9233624073766461
+    },
+    {
+     "year": 2021,
+     "picked": "macd(24,52)",
+     "picked_past_sharpe": 1.2678348333044216,
+     "net_return_pct": 44.891788291050915,
+     "net_sharpe": 0.5538916900874726
+    },
+    {
+     "year": 2022,
+     "picked": "macd(24,52)",
+     "picked_past_sharpe": 1.131293645933187,
+     "net_return_pct": -17.826020005235705,
+     "net_sharpe": -0.2757598317264055
+    },
+    {
+     "year": 2023,
+     "picked": "donchian_breakout(55)",
+     "picked_past_sharpe": 1.0325389406363223,
+     "net_return_pct": -1.8604660057697078,
+     "net_sharpe": -0.042299976539472456
+    },
+    {
+     "year": 2024,
+     "picked": "macd(24,52)",
+     "picked_past_sharpe": 0.9570422728437376,
+     "net_return_pct": 30.97738943747378,
+     "net_sharpe": 0.5836668836525456
+    },
+    {
+     "year": 2025,
+     "picked": "donchian_breakout(55)",
+     "picked_past_sharpe": 0.9240849099941509,
+     "net_return_pct": 12.806036588757308,
+     "net_sharpe": 0.30590097245462505
+    },
+    {
+     "year": 2026,
+     "picked": "adx_trend(14,25)",
+     "picked_past_sharpe": 0.8873544872800474,
+     "net_return_pct": 25.128242091102514,
+     "net_sharpe": 0.851278685663087
+    }
+   ],
+   "walk_forward_net_sharpe": 0.17787554862384874,
+   "walk_forward_net_return_pct_per_year": 11.582582175166342,
+   "walk_forward_profitable_years": "5/9",
+   "variants": [
+    {
+     "name": "ma_cross(5,20)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6979449924625726,
+     "net_return_pct_per_year": 47.67960639910491,
+     "turns_per_year": 40.10549014238773,
+     "by_regime": {
+      "bull/high_vol": 1.9567716940449265,
+      "bull/low_vol": 1.0392228200878109,
+      "bear/high_vol": -0.2394624150591394,
+      "bear/low_vol": 0.006169051994259305,
+      "range/high_vol": -0.500218345377963,
+      "range/low_vol": 1.238954879015703
+     }
+    },
+    {
+     "name": "ma_cross(10,50)",
+     "family": "ma_cross",
+     "net_sharpe": 0.791930136072504,
+     "net_return_pct_per_year": 54.085823395065006,
+     "turns_per_year": 14.902039978094194,
+     "by_regime": {
+      "bull/high_vol": 2.457171448266322,
+      "bull/low_vol": 1.589161338490614,
+      "bear/high_vol": -0.025963010585790213,
+      "bear/low_vol": 0.3113894669450275,
+      "range/high_vol": -0.5227606215264922,
+      "range/low_vol": 0.517989438151186
+     }
+    },
+    {
+     "name": "ma_cross(20,100)",
+     "family": "ma_cross",
+     "net_sharpe": 0.8186111517891431,
+     "net_return_pct_per_year": 55.90081759124254,
+     "turns_per_year": 6.100835158817087,
+     "by_regime": {
+      "bull/high_vol": 2.1394329467868474,
+      "bull/low_vol": 1.4586628760986105,
+      "bear/high_vol": 0.0714855352255441,
+      "bear/low_vol": 0.5231833137136114,
+      "range/high_vol": 0.1478258440943444,
+      "range/low_vol": 0.3841480012260562
+     }
+    },
+    {
+     "name": "ma_cross(50,200)",
+     "family": "ma_cross",
+     "net_sharpe": 0.6204038142738217,
+     "net_return_pct_per_year": 42.38478176064682,
+     "turns_per_year": 3.3004518072289155,
+     "by_regime": {
+      "bull/high_vol": 1.6152230095231876,
+      "bull/low_vol": 1.5647349912299984,
+      "bear/high_vol": 0.32121475685068535,
+      "bear/low_vol": -0.12756204740432364,
+      "range/high_vol": 0.13652712601070943,
+      "range/low_vol": -0.06792617580358677
+     }
+    },
+    {
+     "name": "tsmom(6)",
+     "family": "tsmom",
+     "net_sharpe": 0.333608855084033,
+     "net_return_pct_per_year": 22.803648175296942,
+     "turns_per_year": 142.91956462212485,
+     "by_regime": {
+      "bull/high_vol": 1.0507784525092356,
+      "bull/low_vol": 0.994665549044031,
+      "bear/high_vol": -0.3766087939971436,
+      "bear/low_vol": -1.0740562541332594,
+      "range/high_vol": -0.4459386092978229,
+      "range/low_vol": 0.9328799179140935
+     }
+    },
+    {
+     "name": "tsmom(24)",
+     "family": "tsmom",
+     "net_sharpe": 0.6021327813162575,
+     "net_return_pct_per_year": 41.12055583395177,
+     "turns_per_year": 66.90915936473165,
+     "by_regime": {
+      "bull/high_vol": 1.7059078291176408,
+      "bull/low_vol": 1.1727834220226692,
+      "bear/high_vol": 0.08842345381773319,
+      "bear/low_vol": -0.27699473083097015,
+      "range/high_vol": -1.218282422558121,
+      "range/low_vol": 1.309114128162936
+     }
+    },
+    {
+     "name": "tsmom(96)",
+     "family": "tsmom",
+     "net_sharpe": 0.7018022466105812,
+     "net_return_pct_per_year": 47.599832442821686,
+     "turns_per_year": 20.90286144578313,
+     "by_regime": {
+      "bull/high_vol": 1.8335816276388535,
+      "bull/low_vol": 1.3988238054284237,
+      "bear/high_vol": -0.19095019542738126,
+      "bear/low_vol": 0.49246631632138743,
+      "range/high_vol": -0.05986883732624692,
+      "range/low_vol": 0.5923114020490157
+     }
+    },
+    {
+     "name": "tsmom(288)",
+     "family": "tsmom",
+     "net_sharpe": 0.4391953374962084,
+     "net_return_pct_per_year": 28.75552910589631,
+     "turns_per_year": 6.70091730558598,
+     "by_regime": {
+      "bull/high_vol": 0.9375437758187821,
+      "bull/low_vol": 0.9514487602696596,
+      "bear/high_vol": 0.8958434852580425,
+      "bear/low_vol": -1.5183860598601995,
+      "range/high_vol": 0.4123795794163125,
+      "range/low_vol": 0.05351669505719851
+     }
+    },
+    {
+     "name": "macd(12,26)",
+     "family": "macd",
+     "net_sharpe": 0.660355487367395,
+     "net_return_pct_per_year": 45.11730119228357,
+     "turns_per_year": 53.50732475355969,
+     "by_regime": {
+      "bull/high_vol": 1.1816702186562644,
+      "bull/low_vol": -0.2076581708625616,
+      "bear/high_vol": 0.7652536329182384,
+      "bear/low_vol": -2.2867282867922203,
+      "range/high_vol": 0.26461556024085564,
+      "range/low_vol": 2.1341863694679324
+     }
+    },
+    {
+     "name": "macd(24,52)",
+     "family": "macd",
+     "net_sharpe": 0.9202172959023582,
+     "net_return_pct_per_year": 62.82951479690141,
+     "turns_per_year": 32.70447699890471,
+     "by_regime": {
+      "bull/high_vol": 1.5155771998579188,
+      "bull/low_vol": 0.5262713620483218,
+      "bear/high_vol": 0.24210689229444385,
+      "bear/low_vol": 0.32186466193694574,
+      "range/high_vol": 0.8661899903528045,
+      "range/low_vol": 1.542044740015969
+     }
+    },
+    {
+     "name": "donchian_breakout(20)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.6563925411298074,
+     "net_return_pct_per_year": 44.81692501984282,
+     "turns_per_year": 15.30209474260679,
+     "by_regime": {
+      "bull/high_vol": 1.9677227283470475,
+      "bull/low_vol": 2.0873764796026757,
+      "bear/high_vol": -0.7609508043043698,
+      "bear/low_vol": 0.5204072593156981,
+      "range/high_vol": -0.3178683585330422,
+      "range/low_vol": 0.43677350531792214
+     }
+    },
+    {
+     "name": "breakout_fade(20)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.6162298915771038,
+     "net_return_pct_per_year": -25.478010019672325,
+     "turns_per_year": 44.406078860898134,
+     "by_regime": {
+      "bull/high_vol": -1.430167969554021,
+      "bull/low_vol": -1.0461553977092057,
+      "bear/high_vol": 0.3579340707077762,
+      "bear/low_vol": 0.939890197996023,
+      "range/high_vol": -0.353961551482008,
+      "range/low_vol": -1.2666770995460919
+     }
+    },
+    {
+     "name": "donchian_breakout(55)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.792696851481666,
+     "net_return_pct_per_year": 54.0123491632792,
+     "turns_per_year": 5.70078039430449,
+     "by_regime": {
+      "bull/high_vol": 1.9303494811670077,
+      "bull/low_vol": 1.692007846846826,
+      "bear/high_vol": 0.27323968492013534,
+      "bear/low_vol": 0.8433889916397194,
+      "range/high_vol": -0.23331211699510004,
+      "range/low_vol": 0.30187737466034187
+     }
+    },
+    {
+     "name": "breakout_fade(55)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.5056057128096428,
+     "net_return_pct_per_year": -16.981231667019415,
+     "turns_per_year": 26.003559693318728,
+     "by_regime": {
+      "bull/high_vol": -1.347121766305577,
+      "bull/low_vol": -0.44941279889288516,
+      "bear/high_vol": -0.4663549002744329,
+      "bear/low_vol": 0.3806779291815055,
+      "range/high_vol": 0.5594019192155837,
+      "range/low_vol": -0.5274519995656988
+     }
+    },
+    {
+     "name": "donchian_breakout(200)",
+     "family": "donchian_breakout",
+     "net_sharpe": 0.34091203862308106,
+     "net_return_pct_per_year": 22.7894315104861,
+     "turns_per_year": 1.7002327491785323,
+     "by_regime": {
+      "bull/high_vol": 1.5394366824211398,
+      "bull/low_vol": 1.1324172424885348,
+      "bear/high_vol": -0.06064456369952638,
+      "bear/low_vol": -1.1473431396186788,
+      "range/high_vol": 0.6070646955235648,
+      "range/low_vol": -0.622222496422432
+     }
+    },
+    {
+     "name": "breakout_fade(200)",
+     "family": "breakout_fade",
+     "net_sharpe": -0.5340983575433899,
+     "net_return_pct_per_year": -12.533628360015728,
+     "turns_per_year": 14.401971522453449,
+     "by_regime": {
+      "bull/high_vol": -1.2838894260100315,
+      "bull/low_vol": -0.9327862972745837,
+      "bear/high_vol": 0.12563451383252758,
+      "bear/low_vol": 0.4147217528520119,
+      "range/high_vol": 0.49662727986293914,
+      "range/low_vol": -0.055484632584744294
+     }
+    },
+    {
+     "name": "keltner_breakout(20,1.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.5686017294078615,
+     "net_return_pct_per_year": 38.832442951978145,
+     "turns_per_year": 12.901766155531215,
+     "by_regime": {
+      "bull/high_vol": 2.153704683648113,
+      "bull/low_vol": 1.7773437807298467,
+      "bear/high_vol": -0.6551813580407001,
+      "bear/low_vol": 0.22914568720622264,
+      "range/high_vol": -0.752331227604181,
+      "range/low_vol": 0.37612052661508094
+     }
+    },
+    {
+     "name": "keltner_breakout(20,2.5)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.08336228657066193,
+     "net_return_pct_per_year": 5.695893315480726,
+     "turns_per_year": 6.100835158817087,
+     "by_regime": {
+      "bull/high_vol": 2.254804698297211,
+      "bull/low_vol": 0.5618189942862267,
+      "bear/high_vol": -1.3997441957636467,
+      "bear/low_vol": -0.7504517326541535,
+      "range/high_vol": -1.2026494479840808,
+      "range/low_vol": 0.10039324855841199
+     }
+    },
+    {
+     "name": "keltner_breakout(50,2.0)",
+     "family": "keltner_breakout",
+     "net_sharpe": 0.504942458368075,
+     "net_return_pct_per_year": 34.428991589002436,
+     "turns_per_year": 8.101108981380065,
+     "by_regime": {
+      "bull/high_vol": 2.138764166100428,
+      "bull/low_vol": 1.594825912265907,
+      "bear/high_vol": -0.7224707659082503,
+      "bear/low_vol": 0.18047954842740502,
+      "range/high_vol": -0.7874748339915562,
+      "range/low_vol": 0.30301163007070947
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,1.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -0.7715676357895829,
+     "net_return_pct_per_year": -46.30724595434722,
+     "turns_per_year": 31.70434008762322,
+     "by_regime": {
+      "bull/high_vol": -1.9651882244873746,
+      "bull/low_vol": -1.1669104333947051,
+      "bear/high_vol": 0.24014669897262877,
+      "bear/low_vol": 1.21435940967788,
+      "range/high_vol": 0.10804143964217722,
+      "range/low_vol": -1.8663106793203568
+     }
+    },
+    {
+     "name": "range_trade(20,1.5)",
+     "family": "range_trade",
+     "net_sharpe": -0.9713299441912079,
+     "net_return_pct_per_year": -18.23404847344601,
+     "turns_per_year": 16.40224534501643,
+     "by_regime": {
+      "bull/high_vol": 0.7965592334045434,
+      "bull/low_vol": -1.3204546153285293,
+      "bear/high_vol": -1.3675039421052047,
+      "bear/low_vol": 0.8974366299717766,
+      "range/high_vol": -1.588195090479267,
+      "range/low_vol": -1.462406692674542
+     }
+    },
+    {
+     "name": "bollinger_reversion(20,2.5)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -0.42270213358821246,
+     "net_return_pct_per_year": -19.941376716776478,
+     "turns_per_year": 15.102067360350492,
+     "by_regime": {
+      "bull/high_vol": -2.083827283105338,
+      "bull/low_vol": -0.782811976144458,
+      "bear/high_vol": 0.6340761605625942,
+      "bear/low_vol": 1.4621352080064898,
+      "range/high_vol": 1.0950794919366194,
+      "range/low_vol": -1.4853189807205154
+     }
+    },
+    {
+     "name": "range_trade(20,2.5)",
+     "family": "range_trade",
+     "net_sharpe": -0.19781629084613464,
+     "net_return_pct_per_year": -2.035009361767755,
+     "turns_per_year": 5.800794085432639,
+     "by_regime": {
+      "bull/high_vol": 0.3263705334771795,
+      "bull/low_vol": -0.29365815209349766,
+      "bear/high_vol": -1.2363926963976457,
+      "bear/low_vol": 1.0109595361060137,
+      "range/high_vol": -0.1874871981924855,
+      "range/low_vol": -0.5120104411426167
+     }
+    },
+    {
+     "name": "bollinger_reversion(96,2.0)",
+     "family": "bollinger_reversion",
+     "net_sharpe": -0.5903515443219518,
+     "net_return_pct_per_year": -32.637056335270934,
+     "turns_per_year": 6.500889923329682,
+     "by_regime": {
+      "bull/high_vol": -2.208541167410621,
+      "bull/low_vol": -1.8219282499015081,
+      "bear/high_vol": 0.0541668103890654,
+      "bear/low_vol": -0.7433796789784238,
+      "range/high_vol": 1.2696201624014198,
+      "range/low_vol": 0.5357812064325933
+     }
+    },
+    {
+     "name": "range_trade(96,2.0)",
+     "family": "range_trade",
+     "net_sharpe": 0.10056497978123292,
+     "net_return_pct_per_year": 1.966704709435426,
+     "turns_per_year": 8.401150054764512,
+     "by_regime": {
+      "bull/high_vol": -0.39267298668101086,
+      "bull/low_vol": -0.15590930748533,
+      "bear/high_vol": 0.6877419261806222,
+      "bear/low_vol": -0.9283482015712006,
+      "range/high_vol": 0.9901554837393547,
+      "range/low_vol": -0.03559780560655268
+     }
+    },
+    {
+     "name": "rsi_reversion(14,20)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.5645251958633744,
+     "net_return_pct_per_year": -26.125891142551673,
+     "turns_per_year": 10.501437568455641,
+     "by_regime": {
+      "bull/high_vol": -1.9961306298933665,
+      "bull/low_vol": -1.1828491458076196,
+      "bear/high_vol": 1.3500163017145401,
+      "bear/low_vol": 0.08663300536479174,
+      "range/high_vol": 1.032766230413195,
+      "range/low_vol": -2.2163486005616755
+     }
+    },
+    {
+     "name": "rsi_reversion(14,30)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.6396014199835502,
+     "net_return_pct_per_year": -22.478298173124866,
+     "turns_per_year": 4.6006297918948516,
+     "by_regime": {
+      "bull/high_vol": -1.004533329512375,
+      "bull/low_vol": -1.4041185567592611,
+      "bear/high_vol": 0.6382525875753869,
+      "bear/low_vol": -0.419435404067499,
+      "range/high_vol": -0.6342976083213003,
+      "range/low_vol": -2.150760311606154
+     }
+    },
+    {
+     "name": "rsi_reversion(48,15)",
+     "family": "rsi_reversion",
+     "net_sharpe": -0.5288022469804112,
+     "net_return_pct_per_year": -23.45272638282115,
+     "turns_per_year": 2.8003833515881706,
+     "by_regime": {
+      "bull/high_vol": -1.5153303092306987,
+      "bull/low_vol": -1.8310568093808104,
+      "bear/high_vol": 1.114621368035557,
+      "bear/low_vol": 0.3940438210442062,
+      "range/high_vol": 0.04135087102097719,
+      "range/low_vol": 0.23302406816870302
+     }
+    },
+    {
+     "name": "stochastic_reversion(14)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -0.6614353218763626,
+     "net_return_pct_per_year": -29.899948656523,
+     "turns_per_year": 94.61295180722891,
+     "by_regime": {
+      "bull/high_vol": -1.2606527921047694,
+      "bull/low_vol": -1.127856848852176,
+      "bear/high_vol": 0.47404396198843274,
+      "bear/low_vol": 2.155157881186092,
+      "range/high_vol": -0.4259583848837218,
+      "range/low_vol": -1.6992311478446385
+     }
+    },
+    {
+     "name": "stochastic_reversion(48)",
+     "family": "stochastic_reversion",
+     "net_sharpe": -0.6654085651962257,
+     "net_return_pct_per_year": -32.8156509340333,
+     "turns_per_year": 53.90737951807229,
+     "by_regime": {
+      "bull/high_vol": -2.262184140087351,
+      "bull/low_vol": -1.5375872507273023,
+      "bear/high_vol": 0.4196195283824133,
+      "bear/low_vol": 1.4953966969919406,
+      "range/high_vol": 0.7311800400448278,
+      "range/low_vol": -1.330006076875325
+     }
+    },
+    {
+     "name": "vwap_reversion(48,1.5)",
+     "family": "vwap_reversion",
+     "net_sharpe": -1.2444452390773564,
+     "net_return_pct_per_year": -54.54583851296284,
+     "turns_per_year": 36.20495618838992,
+     "by_regime": {
+      "bull/high_vol": -2.290421473736454,
+      "bull/low_vol": -2.0124752831672614,
+      "bear/high_vol": -1.110187626390329,
+      "bear/low_vol": 1.10995584293958,
+      "range/high_vol": 0.3244485023599532,
+      "range/low_vol": -1.6559031777310897
+     }
+    },
+    {
+     "name": "vwap_reversion(288,2.0)",
+     "family": "vwap_reversion",
+     "net_sharpe": -0.5813943427553859,
+     "net_return_pct_per_year": -20.297014876333506,
+     "turns_per_year": 11.801615553121577,
+     "by_regime": {
+      "bull/high_vol": -1.2315914058422386,
+      "bull/low_vol": -1.8016359288482646,
+      "bear/high_vol": 0.29333366825801754,
+      "bear/low_vol": -0.05619617397817647,
+      "range/high_vol": 0.4478258586775589,
+      "range/low_vol": 0.6759085530549456
+     }
+    },
+    {
+     "name": "trend_pullback(20,100)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.24018341095657303,
+     "net_return_pct_per_year": -5.045655035635654,
+     "turns_per_year": 18.402519167579406,
+     "by_regime": {
+      "bull/high_vol": -0.3827035174199887,
+      "bull/low_vol": -0.5350869143292585,
+      "bear/high_vol": 0.5248307210899996,
+      "bear/low_vol": 0.4404463870567723,
+      "range/high_vol": -0.2700586276697781,
+      "range/low_vol": -0.7797902070684659
+     }
+    },
+    {
+     "name": "trend_pullback(50,200)",
+     "family": "trend_pullback",
+     "net_sharpe": -0.15906850030138678,
+     "net_return_pct_per_year": -5.267100808839536,
+     "turns_per_year": 22.80312157721796,
+     "by_regime": {
+      "bull/high_vol": -1.1754545705523376,
+      "bull/low_vol": 0.1717423678630178,
+      "bear/high_vol": 0.41515629665430825,
+      "bear/low_vol": 0.07410668857459048,
+      "range/high_vol": 0.28508371398026083,
+      "range/low_vol": -1.136095802936685
+     }
+    },
+    {
+     "name": "adx_trend(14,25)",
+     "family": "adx_trend",
+     "net_sharpe": 0.8819157158898918,
+     "net_return_pct_per_year": 50.46839108418618,
+     "turns_per_year": 17.702423329682365,
+     "by_regime": {
+      "bull/high_vol": 2.570812256894824,
+      "bull/low_vol": 1.379978149380617,
+      "bear/high_vol": 0.275952438463793,
+      "bear/low_vol": 0.6520011366916385,
+      "range/high_vol": -0.570801283250676,
+      "range/low_vol": 0.1948567820908233
+     }
+    },
+    {
+     "name": "adx_trend(28,20)",
+     "family": "adx_trend",
+     "net_sharpe": 0.5972600321999975,
+     "net_return_pct_per_year": 31.34341558615821,
+     "turns_per_year": 7.901081599123767,
+     "by_regime": {
+      "bull/high_vol": 1.3872136682866798,
+      "bull/low_vol": 1.8530308267055235,
+      "bear/high_vol": -0.8429658227534832,
+      "bear/low_vol": 0.23364743879294292,
+      "range/high_vol": 0.21324177832138697,
+      "range/low_vol": 0.3305066559384535
+     }
+    }
+   ]
+  }
+ }
+}

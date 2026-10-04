@@ -45,6 +45,8 @@ class Engine:
         self.decisions: deque[dict[str, Any]] = deque(maxlen=100)
         self.ticks = 0
         self.orders_sent = 0
+        self.halted_ticks = 0  # ticks on which the safety kernel blocked trading
+        self.max_abs_exposure = 0.0  # largest |notional / equity| actually held
         self.state = "OBSERVING"
         self.last: dict[str, Any] = {}
 
@@ -62,8 +64,10 @@ class Engine:
     def on_bbo(self, ts: float, bbo: tuple[float, float, float, float, float]) -> None:
         self.on_book(merge_bbo(self.market.book, self.meta.coin, ts, bbo))
 
-    def on_chart(self, score: float) -> None:
-        self.market.chart_score = score
+    def on_chart(self, tf_score: tuple[str, float]) -> None:
+        tf, score = tf_score
+        if tf in self.market.chart_scores:
+            self.market.chart_scores[tf] = score
 
     # --- learned state: survives restarts --------------------------------
     def _signature(self) -> dict[str, Any]:
@@ -139,6 +143,7 @@ class Engine:
             self.state = "HALTED_INSTRUMENTATION" if faults else "OBSERVING"
             self.last = {"ts": now, "state": self.state, "faults": faults, "warmup": feats is None}
             if faults:
+                self.halted_ticks += 1
                 self._unref.clear()
                 self._pending.clear()  # forecasts spanning a data gap would be scored against garbage
                 self.half_life.prev = None
@@ -159,6 +164,7 @@ class Engine:
             buy_rate=feats.buy_rate, maker_adverse_bps=self.journal.maker_adverse_bps(),
         )  # fmt: skip
         d = decide(now, fc, acct, book, self.meta, s)
+        self.max_abs_exposure = max(self.max_abs_exposure, abs(d.f_current))
 
         w = getattr(champ.model, "w", None)  # linear models can explain themselves; others cannot
         contrib = w[:-1] * x[:-1] if w is not None else np.zeros(0)

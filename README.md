@@ -56,21 +56,45 @@ starting champion).
 
 ## What the models have been trained on
 
-There are two separate kinds of learning, on two kinds of data:
+Two kinds of learning, on two kinds of data.
 
-- **Chart model (10 years of history).** `models/chart_model.txt` is a LightGBM model trained on
-  5-minute BTC/USD candles from Bitstamp, October 2016 onward, using scale-free chart features
-  (multi-horizon returns, RSI, MACD, Bollinger and Donchian position, ADX, ATR, efficiency ratio,
-  stochastic, relative volume, candle shape, time of day). Live, it scores each closed 5-minute
-  Hyperliquid candle and the result is one input feature, `chart_ctx`. Its year-by-year
-  out-of-sample record is in `models/chart_model.json`; read it before trusting it.
-- **Order-flow models (live data only).** The ridge / neural / tree models that actually drive
-  trading use order-book and trade-flow features, which do not exist in candle history. They learn
-  from live data, or from your own recordings via warm start.
+**1. Chart models: 10 years of history, four timeframes.** `models/chart_{5m,1h,4h,1d}.txt` are
+LightGBM models trained on Bitstamp BTC/USD candles from October 2016. Inputs: scale-free chart
+features (multi-horizon returns, RSI, MACD, Bollinger and Donchian position, ADX, ATR, efficiency
+ratio, stochastic, relative volume, candle shape, time of day) plus the current position of 36
+classic strategy variants across 13 families (MA cross, time-series momentum, MACD, Donchian and
+Keltner breakouts, breakout fade, Bollinger / RSI / stochastic / VWAP reversion, range trade, trend
+pullback, ADX trend). Live, each model scores its latest closed Hyperliquid candle and the result is
+one input feature per timeframe (`chart_5m` ... `chart_1d`).
+
+Their walk-forward record (each year scored by a model trained only on earlier years; full detail
+per year and per market regime in `models/chart_<tf>.json`):
+
+| Timeframe | Out-of-sample correlation | Strongest 10% of forecasts, after a 9 bps round trip | Years net-positive |
+|---|---|---|---|
+| 5m | 0.065 early, ~0 since 2024 | -5.8 bps | 0 / 10 |
+| 1h | 0.034, positive every year | -2.1 bps | 3 / 10 |
+| 4h | 0.013, not significant | -1.1 bps | 4 / 9 |
+| 1d | 0.019, not significant | +17.5 bps on 2,787 bars: too few to trust | 3 / 6 |
+
+Read that as: charts carry a small, real signal at the 1-hour scale and essentially none at 5
+minutes today, and nowhere is it reliably larger than trading costs.
+
+**2. Strategy lab.** `models/strategy_lab.json` holds every variant x timeframe x market regime
+(bull / bear / range x high / low volatility), net of taker fees. In sample, trend following at 4h
+and 1d reaches a Sharpe near 1.0. Picked honestly (each year, choose the best variant on earlier
+years, then trade it): Sharpe -0.83 at 5m, 0.07 at 1h, 0.27 at 4h, 0.18 at 1d, against 0.7 for
+simply holding BTC. No classic strategy beat buy-and-hold out of sample.
+
+**3. Order-flow models: live data only.** The ridge / neural / tree models that actually drive
+trading use order-book and trade-flow features, which do not exist in candle history. They learn
+from live data, or from your own recordings via warm start.
 
 ```bash
 python -m app.research.history --years 10          # download or top up candles (resumable)
+python -m app.research.strategy_lab                # every strategy x timeframe x regime
 python -m app.research.chart_train                 # walk-forward report, then train and save
+python -m app.research.stress                      # engine behaviour in hostile environments
 python -m app.research.warmstart "data/raw-*.jsonl"  # teach the order-flow models from recordings
 ```
 
@@ -79,6 +103,24 @@ tree training buffer, champion, promotion history) is saved to `data/state/engin
 five minutes and on shutdown, and restored at startup. A state file saved with different features,
 models or horizon is refused, not half-loaded. Do not warm-start twice from the same recording:
 that counts the same evidence twice.
+
+## Stress lab
+
+`python -m app.research.stress` runs the real engine through eleven synthetic environments, each
+with a genuine planted edge so the engine is leveraged when the shock arrives
+(`models/stress_report.json`, default risk settings):
+
+| Environment | Worst drawdown | Liquidated? |
+|---|---|---|
+| calm, trending, choppy, volatility spike, thin liquidity | 5 - 7% | no |
+| edge disappears / edge reverses | 7 - 8% | no |
+| corrupt (crossed) book for 30 s | 6% (kernel blocked trading) | no |
+| flash crash, -8% in 20 s | 25% | no |
+| feed outage, 2 min blind while price moves 1% | 25% | no |
+| gap down, -3% between two ticks | 41% | no |
+
+These are simulations with simplified liquidity. The gap and outage losses are the direct price of
+running ~30x; `HL_RISK_AVERSION` and `HL_JUMP_SIZE` are the controls.
 
 ## Research tools (offline, on recorded data)
 
@@ -132,8 +174,8 @@ plus `python -m backtest.run` for backtest. See `.env.example`, `docs/DEPLOY.md`
 
 Built and tested: Hyperliquid market-data adapter, paper venue (latency, book-walking taker fills,
 queue-aware maker fills, fees, funding, margin rejects, liquidation), feature set, indicator
-library, linear / neural / tree models, chart model trained on 10 years of candles, learned-state
-persistence and warm start, champion-challenger promotion, regime-aware calibration,
+library, linear / neural / tree models, chart models for four timeframes trained on 10 years of
+candles, strategy lab, stress lab, learned-state persistence and warm start, champion-challenger promotion, regime-aware calibration,
 utility decision engine, maker/taker selection, safety kernel with reconciliation, journal
 (drawdown, fees, markouts), JSONL persistence off the hot path, dashboard, RSS news ingestion with
 de-duplication, feature discovery, RL study, replay backtester, CI (including the Docker build).

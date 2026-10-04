@@ -1,0 +1,115 @@
+{
+ "note": "synthetic markets with a planted edge; risk_aversion=4.0, jump scenario 0.015 @ 0.0001",
+ "results": [
+  {
+   "environment": "calm",
+   "net_return_pct": 524.8812014817318,
+   "max_drawdown_pct": 5.774249680153709,
+   "max_exposure_x": 32.51265494952511,
+   "fills": 262,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 6248.812014817318
+  },
+  {
+   "environment": "trending",
+   "net_return_pct": 1117.718624606483,
+   "max_drawdown_pct": 6.529506333241908,
+   "max_exposure_x": 32.513906539405085,
+   "fills": 322,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 12177.18624606483
+  },
+  {
+   "environment": "choppy",
+   "net_return_pct": 148.98629015481654,
+   "max_drawdown_pct": 6.606424733265593,
+   "max_exposure_x": 30.04417222759283,
+   "fills": 187,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 2489.8629015481656
+  },
+  {
+   "environment": "vol_spike",
+   "net_return_pct": 378.82511636467575,
+   "max_drawdown_pct": 5.103292094539924,
+   "max_exposure_x": 31.995845751112757,
+   "fills": 235,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 4788.251163646757
+  },
+  {
+   "environment": "flash_crash",
+   "net_return_pct": 40.839366634311624,
+   "max_drawdown_pct": 25.382852063216955,
+   "max_exposure_x": 30.61711502546191,
+   "fills": 158,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 1408.3936663431161
+  },
+  {
+   "environment": "gap_down",
+   "net_return_pct": -21.793383934599863,
+   "max_drawdown_pct": 40.92102474931816,
+   "max_exposure_x": 25.826506971047774,
+   "fills": 53,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 782.0661606540014
+  },
+  {
+   "environment": "thin_liquidity",
+   "net_return_pct": 131.98658800350356,
+   "max_drawdown_pct": 6.262016660821857,
+   "max_exposure_x": 32.12843328927111,
+   "fills": 848,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 2319.8658800350354
+  },
+  {
+   "environment": "feed_outage",
+   "net_return_pct": 171.14317689766975,
+   "max_drawdown_pct": 25.05136320556389,
+   "max_exposure_x": 32.506904471685516,
+   "fills": 195,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 117,
+   "final_equity": 2711.4317689766976
+  },
+  {
+   "environment": "crossed_book",
+   "net_return_pct": 375.4723853715749,
+   "max_drawdown_pct": 5.701851568115668,
+   "max_exposure_x": 32.51111831797622,
+   "fills": 245,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 30,
+   "final_equity": 4754.723853715749
+  },
+  {
+   "environment": "edge_disappears",
+   "net_return_pct": 15.468214604350216,
+   "max_drawdown_pct": 8.241983049084677,
+   "max_exposure_x": 26.62492713902165,
+   "fills": 56,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 1154.6821460435021
+  },
+  {
+   "environment": "edge_reverses",
+   "net_return_pct": 17.64440503060016,
+   "max_drawdown_pct": 6.512650706807877,
+   "max_exposure_x": 25.826506971047774,
+   "fills": 41,
+   "liquidations": 0,
+   "kernel_blocked_ticks": 0,
+   "final_equity": 1176.4440503060016
+  }
+ ]
+}

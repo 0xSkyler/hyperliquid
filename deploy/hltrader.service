@@ -1,0 +1,21 @@
+[Unit]
+Description=Hyperliquid autonomous trader
+After=network-online.target chrony.service
+Wants=network-online.target
+
+[Service]
+User=hltrader
+WorkingDirectory=/opt/hltrader/app
+EnvironmentFile=/opt/hltrader/app/.env
+ExecStart=/opt/hltrader/app/.venv/bin/python -m app.main
+Restart=always
+RestartSec=3
+MemoryMax=1G
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/hltrader/app/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+services:
+  trader:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    ports: ["127.0.0.1:8787:8787"]
+    volumes: ["./data:/srv/data"]
+    depends_on:
+      db: {condition: service_healthy}
+    mem_limit: 1g
+    logging: {driver: json-file, options: {max-size: "50m", max-file: "5"}}
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment: {POSTGRES_USER: hl, POSTGRES_PASSWORD: hl, POSTGRES_DB: hl}
+    volumes:
+      - pg:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U hl"], interval: 5s, retries: 10}
+volumes: {pg: {}}

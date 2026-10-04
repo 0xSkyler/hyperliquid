@@ -17,8 +17,10 @@ Every second:
 1. **Perceive** - order book (20 levels), trades and funding from the WebSocket, held in memory.
 2. **Features** - touch/5-level imbalance, microprice, order-flow imbalance (1/5/30 s), trade-flow
    imbalance, vol-normalised returns (5/30/300 s), RSI, z-score, premium, spread.
-3. **Forecast** - an online regression (recursive least squares with forgetting) predicts the
-   forward return over `HL_HORIZON_S`, with parameter uncertainty.
+3. **Forecast** - several models predict the forward return over `HL_HORIZON_S` every tick: an
+   online linear regression, a small online neural network, gradient-boosted trees (LightGBM, refit
+   periodically, discarded whenever they cannot beat "predict zero" on a holdout), and optionally a
+   regression over automatically discovered features. Only the **champion's** forecast is traded.
 4. **Calibrate** - each forecast is scored when its horizon elapses, from the price that was
    *executable* (decision time + latency). Per soft regime (trend/range/chaos) the engine keeps the
    lower confidence bound of the realized-vs-forecast slope. That number in [0, 1] multiplies the
@@ -42,6 +44,50 @@ unknown or stale account state, unacknowledged orders, or a position the engine 
 all stop new orders. On startup the exchange's position is adopted as truth; a restart never
 assumes flat.
 
+## Champion / challenger
+
+All models are scored on the same resolved forecasts. A challenger replaces the champion when its
+*calibrated* forecast has significantly lower squared error than the champion's on the same
+out-of-sample observations (paired test, corrected for overlapping horizons, threshold
+`promote_z`). A model that has earned no trust is indistinguishable from "predict zero", so nothing
+is ever promoted on noise. Promotions are logged to `data/promotions.jsonl` and shown on the
+dashboard. Choose the line-up with `HL_MODELS` (default `ridge,mlp,tree,ridge_disc`; first is the
+starting champion).
+
+## Research tools (offline, on recorded data)
+
+Record first: `HL_RECORD_RAW=1` writes one `data/raw-YYYYMMDD.jsonl` per UTC day. These tools need
+days to weeks of it; on less they say so and produce nothing.
+
+```bash
+python -m app.research.discovery "data/raw-*.jsonl"   # feature discovery
+python -m app.research.rl "data/raw-*.jsonl"          # reinforcement-learning study
+```
+
+**Feature discovery** generates about 200 candidate features (interactions, signed squares,
+smoothed and de-trended versions) and keeps only those that explain what the linear model
+*cannot*, walk-forward, with a Bonferroni-corrected threshold and a same-sign-in-every-fold
+requirement. Survivors go to `data/discovered_features.json`. They are not deployed: on the next
+start the engine adds a `ridge_disc` challenger that uses them and has to win promotion live.
+This discovers features, not whole strategies; the "strategy" is always the utility engine.
+
+**RL study** trains a tabular Q-learning agent (short / flat / long) on the first 70% of the
+recording and reports its greedy performance on the last 30%. It is not connected to trading,
+and its cost model (flat fee, no queue, latency or impact) is too simple to trust beyond
+"worth a closer look".
+
+## LLM news analysis (optional, paid)
+
+Off by default. With `HL_LLM_NEWS=1` and Anthropic credentials (`ANTHROPIC_API_KEY`), each new
+headline cluster is sent once to Claude (`HL_LLM_MODEL`, default `claude-opus-5-5`, at most
+`HL_LLM_MAX_PER_POLL` calls per minute) and scored for BTC relevance, direction, magnitude,
+confidence and rumour status. The answer is schema-constrained and range-checked, then collapsed
+into one decayed number, the `news_llm` feature. It has no direct authority: the models learn
+whether it predicts anything, and calibration decides whether that is believed. Headlines are
+passed as quoted data and cannot instruct the system. If the primary model declines a headline,
+the API's server-side fallback retries it on another model. News arrives minutes late and the
+models forecast one minute ahead, so do not expect this feature to matter at the default horizon.
+
 ## Run
 
 ```bash
@@ -49,8 +95,8 @@ python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 pytest -q && ruff check . && mypy app backtest
 python -m app.main                      # paper mode, dashboard on http://127.0.0.1:8787
-HL_RECORD_RAW=1 python -m app.main      # also record raw market data to data/raw.jsonl
-python -m backtest.run data/raw.jsonl   # replay through the same engine
+HL_RECORD_RAW=1 python -m app.main      # also record raw market data to data/raw-YYYYMMDD.jsonl
+python -m backtest.run "data/raw-*.jsonl"  # replay through the same engine
 ```
 
 Modes (`HL_MODE`): `paper` (default), `shadow` (decides, never sends), `testnet`, `live`,
@@ -60,16 +106,15 @@ plus `python -m backtest.run` for backtest. See `.env.example`, `docs/DEPLOY.md`
 
 Built and tested: Hyperliquid market-data adapter, paper venue (latency, book-walking taker fills,
 queue-aware maker fills, fees, funding, margin rejects, liquidation), feature set, indicator
-library, online model, regime-aware calibration, utility decision engine, maker/taker selection,
-safety kernel with reconciliation, journal (drawdown, fees, markouts), JSONL persistence off the
-hot path, dashboard, RSS news ingestion with de-duplication, replay backtester, CI config.
+library, linear / neural / tree models, champion-challenger promotion, regime-aware calibration,
+utility decision engine, maker/taker selection, safety kernel with reconciliation, journal
+(drawdown, fees, markouts), JSONL persistence off the hot path, dashboard, RSS news ingestion with
+de-duplication, feature discovery, RL study, replay backtester, CI (including the Docker build).
 
-Written but **not verified** here: `HyperliquidLive` order placement (needs keys; test on testnet
-first), `PostgresSink`, Docker image (no Docker on the build machine).
+Written but **not verified** against the real service: `HyperliquidLive` order placement (needs
+keys; test on testnet first), `PostgresSink`, and the LLM news call (tested with a stand-in
+client only; no API credentials were available).
 
-Not built (from the original brief): news/macro as model inputs, LLM news analysis, economic
-calendar and surprise scoring, cross-exchange lead/lag feeds, multi-asset ranking, market-making
-quoting, automated feature/strategy discovery, champion/challenger promotion, tree/neural/RL
-models, counterfactual and attribution reports, liquidation-cascade detection. The engine is
-structured so these plug in as additional features or venues; each should be added only with
-recorded-data evidence that it improves out-of-sample calibration.
+Not built (from the original brief): economic calendar and surprise scoring, cross-exchange
+lead/lag feeds, multi-asset ranking, market-making quoting, whole-strategy generation,
+counterfactual and attribution reports, liquidation-cascade detection, RL in the live loop.

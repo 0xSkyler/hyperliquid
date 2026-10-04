@@ -2,13 +2,15 @@
 
 SECURITY: everything fetched here is untrusted *data*. Text is sanitised, length-limited,
 stored and displayed. Nothing in it is ever executed, evaluated, or interpreted as an
-instruction, and in this version it does not feed the trading model at all (context only).
+instruction. With HL_LLM_NEWS=1 an LLM scores each headline (app/news/llm.py); only the
+resulting bounded numbers reach the models, as one feature that must earn trust like any other.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import re
 import time
 from collections import deque
@@ -40,9 +42,24 @@ class Cluster:
     first: NewsItem  # earliest credible report
     sources: set[str] = field(default_factory=set)
     tokens: frozenset[str] = frozenset()
+    analysis: dict[str, Any] | None = None
+    tried: bool = False
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self.first) | {"confirmations": len(self.sources), "sources": sorted(self.sources)}
+        d = asdict(self.first) | {"confirmations": len(self.sources), "sources": sorted(self.sources)}
+        return d | {"analysis": self.analysis}
+
+    def impact(self, now: float, half_life_s: float) -> float:
+        a = self.analysis
+        if a is None:
+            return 0.0
+        age = max(now - self.first.published_ts, 0.0)
+        w = a["direction"] * a["magnitude"] * a["confidence"] * a["btc_relevance"] * self.first.credibility
+        return w * (0.3 if a["is_rumor"] else 1.0) * math.exp(-age * math.log(2) / half_life_s)
+
+
+class Analyst(Protocol):
+    async def analyze(self, item: NewsItem) -> dict[str, Any] | None: ...
 
 
 class NewsSource(Protocol):
@@ -109,8 +126,14 @@ class RssSource:
 
 
 class NewsMonitor:
-    def __init__(self, sources: list[NewsSource], poll_s: float = 60.0, similarity: float = 0.6) -> None:
+    def __init__(
+        self, sources: list[NewsSource], poll_s: float = 60.0, similarity: float = 0.6,
+        analyst: Analyst | None = None, max_per_poll: int = 5, half_life_s: float = 1800.0,
+    ) -> None:  # fmt: skip
         self.sources = sources
+        self.analyst = analyst
+        self.max_per_poll = max_per_poll
+        self.half_life_s = half_life_s
         self.poll_s = poll_s
         self.similarity = similarity
         self.clusters: deque[Cluster] = deque(maxlen=300)
@@ -145,15 +168,34 @@ class NewsMonitor:
                     self.errors[src.name] = self.errors.get(src.name, 0) + 1
                     log.warning("news source %s failed: %s", src.name, e)
 
+    async def analyze_new(self, now: float) -> int:
+        """Score the newest unscored clusters from the last two hours; bounded calls per poll."""
+        if self.analyst is None:
+            return 0
+        todo = [c for c in self.clusters if not c.tried and now - c.first.published_ts < 7200]
+        todo.sort(key=lambda c: c.first.published_ts, reverse=True)
+        for c in todo[: self.max_per_poll]:
+            c.tried = True
+            c.analysis = await self.analyst.analyze(c.first)
+        return min(len(todo), self.max_per_poll)
+
+    def score(self, now: float) -> float:
+        """Decayed, signed news pressure in [-3, 3]; 0 when nothing has been scored."""
+        return max(-3.0, min(3.0, sum(c.impact(now, self.half_life_s) for c in self.clusters)))
+
     async def run(self) -> None:
         while True:
             await self.poll_once()
+            await self.analyze_new(time.time())
             await asyncio.sleep(self.poll_s)
 
     def snapshot(self, limit: int = 15) -> dict[str, Any]:
         latest = sorted(self.clusters, key=lambda c: c.first.published_ts, reverse=True)[:limit]
         return {
             "clusters": len(self.clusters),
+            "llm_enabled": self.analyst is not None,
+            "llm_scored": sum(c.analysis is not None for c in self.clusters),
+            "score": self.score(time.time()),
             "sources_ok": self.last_ok,
             "source_errors": self.errors,
             "latest": [c.to_dict() for c in latest],

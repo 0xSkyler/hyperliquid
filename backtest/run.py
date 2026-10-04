@@ -1,6 +1,6 @@
 """Replay recorded market data through the *same* Engine and PaperVenue used in paper mode.
 
-    python -m backtest.run data/raw.jsonl            # recorded with HL_RECORD_RAW=1
+    python -m backtest.run "data/raw-*.jsonl"        # recorded with HL_RECORD_RAW=1
     python -m backtest.run --synthetic 20000         # self-test on generated data (not evidence of edge)
 
 The model learns online during the replay (predict, then update), so every forecast and
@@ -20,19 +20,10 @@ import numpy as np
 from app.brain.engine import Engine
 from app.config.settings import Mode, Settings
 from app.exchange.base import AssetMeta, Book, Trade
-from app.exchange.hyperliquid import parse_event
 from app.exchange.paper import PaperVenue
+from app.research.dataset import read_events
 
 Event = tuple[float, str, Any]
-
-
-def read_events(path: str) -> Iterator[Event]:
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            r = json.loads(line)
-            ev = parse_event(r["ch"], r["d"], r["t"])
-            if ev:
-                yield r["t"], ev[0], ev[1]
 
 
 def synthetic_events(
@@ -75,6 +66,8 @@ def run_backtest(events: Iterable[Event], s: Settings, meta: AssetMeta) -> dict[
             eng.on_bbo(ts, payload)
         elif kind == "trades":
             eng.on_trades(payload)
+        elif kind == "news":
+            eng.on_news(payload)
         else:
             eng.on_ctx(payload)
     snap = eng.snapshot()
@@ -84,6 +77,9 @@ def run_backtest(events: Iterable[Event], s: Settings, meta: AssetMeta) -> dict[
         "rejects": venue.rejects,
         "funding_paid": venue.funding_paid,
         **snap["journal"],
+        "champion": snap["model"]["champion"],
+        "promotions": snap["model"]["promotions"],
+        "arena": snap["model"]["arena"],
         "oos_ic": snap["model"]["oos_ic"],
         "resolved_forecasts": snap["model"]["resolved_forecasts"],
         "calibration": snap["model"]["calibration"],
@@ -94,7 +90,7 @@ def run_backtest(events: Iterable[Event], s: Settings, meta: AssetMeta) -> dict[
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("path", nargs="?")
+    ap.add_argument("paths", nargs="*", help="recorded raw files (globs allowed)")
     ap.add_argument("--synthetic", type=int, default=0, metavar="SECONDS")
     ap.add_argument("--signal", type=float, default=0.0, help="planted edge for --synthetic, bps per unit imbalance")
     ap.add_argument("--horizon", type=float, default=None)
@@ -106,8 +102,8 @@ def main() -> None:
     meta = AssetMeta(s.coin, 5, args.max_leverage)
     if args.synthetic:
         events: Iterable[Event] = synthetic_events(args.synthetic, args.signal)
-    elif args.path:
-        events = read_events(args.path)
+    elif args.paths:
+        events = read_events(args.paths)
     else:
         ap.error("give a recorded file or --synthetic N")
     print(json.dumps(run_backtest(events, s, meta), indent=1, default=float))

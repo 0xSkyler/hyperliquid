@@ -15,7 +15,7 @@ _PAGE = """<!doctype html><meta charset=utf-8><title>HL trader</title>
 .v{font-size:18px}pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto}
 h3{margin:18px 0 6px}</style>
 <h2 id=t>loading</h2><div class=g id=g></div>
-<h3>Last decision</h3><pre id=d></pre><h3>Calibration (out-of-sample)</h3><pre id=m></pre>
+<h3>Model arena</h3><pre id=a></pre><h3>Last decision</h3><pre id=d></pre><h3>Calibration (out-of-sample)</h3><pre id=m></pre>
 <h3>Recent orders</h3><pre id=r></pre><h3>News (context only)</h3><pre id=n></pre>
 <script>
 const f=(x,n=2)=>x==null?'-':Number(x).toFixed(n);
@@ -27,7 +27,7 @@ const cards=[['Equity',f(j.equity)],['Net return %',f(j.net_return_pct,3)],['Max
 ['Faults',(l.faults||[]).join(', ')||'none'],['Feed age s',f(s.health.feed_age_s,2)]];
 document.getElementById('g').innerHTML=cards.map(([k,v])=>`<div class=c><div class=k>${k}</div><div class=v>${v}</div></div>`).join('');
 const pre=(id,o)=>document.getElementById(id).textContent=JSON.stringify(o,null,1);
-pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));
+pre('a',e.model.arena.map(x=>`${x.champion?'CHAMPION ':'          '}${x.name.padEnd(11)} ic ${f(x.oos_ic,4)}  trusted beta ${f(x.max_trusted_beta,3)}  vs champion t ${f(x.vs_champion_t,2)}  resolved ${x.resolved}`));pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));
 }catch(err){document.getElementById('t').textContent='disconnected: '+err}}
 go();setInterval(go,2000);</script>"""
 

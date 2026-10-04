@@ -30,6 +30,8 @@ class Standardizer:
 class OnlineRidge:
     """Recursive least squares with forgetting: forecast mean plus parameter uncertainty."""
 
+    name = "ridge"
+
     def __init__(self, n: int, forgetting: float = 0.9999, prior_var: float = 0.05) -> None:
         self.w = np.zeros(n)
         self.P = np.eye(n) * prior_var
@@ -47,7 +49,8 @@ class OnlineRidge:
         self.n_obs += 1
         a = max(1 - self.lam, 1.0 / self.n_obs)
         if self.n_obs > 20:  # robustify against outliers once a scale estimate exists
-            lim = 5.0 * math.sqrt(self.resid_var)
+            # Floor of 0.5 bps: a quiet spell (targets all exactly 0) must not clip every later error to 0.
+            lim = 5.0 * math.sqrt(max(self.resid_var, 0.25))
             err = max(-lim, min(lim, err))
         self.resid_var += a * (err * err - self.resid_var)
         Px = self.P @ x

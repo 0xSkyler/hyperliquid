@@ -14,10 +14,11 @@ import numpy as np
 
 from app.brain.decision import Decision, Forecast, decide
 from app.config.settings import Mode, Settings
+from app.ensemble.arena import build_arena
 from app.exchange.base import AssetCtx, AssetMeta, Book, Trade, Venue, merge_bbo
 from app.learning.journal import Journal
 from app.market.state import FEATURE_NAMES, REGIMES, MarketState
-from app.models.online import EdgeCalibrator, HalfLife, OnlineRidge, Standardizer
+from app.models.online import HalfLife, Standardizer
 from app.risk.kernel import SafetyKernel
 
 
@@ -31,12 +32,13 @@ class Engine:
         n = len(FEATURE_NAMES)
         self.market = MarketState(s.decision_interval_s)
         self.std = Standardizer(n - 1)
-        self.model = OnlineRidge(n, s.forgetting)
-        self.cal = EdgeCalibrator(len(REGIMES), s.cal_forgetting, s.cal_z, s.min_indep_samples, s.horizon_ticks)
+        self.arena = build_arena(s, FEATURE_NAMES[:-1], len(REGIMES), async_fit=s.mode is not Mode.BACKTEST)
+        self.arena.on_promotion = self._on_promotion
         self.half_life = HalfLife(s.decision_interval_s)
         self.kernel = SafetyKernel(s)
         self.journal = Journal()
-        # [due_ts, x, reference mid (None until known), raw forecast, regime, reference ts]
+        # [due_ts, per-model inputs, reference mid (None until known), per-model raw forecasts, regime,
+        #  reference ts, per-model trusted betas]
         self._pending: deque[list[Any]] = deque()
         self._unref: deque[list[Any]] = deque()
         self.decisions: deque[dict[str, Any]] = deque(maxlen=100)
@@ -58,6 +60,14 @@ class Engine:
 
     def on_bbo(self, ts: float, bbo: tuple[float, float, float, float, float]) -> None:
         self.on_book(merge_bbo(self.market.book, self.meta.coin, ts, bbo))
+
+    def on_news(self, score: float) -> None:
+        self.market.news_score = score
+
+    def _on_promotion(self, event: dict[str, Any]) -> None:
+        self.half_life.prev = None
+        if self.sink:
+            self.sink.put("promotions", event)
 
     def on_trades(self, trades: list[Trade]) -> None:
         self.market.on_trades(trades)
@@ -86,12 +96,10 @@ class Engine:
             self.journal.on_tick(now, book.mid, acct.equity)
             # Learn from forecasts whose horizon has elapsed (calibrate first: out-of-sample).
             while self._pending and self._pending[0][0] <= now:
-                _, x, mid0, mu_raw, regime, _ = self._pending.popleft()
+                _, xs, mid0, mus, regime, _, betas = self._pending.popleft()
                 if mid0 is None:
                     continue
-                y = math.log(book.mid / mid0) * 1e4
-                self.cal.update(mu_raw, y, regime)
-                self.model.update(x, y)
+                self.arena.resolve(now, xs, mus, betas, math.log(book.mid / mid0) * 1e4, regime)
 
         feats = mkt.features(now) if not faults else None
         if faults or feats is None or book is None:
@@ -103,14 +111,15 @@ class Engine:
                 self.half_life.prev = None
             return None
 
-        x = np.append(self.std.transform(feats.values), 1.0)
-        mu_raw, pvar = self.model.predict(x)
-        item = [now + s.horizon_s, x, None, mu_raw, feats.regime, now + s.latency_ms / 1000]
+        xs, mus, pvars, betas = self.arena.predict(self.std.transform(feats.values), feats.regime)
+        item = [now + s.horizon_s, xs, None, mus, feats.regime, now + s.latency_ms / 1000, betas]
         self._pending.append(item)
         self._unref.append(item)
-        beta = self.cal.beta(feats.regime)
+        c = self.arena.champion  # only the champion's forecast is traded
+        champ = self.arena.champ
+        x, mu_raw, pvar, beta = xs[c], mus[c], pvars[c], betas[c]
         hl = self.half_life.update(mu_raw)
-        sigma_h = max(feats.sigma_tick * math.sqrt(s.horizon_ticks) * 1e4, math.sqrt(self.model.resid_var))
+        sigma_h = max(feats.sigma_tick * math.sqrt(s.horizon_ticks) * 1e4, math.sqrt(champ.model.resid_var))
         fc = Forecast(
             mu_bps=beta * mu_raw, mu_raw_bps=mu_raw, sigma_bps=sigma_h, param_sigma_bps=math.sqrt(pvar),
             beta=beta, half_life_s=hl, horizon_s=s.horizon_s, sell_rate=feats.sell_rate,
@@ -118,14 +127,17 @@ class Engine:
         )  # fmt: skip
         d = decide(now, fc, acct, book, self.meta, s)
 
-        contrib = self.model.w[:-1] * x[:-1]
+        w = getattr(champ.model, "w", None)  # linear models can explain themselves; others cannot
+        contrib = w[:-1] * x[:-1] if w is not None else np.zeros(0)
         order = np.argsort(-contrib * np.sign(mu_raw if mu_raw else 1.0))
+        names = champ.feature_names
         d.extra = {
+            "champion": champ.model.name,
             "regime": {k: round(float(v), 3) for k, v in zip(REGIMES, feats.regime, strict=True)},
             "mu_raw_bps": mu_raw, "sigma_bps": sigma_h, "param_sigma_bps": fc.param_sigma_bps,
             "beta": beta, "half_life_s": hl,
-            "supporting": [(FEATURE_NAMES[i], round(float(contrib[i]), 3)) for i in order[:4]],
-            "contradicting": [(FEATURE_NAMES[i], round(float(contrib[i]), 3)) for i in order[-3:][::-1]],
+            "supporting": [(names[i], round(float(contrib[i]), 3)) for i in order[:4]],
+            "contradicting": [(names[i], round(float(contrib[i]), 3)) for i in order[-3:][::-1]],
         }  # fmt: skip
 
         if d.order is not None:
@@ -167,18 +179,22 @@ class Engine:
         return "OBSERVING" if beta == 0 else "NORMAL"
 
     def snapshot(self) -> dict[str, Any]:
-        slope, lcb, n = self.cal.per_regime()
+        champ = self.arena.champ
+        slope, lcb, n = champ.cal.per_regime()
+        w = getattr(champ.model, "w", None)
         b = self.market.book
         return {
             "mode": self.s.mode.value, "coin": self.meta.coin, "state": self.state, "ticks": self.ticks,
             "mid": b.mid if b is not None and b.valid() else None,
             "last": self.last, "journal": self.journal.summary(), "orders_sent": self.orders_sent,
             "model": {
-                "resolved_forecasts": self.model.n_obs, "oos_ic": self.cal.ic(),
-                "resid_std_bps": math.sqrt(self.model.resid_var),
+                "champion": champ.model.name, "arena": self.arena.snapshot(), "promotions": self.arena.promotions[-10:],
+                "resolved_forecasts": champ.model.n_obs, "oos_ic": champ.cal.ic(),
+                "resid_std_bps": math.sqrt(champ.model.resid_var),
                 "calibration": {r: {"slope": float(slope[i]), "trusted_beta": float(lcb[i]),
                                     "indep_samples": float(n[i])} for i, r in enumerate(REGIMES)},
-                "weights": dict(zip(FEATURE_NAMES, (round(float(w), 4) for w in self.model.w), strict=True)),
+                "weights": dict(zip(champ.feature_names, (round(float(v), 4) for v in w[:-1]), strict=True))
+                if w is not None else {},
             },
             "recent_decisions": list(self.decisions)[-20:],
         }  # fmt: skip

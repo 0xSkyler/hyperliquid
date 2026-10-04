@@ -32,6 +32,19 @@ class Settings:
     cal_z: float = 2.0  # lower-confidence-bound z on the out-of-sample slope
     min_indep_samples: float = 30.0  # independent resolved forecasts before any trust
 
+    # Model arena: the first available name starts as champion. "tree" needs lightgbm;
+    # "ridge_disc" needs a discovered-features file (python -m app.research.discovery).
+    models: tuple[str, ...] = ("ridge", "mlp", "tree", "ridge_disc")
+    promote_z: float = 2.5  # paired-test t-statistic a challenger must exceed to be promoted
+    tree_min_train: int = 3000
+    tree_refit_every: int = 1500
+    discovered_path: str = "data/discovered_features.json"
+
+    # LLM news analysis: off unless HL_LLM_NEWS=1 (each new headline cluster is one paid API call)
+    llm_news: bool = False
+    llm_model: str = "claude-opus-5-5"
+    llm_max_per_poll: int = 5
+
     # Preferences (these are the operator's risk preferences, not trading rules)
     risk_aversion: float = 4.0  # CRRA gamma; 1 = full Kelly, 4 ~ quarter Kelly
     jump_prob: float = 1e-4  # per-horizon probability of a gap move, each direction
@@ -88,6 +101,11 @@ class Settings:
             jump_prob=float(env.get("HL_JUMP_PROB", d.jump_prob)),
             jump_size=float(env.get("HL_JUMP_SIZE", d.jump_size)),
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
+            models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
+            discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),
+            llm_news=env.get("HL_LLM_NEWS", "0") == "1",
+            llm_model=env.get("HL_LLM_MODEL", d.llm_model),
+            llm_max_per_poll=int(env.get("HL_LLM_MAX_PER_POLL", d.llm_max_per_poll)),
             data_dir=env.get("HL_DATA_DIR", d.data_dir),
             record_raw=env.get("HL_RECORD_RAW", "0") == "1",
             database_url=env.get("DATABASE_URL", ""),

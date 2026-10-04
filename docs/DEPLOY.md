@@ -40,8 +40,7 @@ docker compose logs -f trader
 ```
 
 Compose starts the trader and Postgres, applies `migrations/001_init.sql`, restarts on failure and
-uses `/health` as the container health check. (The image has not been built on the authoring
-machine, which had no Docker.)
+uses `/health` as the container health check. The image is built on every push by CI.
 
 ## Dashboard and health
 

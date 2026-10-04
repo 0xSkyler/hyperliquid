@@ -17,7 +17,7 @@ FEATURE_NAMES = (
     "ofi_1s", "ofi_5s", "ofi_30s",
     "tfi_5s", "tfi_30s",
     "ret_5s", "ret_30s", "ret_300s",
-    "rsi_15s", "z_300s", "premium_bps", "spread_bps",
+    "rsi_15s", "z_300s", "premium_bps", "spread_bps", "news_llm",
     "bias",
 )  # fmt: skip
 REGIMES = ("trend", "range", "chaos")
@@ -40,6 +40,7 @@ class MarketState:
         self.n_look = round(LOOKBACK_S / interval_s)
         self.book: Book | None = None
         self.ctx: AssetCtx | None = None
+        self.news_score = 0.0  # decayed LLM-scored news pressure; 0 unless HL_LLM_NEWS is enabled
         self.feed_ts = 0.0  # last message of any kind: liveness of the market-data connection
         self.mids: deque[float] = deque(maxlen=self.n_look + 1)
         self._ofi: deque[tuple[float, float]] = deque()
@@ -131,6 +132,7 @@ class MarketState:
             (mid - float(arr.mean())) / sd if sd > 0 else 0.0,
             self.ctx.premium * 1e4 if self.ctx else 0.0,
             (b.best_ask - b.best_bid) / mid * 1e4,
+            self.news_score,
         ])  # fmt: skip
 
         # Soft regime: heuristics expressed as probabilities, never as a single hard label.

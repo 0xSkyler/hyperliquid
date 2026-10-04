@@ -56,6 +56,8 @@ def parse_event(channel: str, data: Any, recv_ts: float) -> tuple[str, Any] | No
         return "bbo", (float(b["px"]), float(b["sz"]), float(a["px"]), float(a["sz"]), data["time"] / 1000.0)
     if channel == "trades":
         return "trades", parse_trades(data, recv_ts)
+    if channel == "news":  # written by our own recorder so replays see the same news feature
+        return "news", float(data["score"])
     if channel == "activeAssetCtx":
         return "ctx", parse_ctx(data, recv_ts)
     return None

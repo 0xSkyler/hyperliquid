@@ -45,7 +45,16 @@ async def run(s: Settings, duration: float | None) -> Engine:
 
     sink = PostgresSink(s.database_url) if s.database_url else JsonlSink(s.data_dir)
     engine = Engine(s, venue, meta, sink)
-    news = NewsMonitor([RssSource(u) for u in s.news_feeds])
+    analyst = None
+    if s.llm_news:
+        from app.news.llm import LlmAnalyst
+
+        analyst = LlmAnalyst(s.llm_model)
+        log.info("LLM news analysis enabled (model=%s, at most %d calls per poll)", s.llm_model, s.llm_max_per_poll)
+    news = NewsMonitor([RssSource(u) for u in s.news_feeds], analyst=analyst, max_per_poll=s.llm_max_per_poll)
+
+    def raw_stream_name(ts: float) -> str:
+        return "raw-" + time.strftime("%Y%m%d", time.gmtime(ts))  # one file per UTC day
     loop_lag = {"max_ms": 0.0, "tick_ms": 0.0}
 
     def state() -> dict[str, Any]:
@@ -59,7 +68,7 @@ async def run(s: Settings, duration: float | None) -> Engine:
     async def stream() -> None:
         async for ts, ch, d in data.raw_stream(s.coin):
             if s.record_raw:
-                sink.put("raw", {"t": ts, "ch": ch, "d": d})
+                sink.put(raw_stream_name(ts), {"t": ts, "ch": ch, "d": d})
             ev = parse_event(ch, d, ts)
             if ev is None:
                 continue
@@ -83,7 +92,13 @@ async def run(s: Settings, duration: float | None) -> Engine:
             loop_lag["max_ms"] = max(loop_lag["max_ms"], (time.time() - nxt) * 1000)
             if live is not None and n % 2 == 0:
                 await asyncio.to_thread(live.refresh)
-            d = engine.on_tick(time.time())
+            now = time.time()
+            score = news.score(now) if analyst is not None else 0.0
+            if abs(score - engine.market.news_score) > 1e-6:
+                engine.on_news(score)
+                if s.record_raw:
+                    sink.put(raw_stream_name(now), {"t": now, "ch": "news", "d": {"score": score}})
+            d = engine.on_tick(now)
             loop_lag["tick_ms"] = (time.perf_counter() - t0) * 1000
             if d is not None and d.order is not None:
                 log.info("%s f %.2f -> %.2f | edge %.2f bps | %s | %s", d.action, d.f_current, d.f_target,
@@ -91,8 +106,9 @@ async def run(s: Settings, duration: float | None) -> Engine:
             n += 1
             if n % 60 == 0:
                 j = engine.journal.summary()
-                log.info("state=%s equity=%.2f fills=%d resolved=%d ic=%.4f beta=%s", engine.state,
-                         j["equity"], j["fills"], engine.model.n_obs, engine.cal.ic(),
+                champ = engine.arena.champ
+                log.info("state=%s equity=%.2f fills=%d champion=%s resolved=%d ic=%.4f beta=%s", engine.state,
+                         j["equity"], j["fills"], champ.model.name, champ.model.n_obs, champ.cal.ic(),
                          engine.last.get("extra", {}).get("beta"))  # fmt: skip
 
     runner = await serve(state, s.dashboard_host, s.dashboard_port)

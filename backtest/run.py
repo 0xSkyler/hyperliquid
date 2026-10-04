@@ -47,10 +47,14 @@ def synthetic_events(
         yield ts, "trades", [Trade(ts, b0 + 1 if buy else b0, float(rng.exponential(0.05)), buy)]
 
 
-def run_backtest(events: Iterable[Event], s: Settings, meta: AssetMeta) -> dict[str, Any]:
+def run_backtest(
+    events: Iterable[Event], s: Settings, meta: AssetMeta, state_in: bytes | None = None, keep_engine: bool = False
+) -> dict[str, Any]:
     s = dataclasses.replace(s, mode=Mode.BACKTEST)
     venue = PaperVenue(s.paper_equity, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
     eng = Engine(s, venue, meta)
+    if state_in is not None and (why := eng.load_state(state_in)):
+        raise ValueError(why)
     next_tick: float | None = None
     actions = 0
     for ts, kind, payload in events:
@@ -68,10 +72,12 @@ def run_backtest(events: Iterable[Event], s: Settings, meta: AssetMeta) -> dict[
             eng.on_trades(payload)
         elif kind == "news":
             eng.on_news(payload)
+        elif kind == "chart":
+            eng.on_chart(payload)
         else:
             eng.on_ctx(payload)
     snap = eng.snapshot()
-    return {
+    return ({"engine": eng} if keep_engine else {}) | {
         "ticks": eng.ticks,
         "orders": actions,
         "rejects": venue.rejects,

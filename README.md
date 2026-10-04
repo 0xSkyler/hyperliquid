@@ -54,6 +54,32 @@ is ever promoted on noise. Promotions are logged to `data/promotions.jsonl` and 
 dashboard. Choose the line-up with `HL_MODELS` (default `ridge,mlp,tree,ridge_disc`; first is the
 starting champion).
 
+## What the models have been trained on
+
+There are two separate kinds of learning, on two kinds of data:
+
+- **Chart model (10 years of history).** `models/chart_model.txt` is a LightGBM model trained on
+  5-minute BTC/USD candles from Bitstamp, October 2016 onward, using scale-free chart features
+  (multi-horizon returns, RSI, MACD, Bollinger and Donchian position, ADX, ATR, efficiency ratio,
+  stochastic, relative volume, candle shape, time of day). Live, it scores each closed 5-minute
+  Hyperliquid candle and the result is one input feature, `chart_ctx`. Its year-by-year
+  out-of-sample record is in `models/chart_model.json`; read it before trusting it.
+- **Order-flow models (live data only).** The ridge / neural / tree models that actually drive
+  trading use order-book and trade-flow features, which do not exist in candle history. They learn
+  from live data, or from your own recordings via warm start.
+
+```bash
+python -m app.research.history --years 10          # download or top up candles (resumable)
+python -m app.research.chart_train                 # walk-forward report, then train and save
+python -m app.research.warmstart "data/raw-*.jsonl"  # teach the order-flow models from recordings
+```
+
+**Learned state persists.** Everything the order-flow models have learned (weights, calibration,
+tree training buffer, champion, promotion history) is saved to `data/state/engine-<coin>.pkl` every
+five minutes and on shutdown, and restored at startup. A state file saved with different features,
+models or horizon is refused, not half-loaded. Do not warm-start twice from the same recording:
+that counts the same evidence twice.
+
 ## Research tools (offline, on recorded data)
 
 Record first: `HL_RECORD_RAW=1` writes one `data/raw-YYYYMMDD.jsonl` per UTC day. These tools need
@@ -106,7 +132,8 @@ plus `python -m backtest.run` for backtest. See `.env.example`, `docs/DEPLOY.md`
 
 Built and tested: Hyperliquid market-data adapter, paper venue (latency, book-walking taker fills,
 queue-aware maker fills, fees, funding, margin rejects, liquidation), feature set, indicator
-library, linear / neural / tree models, champion-challenger promotion, regime-aware calibration,
+library, linear / neural / tree models, chart model trained on 10 years of candles, learned-state
+persistence and warm start, champion-challenger promotion, regime-aware calibration,
 utility decision engine, maker/taker selection, safety kernel with reconciliation, journal
 (drawdown, fees, markouts), JSONL persistence off the hot path, dashboard, RSS news ingestion with
 de-duplication, feature discovery, RL study, replay backtester, CI (including the Docker build).

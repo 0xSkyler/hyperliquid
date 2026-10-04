@@ -56,6 +56,8 @@ def parse_event(channel: str, data: Any, recv_ts: float) -> tuple[str, Any] | No
         return "bbo", (float(b["px"]), float(b["sz"]), float(a["px"]), float(a["sz"]), data["time"] / 1000.0)
     if channel == "trades":
         return "trades", parse_trades(data, recv_ts)
+    if channel == "chart":  # also written by our recorder
+        return "chart", float(data["score"])
     if channel == "news":  # written by our own recorder so replays see the same news feature
         return "news", float(data["score"])
     if channel == "activeAssetCtx":
@@ -82,6 +84,15 @@ class HyperliquidData:
             if a["name"] == coin and not a.get("isDelisted"):
                 return AssetMeta(coin, int(a["szDecimals"]), float(a["maxLeverage"]))
         raise ValueError(f"{coin} is not a listed Hyperliquid perp")
+
+    async def candles(self, coin: str, interval: str = "5m", step_s: int = 300, n: int = 1100) -> np.ndarray:
+        """Last `n` *closed* candles as (n, 6): ts (s), open, high, low, close, volume."""
+        now_ms = int(time.time() * 1000)
+        req = {"coin": coin, "interval": interval, "startTime": now_ms - n * step_s * 1000, "endTime": now_ms}
+        rows = await self.info({"type": "candleSnapshot", "req": req})
+        closed = [r for r in rows if r["T"] < now_ms]
+        return np.array([[r["t"] / 1000, float(r["o"]), float(r["h"]), float(r["l"]), float(r["c"]), float(r["v"])]
+                         for r in closed])  # fmt: skip
 
     async def fees(self, address: str) -> tuple[float, float] | None:
         """(taker, maker) perp fee rates for this account, or None if unavailable."""

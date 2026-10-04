@@ -8,6 +8,7 @@ import dataclasses
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Any
 
 from app.brain.engine import Engine
@@ -15,6 +16,7 @@ from app.config.settings import Mode, Settings
 from app.exchange.base import Venue
 from app.exchange.hyperliquid import HyperliquidData, HyperliquidLive, parse_event
 from app.exchange.paper import PaperVenue
+from app.models.chart import ChartModel
 from app.monitoring.dashboard import serve
 from app.news.monitor import NewsMonitor, RssSource
 from app.persistence.sink import JsonlSink, PostgresSink
@@ -45,6 +47,24 @@ async def run(s: Settings, duration: float | None) -> Engine:
 
     sink = PostgresSink(s.database_url) if s.database_url else JsonlSink(s.data_dir)
     engine = Engine(s, venue, meta, sink)
+    state_file = Path(s.state_file)
+    if state_file.is_file():
+        why = engine.load_state(state_file.read_bytes())
+        champ = engine.arena.champ
+        log.info("learned state: %s", why or f"restored ({champ.model.n_obs} resolved forecasts, "
+                                             f"champion {champ.model.name})")  # fmt: skip
+    else:
+        log.info("learned state: none found, starting from scratch")
+
+    def save_state() -> None:
+        blob = engine.dump_state()
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        tmp = state_file.with_suffix(".tmp")
+        tmp.write_bytes(blob)
+        tmp.replace(state_file)
+
+    chart = ChartModel.load(s.chart_model_path)
+    log.info("chart model: %s", f"loaded (trained to {chart.meta['trained_to']})" if chart else "none")
     analyst = None
     if s.llm_news:
         from app.news.llm import LlmAnalyst
@@ -61,7 +81,9 @@ async def run(s: Settings, duration: float | None) -> Engine:
         b = engine.market.book
         age = time.time() - engine.market.feed_ts if b else None
         faults = engine.last.get("faults", ["starting"])
-        health = {"ok": not faults, "faults": faults, "feed_age_s": age, "ws_reconnects": data.reconnects,
+        chart_info = {"loaded": chart is not None, "score": engine.market.chart_score}
+        health = {"ok": not faults, "chart": chart_info, "faults": faults, "feed_age_s": age,
+                  "ws_reconnects": data.reconnects,
                   "sink_dropped": sink.dropped, "loop_lag_ms": loop_lag}  # fmt: skip
         return {"engine": engine.snapshot(), "news": news.snapshot(), "health": health}
 
@@ -81,6 +103,26 @@ async def run(s: Settings, duration: float | None) -> Engine:
                 engine.on_trades(payload)
             else:
                 engine.on_ctx(payload)
+
+    async def chart_loop() -> None:
+        """Score each newly closed 5-minute bar. One REST call per bar, never on the decision path."""
+        last_bar = 0.0
+        while chart is not None:
+            try:
+                c = await data.candles(s.coin)
+                if len(c) and c[-1, 0] != last_bar:
+                    score = chart.score(c)
+                    last_bar = c[-1, 0]
+                    if score is not None:
+                        engine.on_chart(score)
+                        if s.record_raw:
+                            now = time.time()
+                            sink.put(raw_stream_name(now), {"t": now, "ch": "chart", "d": {"score": score}})
+                elif len(c) and time.time() - last_bar > 1200:
+                    engine.on_chart(0.0)  # candles have stopped updating: an old score is not context
+            except Exception as e:  # noqa: BLE001 - context feature only; never stop trading for it
+                log.warning("chart update failed: %s", e)
+            await asyncio.sleep(20)
 
     async def ticker() -> None:
         nxt = time.time()
@@ -104,6 +146,8 @@ async def run(s: Settings, duration: float | None) -> Engine:
                 log.info("%s f %.2f -> %.2f | edge %.2f bps | %s | %s", d.action, d.f_current, d.f_target,
                          d.expected_edge_bps, d.exec_style, d.reason)  # fmt: skip
             n += 1
+            if n % 300 == 0:
+                save_state()
             if n % 60 == 0:
                 j = engine.journal.summary()
                 champ = engine.arena.champ
@@ -113,9 +157,9 @@ async def run(s: Settings, duration: float | None) -> Engine:
 
     runner = await serve(state, s.dashboard_host, s.dashboard_port)
     log.info("dashboard: http://%s:%d", s.dashboard_host, s.dashboard_port)
-    tasks = [asyncio.create_task(c) for c in (stream(), ticker(), news.run())]
+    tasks = [asyncio.create_task(c) for c in (stream(), ticker(), news.run(), chart_loop())]
     try:
-        done, _ = await asyncio.wait(tasks, timeout=duration, return_when=asyncio.FIRST_EXCEPTION)
+        done, _ = await asyncio.wait(tasks[:3], timeout=duration, return_when=asyncio.FIRST_EXCEPTION)
         for t in done:
             t.result()
     finally:
@@ -123,6 +167,7 @@ async def run(s: Settings, duration: float | None) -> Engine:
             t.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
         await runner.cleanup()
+        save_state()
         sink.close()
     return engine
 

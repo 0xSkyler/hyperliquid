@@ -7,6 +7,7 @@ Nothing here touches disk or network; persistence goes through a non-blocking si
 from __future__ import annotations
 
 import math
+import pickle  # noqa: S403 - only ever loads the state file this process wrote itself
 from collections import deque
 from typing import Any, Protocol
 
@@ -60,6 +61,38 @@ class Engine:
 
     def on_bbo(self, ts: float, bbo: tuple[float, float, float, float, float]) -> None:
         self.on_book(merge_bbo(self.market.book, self.meta.coin, ts, bbo))
+
+    def on_chart(self, score: float) -> None:
+        self.market.chart_score = score
+
+    # --- learned state: survives restarts --------------------------------
+    def _signature(self) -> dict[str, Any]:
+        return {
+            "features": list(FEATURE_NAMES), "horizon_s": self.s.horizon_s, "interval_s": self.s.decision_interval_s,
+            "models": [(e.model.name, e.feature_names) for e in self.arena.entries],
+        }  # fmt: skip
+
+    def dump_state(self) -> bytes:
+        return pickle.dumps({
+            "sig": self._signature(), "std": self.std, "entries": self.arena.entries,
+            "champion": self.arena.champion, "promotions": self.arena.promotions, "half_life": self.half_life,
+        })  # fmt: skip
+
+    def load_state(self, blob: bytes) -> str:
+        """Restore learned state. Returns '' on success, otherwise why it was not used."""
+        try:
+            st = pickle.loads(blob)  # noqa: S301
+        except Exception as ex:  # noqa: BLE001
+            return f"unreadable state file ({type(ex).__name__})"
+        if st.get("sig") != self._signature():
+            return "state was saved with different features, models or horizon"
+        self.std, self.half_life = st["std"], st["half_life"]
+        self.half_life.prev = None
+        self.arena.entries, self.arena.champion, self.arena.promotions = st["entries"], st["champion"], st["promotions"]
+        for e in self.arena.entries:
+            if hasattr(e.model, "set_async"):
+                e.model.set_async(self.s.mode is not Mode.BACKTEST)
+        return ""
 
     def on_news(self, score: float) -> None:
         self.market.news_score = score

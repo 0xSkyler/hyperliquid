@@ -9,4 +9,7 @@
 - News and all other fetched text is untrusted data: sanitised, length-capped, stored, displayed
   via `textContent`. It is never executed or interpreted as instructions and does not reach the
   decision engine.
+- Learned state is stored with Python `pickle` (`data/state/*.pkl`). Unpickling runs code, so treat
+  that directory like the program itself: writable only by the service user, and never load a
+  state file obtained from someone else.
 - LIVE mode refuses to start without `HL_LIVE_CONFIRM`.

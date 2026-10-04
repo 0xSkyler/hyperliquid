@@ -3,6 +3,7 @@ WORKDIR /srv
 COPY pyproject.toml README.md ./
 COPY app app
 COPY backtest backtest
+COPY models models
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir ".[fast,postgres]" && useradd -r -u 10001 trader && mkdir data && chown trader data
 USER trader

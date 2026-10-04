@@ -43,12 +43,31 @@ class TreeForecaster:
         self._count = 0
         self._since_fit = 0
         self._booster: Any = None
-        self._pool = ThreadPoolExecutor(1, thread_name_prefix="tree-fit") if async_fit else None
+        self._pool: ThreadPoolExecutor | None = None
         self._job: Future[None] | None = None
+        self.set_async(async_fit)
         self.resid_var = 0.0
         self.n_obs = 0
         self.fits = 0
         self.rejected_fits = 0
+
+    def set_async(self, async_fit: bool) -> None:
+        self._pool = ThreadPoolExecutor(1, thread_name_prefix="tree-fit") if async_fit else None
+
+    def __getstate__(self) -> dict[str, Any]:
+        st = self.__dict__.copy()
+        st["_pool"] = st["_job"] = None  # threads are not state
+        X, y = self._chronological()
+        st["_X"], st["_y"], st["_cap"] = X, y, len(self._y)
+        return st
+
+    def __setstate__(self, st: dict[str, Any]) -> None:
+        X, y, cap = st.pop("_X"), st.pop("_y"), st.pop("_cap")
+        self.__dict__.update(st)
+        self._X = np.empty((cap, X.shape[1]))
+        self._y = np.empty(cap)
+        self._X[: len(y)], self._y[: len(y)] = X, y
+        self._count = len(y) if len(y) < cap else cap  # ring restarts at 0 with the same contents in order
 
     def predict(self, x: np.ndarray) -> tuple[float, float]:
         b = self._booster

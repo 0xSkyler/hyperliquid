@@ -13,6 +13,9 @@ jobs:
       - run: mypy app backtest
       - run: pytest -q
       - run: pip-audit
-      - uses: gitleaks/gitleaks-action@v2
-        env: {GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
       - run: docker build -t hltrader .
+      - name: secret scan
+        run: |
+          docker run --rm -u 0 -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.18.4 detect --no-git --source /repo             --redact --report-format json --report-path /repo/gitleaks.json && exit 0
+          python -c "import json; [print('::error file=%s,line=%s::gitleaks %s' % (f['File'].removeprefix('/repo/'), f['StartLine'], f['RuleID'])) for f in json.load(open('gitleaks.json'))]"
+          exit 1

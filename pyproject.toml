@@ -10,6 +10,8 @@ dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
 # Needed only for TESTNET / LIVE order placement.
 live = ["hyperliquid-python-sdk>=0.9", "eth-account>=0.13"]
 postgres = ["asyncpg>=0.30"]
+# Only for python -m app.research.ticks (fast CSV parsing of tick archives).
+research = ["polars>=1.0"]
 fast = ["uvloop>=0.20; sys_platform != 'win32'"]
 
 [build-system]

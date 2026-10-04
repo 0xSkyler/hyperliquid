@@ -33,8 +33,9 @@ class Settings:
     min_indep_samples: float = 30.0  # independent resolved forecasts before any trust
 
     # Model arena: the first available name starts as champion. "tree" needs lightgbm;
-    # "ridge_disc" needs a discovered-features file (python -m app.research.discovery).
-    models: tuple[str, ...] = ("ridge", "mlp", "tree", "ridge_disc")
+    # "ridge_disc" needs a discovered-features file (python -m app.research.discovery); "flow" needs
+    # models/flow_<horizon>s.txt (python -m app.research.flow_train).
+    models: tuple[str, ...] = ("ridge", "mlp", "tree", "flow", "ridge_disc")
     promote_z: float = 2.5  # paired-test t-statistic a challenger must exceed to be promoted
     tree_min_train: int = 3000
     tree_refit_every: int = 1500

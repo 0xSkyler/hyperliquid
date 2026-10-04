@@ -22,6 +22,7 @@ import numpy as np
 
 from app.config.settings import Settings
 from app.models.expand import FeatureExpander, load_specs
+from app.models.flow import PORTABLE, PORTABLE_IDX, PretrainedFlow
 from app.models.neural import OnlineMLP
 from app.models.online import EdgeCalibrator, OnlineRidge
 from app.models.tree import TreeForecaster
@@ -48,9 +49,12 @@ class Entry:
     dm_mean: float = 0.0  # EW mean of (champion sq. error - this model's sq. error)
     dm_var: float = 0.0
     dm_n: float = 0.0
+    raw_cols: tuple[int, ...] | None = None  # if set, the model reads these unstandardised features instead
     failed: str = ""  # set if the model raised; it then forecasts zero for the rest of the run
 
-    def view(self, z: np.ndarray) -> np.ndarray:
+    def view(self, z: np.ndarray, raw: np.ndarray | None = None) -> np.ndarray:
+        if self.raw_cols is not None:
+            return raw[list(self.raw_cols)] if raw is not None else np.zeros(len(self.raw_cols))
         extra = self.expander(z) if self.expander is not None else ()
         return np.concatenate([z, extra, [1.0]])
 
@@ -70,10 +74,11 @@ class Arena:
         return self.entries[self.champion]
 
     def predict(
-        self, z: np.ndarray, regime: np.ndarray
+        self, z: np.ndarray, regime: np.ndarray, raw: np.ndarray | None = None
     ) -> tuple[list[np.ndarray], list[float], list[float], list[float]]:
-        """Per model: its input vector, raw forecast, parameter variance, trusted beta."""
-        xs = [e.view(z) for e in self.entries]
+        """Per model: its input vector, raw forecast, parameter variance, trusted beta.
+        `z` is the standardised feature vector, `raw` the same features before standardising."""
+        xs = [e.view(z, raw) for e in self.entries]
         preds = [self._guard(e, lambda e=e, x=x: e.model.predict(x)) or (0.0, 0.0)  # type: ignore[misc]
                  for e, x in zip(self.entries, xs, strict=True)]  # fmt: skip
         betas = [e.cal.beta(regime) for e in self.entries]
@@ -155,6 +160,10 @@ def build_arena(s: Settings, base_names: tuple[str, ...], n_regimes: int, async_
         elif name == "tree" and tree_available():
             tree = TreeForecaster(n, s.tree_min_train, s.tree_refit_every, purge=s.horizon_ticks, async_fit=async_fit)
             entries.append(Entry(tree, cal(), None, list(base_names)))
+        elif name == "flow":
+            flow = PretrainedFlow.load(s.chart_model_dir, s.horizon_s)
+            if flow is not None:
+                entries.append(Entry(flow, cal(), None, list(PORTABLE), raw_cols=PORTABLE_IDX))
         elif name == "ridge_disc":
             specs = load_specs(s.discovered_path)
             if specs:

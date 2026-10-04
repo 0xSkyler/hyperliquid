@@ -80,23 +80,33 @@ def _score(p: np.ndarray, y: np.ndarray, y_bps: np.ndarray, horizon: int, cost_b
             "top_decile_gross_bps": gross, "top_decile_net_bps": gross - cost_bps}  # fmt: skip
 
 
-def train_timeframe(tf: str, bars: np.ndarray, daily: np.ndarray, horizon: int, cost_bps: float) -> tuple[Any, dict[str, Any]]:
-    X, y, y_bps, rows = make_xy(bars, horizon)
-    ts = bars[rows, 0]
-    regime = bar_regimes(bars[rows], daily)
-    year = ts.astype("datetime64[s]").astype("datetime64[Y]").astype(int) + 1970
+def walk_forward_oos(X: np.ndarray, y: np.ndarray, year: np.ndarray, horizon: int) -> list[tuple[int, np.ndarray, np.ndarray]]:
+    """[(year, test row indices, predictions)] where each year's model saw only earlier rows."""
     purge = horizon + 5
-    wf, oos_p, oos_idx = [], [], []
+    out = []
     for yr in sorted(set(year.tolist())):
         test = np.flatnonzero(year == yr)
         train_end = int(test[0]) - purge
         if len(test) < 50 or train_end < 500:
             continue
         booster, _ = fit(X[:train_end], y[:train_end], purge)
-        p = booster.predict(X[test])
-        wf.append({"year": int(yr)} | _score(p, y[test], y_bps[test], horizon, cost_bps))
-        oos_p.append(p)
-        oos_idx.append(test)
+        out.append((int(yr), test, booster.predict(X[test])))
+    return out
+
+
+def year_of(ts: np.ndarray) -> np.ndarray:
+    return ts.astype("datetime64[s]").astype("datetime64[Y]").astype(int) + 1970
+
+
+def train_timeframe(tf: str, bars: np.ndarray, daily: np.ndarray, horizon: int, cost_bps: float) -> tuple[Any, dict[str, Any]]:
+    X, y, y_bps, rows = make_xy(bars, horizon)
+    ts = bars[rows, 0]
+    regime = bar_regimes(bars[rows], daily)
+    purge = horizon + 5
+    folds = walk_forward_oos(X, y, year_of(ts), horizon)
+    wf = [{"year": yr} | _score(p, y[test], y_bps[test], horizon, cost_bps) for yr, test, p in folds]
+    oos_p = [p for _, _, p in folds]
+    oos_idx = [test for _, test, _ in folds]
     P, idx = (np.concatenate(oos_p), np.concatenate(oos_idx)) if wf else (np.empty(0), np.empty(0, dtype=int))
     overall = _score(P, y[idx], y_bps[idx], horizon, cost_bps)
     by_regime = {name: _score(P[regime[idx] == k], y[idx][regime[idx] == k], y_bps[idx][regime[idx] == k], horizon, cost_bps)

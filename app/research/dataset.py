@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import glob
 import json
 from collections.abc import Iterable, Iterator
@@ -24,6 +25,7 @@ class Dataset:
     Z: np.ndarray  # causally standardised base features, one row per tick
     y: np.ndarray  # forward return in bps from the next tick (first executable price) over the horizon
     mid: np.ndarray  # mid at each row's tick
+    raw: np.ndarray = dataclasses.field(default_factory=lambda: np.empty((0, 0)))  # unstandardised features
     names: tuple[str, ...] = BASE_NAMES
 
 
@@ -47,7 +49,7 @@ def read_events(paths: list[str]) -> Iterator[Event]:
 def build_dataset(events: Iterable[Event], interval_s: float, horizon_ticks: int, coin: str = "BTC") -> Dataset:
     market = MarketState(interval_s)
     std = Standardizer(len(BASE_NAMES))
-    rows: list[tuple[int, np.ndarray]] = []
+    rows: list[tuple[int, np.ndarray, np.ndarray]] = []
     mids: list[float] = []
     next_tick: float | None = None
 
@@ -58,7 +60,7 @@ def build_dataset(events: Iterable[Event], interval_s: float, horizon_ticks: int
         mids.append(b.mid if fresh and b is not None else float("nan"))
         f = market.features(now) if fresh else None
         if f is not None:
-            rows.append((len(mids) - 1, std.transform(f.values)))
+            rows.append((len(mids) - 1, std.transform(f.values), f.values))
 
     for ts, kind, payload in events:
         if next_tick is None:
@@ -84,11 +86,11 @@ def build_dataset(events: Iterable[Event], interval_s: float, horizon_ticks: int
             market.on_ctx(payload)
 
     m = np.array(mids)
-    keep = [(i, z) for i, z in rows if i + 1 + horizon_ticks < len(m)]
+    keep = [r for r in rows if r[0] + 1 + horizon_ticks < len(m)]
     if not keep:
         return Dataset(np.empty((0, len(BASE_NAMES))), np.empty(0), np.empty(0))
-    idx = np.array([i for i, _ in keep])
+    idx = np.array([r[0] for r in keep])
     with np.errstate(invalid="ignore"):
         y = np.log(m[idx + 1 + horizon_ticks] / m[idx + 1]) * 1e4
     ok = np.isfinite(y)
-    return Dataset(np.vstack([z for _, z in keep])[ok], y[ok], m[idx][ok])
+    return Dataset(np.vstack([r[1] for r in keep])[ok], y[ok], m[idx][ok], raw=np.vstack([r[2] for r in keep])[ok])

@@ -149,7 +149,7 @@ class Engine:
                 self.half_life.prev = None
             return None
 
-        xs, mus, pvars, betas = self.arena.predict(self.std.transform(feats.values), feats.regime)
+        xs, mus, pvars, betas = self.arena.predict(self.std.transform(feats.values), feats.regime, feats.values)
         item = [now + s.horizon_s, xs, None, mus, feats.regime, now + s.latency_ms / 1000, betas]
         self._pending.append(item)
         self._unref.append(item)

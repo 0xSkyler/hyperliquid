@@ -51,8 +51,8 @@ All models are scored on the same resolved forecasts. A challenger replaces the 
 out-of-sample observations (paired test, corrected for overlapping horizons, threshold
 `promote_z`). A model that has earned no trust is indistinguishable from "predict zero", so nothing
 is ever promoted on noise. Promotions are logged to `data/promotions.jsonl` and shown on the
-dashboard. Choose the line-up with `HL_MODELS` (default `ridge,mlp,tree,ridge_disc`; first is the
-starting champion).
+dashboard. Choose the line-up with `HL_MODELS` (default `ridge,mlp,tree,flow,ridge_disc`; first is
+the starting champion).
 
 ## What the models have been trained on
 
@@ -86,14 +86,34 @@ and 1d reaches a Sharpe near 1.0. Picked honestly (each year, choose the best va
 years, then trade it): Sharpe -0.83 at 5m, 0.07 at 1h, 0.27 at 4h, 0.18 at 1d, against 0.7 for
 simply holding BTC. No classic strategy beat buy-and-hold out of sample.
 
-**3. Order-flow models: live data only.** The ridge / neural / tree models that actually drive
-trading use order-book and trade-flow features, which do not exist in candle history. They learn
-from live data, or from your own recordings via warm start.
+**3. Swing lab: the 1-hour signal as a slower, maker-order lane.** `models/swing_lab.json`.
+Trading the 1-hour signal directly (long or short while it is strong, flat otherwise) loses money
+walk-forward even with maker orders: roughly -55% a year per unit of notional, profitable in 2 of 9
+years. Maker orders fill about 88% of the time, but they fill when price is moving against them,
+and the entries that go unfilled are the ones that would have won. A variant that holds each
+position until the signal flips shows +64% a year, but it is long BTC 77% of the time and tracks
+buy-and-hold in every year since 2022; that is market exposure, not the signal. For that reason
+no swing lane is wired into live trading.
+
+**4. Trade-flow model: 90 days of tick trades.** `models/flow_60s.txt` is trained on Binance
+BTCUSDT futures trades, replayed second by second through the same market-state code the live
+engine uses, on the seven features that mean the same thing on any venue (trade-flow imbalance,
+volatility-normalised returns, RSI, z-score). It joins the live arena as the `flow_pretrained`
+challenger with zero trust and must earn promotion on Hyperliquid. Its week-by-week record is in
+`models/flow_60s.json`. Tick-trade data has no order-book sizes, so the book-imbalance features
+are still learned live only.
+
+**5. Order-flow models: live data only.** The ridge / neural / tree models learn online from the
+full feature set, including the order-book features, from live data or from your own recordings
+via warm start.
 
 ```bash
 python -m app.research.history --years 10          # download or top up candles (resumable)
 python -m app.research.strategy_lab                # every strategy x timeframe x regime
 python -m app.research.chart_train                 # walk-forward report, then train and save
+python -m app.research.swing_lab                   # 1-hour signal as a maker-order lane
+python -m app.research.ticks --days 90             # download and featurise tick trades (~2 GB)
+python -m app.research.flow_train                  # train the trade-flow model, walk-forward
 python -m app.research.stress                      # engine behaviour in hostile environments
 python -m app.research.warmstart "data/raw-*.jsonl"  # teach the order-flow models from recordings
 ```

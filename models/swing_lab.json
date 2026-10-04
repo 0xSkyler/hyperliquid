@@ -1,0 +1,194 @@
+{
+ "signal": "chart_1h, walk-forward",
+ "maker_fee": 0.00015,
+ "taker_fee": 0.00045,
+ "funding_modelled": false,
+ "buy_and_hold": {
+  "sharpe": 0.31334349571468934,
+  "net_return_pct_per_year": 20.89979089802233
+ },
+ "policies": {
+  "flat_when_weak": {
+   "maker": {
+    "net_return_pct_per_year": -54.517669114313094,
+    "sharpe": -1.1386027583606384,
+    "max_drawdown_pct": 613.754173495175,
+    "hours_in_market_pct": 35.232499055411516,
+    "avg_position": 0.15603298893854312,
+    "position_changes_per_year": 3276.928224303936,
+    "fill_rate": 0.8854725627668325,
+    "profitable_years": "2/9",
+    "last_three_years_pct": [
+     -111.574235241868,
+     -7.294493454005245,
+     3.5908008223419787
+    ]
+   },
+   "taker": {
+    "net_return_pct_per_year": -74.4428089899679,
+    "sharpe": -1.5216561638437187,
+    "max_drawdown_pct": 815.263828301243,
+    "hours_in_market_pct": 37.57898714056779,
+    "avg_position": 0.16313368858546246,
+    "position_changes_per_year": 3562.4545229502432,
+    "profitable_years": "2/9"
+   },
+   "per_year": [
+    {
+     "year": 2018,
+     "threshold_quantile": 0.0,
+     "maker_net_return_pct": 26.266305168341287,
+     "taker_net_return_pct": 47.150301206047885,
+     "buy_and_hold_pct": -72.97951789952387
+    },
+    {
+     "year": 2019,
+     "threshold_quantile": 0.0,
+     "maker_net_return_pct": -86.95851851077202,
+     "taker_net_return_pct": -131.76567672881475,
+     "buy_and_hold_pct": 94.06307274563257
+    },
+    {
+     "year": 2020,
+     "threshold_quantile": 0.5,
+     "maker_net_return_pct": -22.544195058238913,
+     "taker_net_return_pct": -33.58220809687307,
+     "buy_and_hold_pct": 305.4935664335664
+    },
+    {
+     "year": 2021,
+     "threshold_quantile": 0.5,
+     "maker_net_return_pct": -145.76843360981826,
+     "taker_net_return_pct": -163.82382582224352,
+     "buy_and_hold_pct": 59.04761478669125
+    },
+    {
+     "year": 2022,
+     "threshold_quantile": 0.5,
+     "maker_net_return_pct": -58.826536904924374,
+     "taker_net_return_pct": -80.57638867443333,
+     "buy_and_hold_pct": -64.57070489463601
+    },
+    {
+     "year": 2023,
+     "threshold_quantile": 0.5,
+     "maker_net_return_pct": -74.23436849406733,
+     "taker_net_return_pct": -122.4657031611025,
+     "buy_and_hold_pct": 155.78354821136733
+    },
+    {
+     "year": 2024,
+     "threshold_quantile": 0.5,
+     "maker_net_return_pct": -111.574235241868,
+     "taker_net_return_pct": -163.5933403348786,
+     "buy_and_hold_pct": 119.8752060277843
+    },
+    {
+     "year": 2025,
+     "threshold_quantile": 0.97,
+     "maker_net_return_pct": -7.294493454005245,
+     "taker_net_return_pct": -5.777395031057758,
+     "buy_and_hold_pct": -7.1276177941004715
+    },
+    {
+     "year": 2026,
+     "threshold_quantile": 0.97,
+     "maker_net_return_pct": 3.5908008223419787,
+     "taker_net_return_pct": 2.630800822342008,
+     "buy_and_hold_pct": -2.787091328055491
+    }
+   ]
+  },
+  "hold_until_flip": {
+   "maker": {
+    "net_return_pct_per_year": 64.39113908147081,
+    "sharpe": 0.969225356296581,
+    "max_drawdown_pct": 147.54591727915312,
+    "hours_in_market_pct": 98.75314319961434,
+    "avg_position": 0.7670579651609709,
+    "position_changes_per_year": 463.80891952106106,
+    "fill_rate": 0.8811279826464208,
+    "profitable_years": "6/9",
+    "last_three_years_pct": [
+     94.92950330677358,
+     -8.68562622905969,
+     -1.2074076955222557
+    ]
+   },
+   "taker": {
+    "net_return_pct_per_year": 67.57483305332967,
+    "sharpe": 1.0151594822371761,
+    "max_drawdown_pct": 151.37866534500932,
+    "hours_in_market_pct": 99.11013250296405,
+    "avg_position": 0.7671100803877373,
+    "position_changes_per_year": 472.9457610777429,
+    "profitable_years": "6/9"
+   },
+   "per_year": [
+    {
+     "year": 2018,
+     "threshold_quantile": 0.7,
+     "maker_net_return_pct": 99.4373948487883,
+     "taker_net_return_pct": 128.8186330937686,
+     "buy_and_hold_pct": -72.97951789952387
+    },
+    {
+     "year": 2019,
+     "threshold_quantile": 0.7,
+     "maker_net_return_pct": 11.134140088780587,
+     "taker_net_return_pct": 6.112852509531669,
+     "buy_and_hold_pct": 94.06307274563257
+    },
+    {
+     "year": 2020,
+     "threshold_quantile": 0.97,
+     "maker_net_return_pct": 158.30762776872166,
+     "taker_net_return_pct": 158.26762776872164,
+     "buy_and_hold_pct": 305.4935664335664
+    },
+    {
+     "year": 2021,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": 183.26133566700707,
+     "taker_net_return_pct": 182.56680450958618,
+     "buy_and_hold_pct": 59.04761478669125
+    },
+    {
+     "year": 2022,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": -78.99808497333535,
+     "taker_net_return_pct": -79.03808497333536,
+     "buy_and_hold_pct": -64.57070489463601
+    },
+    {
+     "year": 2023,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": 105.61453473097968,
+     "taker_net_return_pct": 105.41453473097968,
+     "buy_and_hold_pct": 155.78354821136733
+    },
+    {
+     "year": 2024,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": 94.92950330677358,
+     "taker_net_return_pct": 97.5255362727257,
+     "buy_and_hold_pct": 119.8752060277843
+    },
+    {
+     "year": 2025,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": -8.68562622905969,
+     "taker_net_return_pct": -6.937675206589024,
+     "buy_and_hold_pct": -7.1276177941004715
+    },
+    {
+     "year": 2026,
+     "threshold_quantile": 0.9,
+     "maker_net_return_pct": -1.2074076955222557,
+     "taker_net_return_pct": -1.0611480138294715,
+     "buy_and_hold_pct": -2.787091328055491
+    }
+   ]
+  }
+ }
+}

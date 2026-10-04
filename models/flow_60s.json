@@ -1,0 +1,162 @@
+{
+ "features": [
+  "tfi_5s",
+  "tfi_30s",
+  "ret_5s",
+  "ret_30s",
+  "ret_300s",
+  "rsi_15s",
+  "z_300s"
+ ],
+ "horizon_s": 60,
+ "source": "Binance USD-M BTCUSDT aggTrades",
+ "days": 90,
+ "from": "2026-07-05",
+ "to": "2026-10-02",
+ "rows": 7705532,
+ "trees": 130,
+ "cost_bps_round_trip": {
+  "taker": 9.0,
+  "maker": 2.9999999999999996
+ },
+ "out_of_sample": {
+  "rows": 5128699,
+  "ic": 0.02240359792926074,
+  "t_stat": 6.550067121057269,
+  "top_decile_gross_bps": 0.2296277880475873,
+  "top_decile_net_taker_bps": -8.770372211952413,
+  "top_decile_net_maker_bps": -2.770372211952412,
+  "forecast_p99_abs_bps": 0.31779532473138267,
+  "share_above_taker_cost": 0.0,
+  "realised_when_above_bps": null
+ },
+ "weeks_with_positive_ic": "9/9",
+ "walk_forward": [
+  {
+   "from": "2026-08-04",
+   "to": "2026-08-10",
+   "rows": 592267,
+   "ic": 0.03446580198303089,
+   "t_stat": 3.424297832601648,
+   "top_decile_gross_bps": 0.25415923739695334,
+   "top_decile_net_taker_bps": -8.745840762603047,
+   "top_decile_net_maker_bps": -2.7458407626030463,
+   "forecast_p99_abs_bps": 0.3003586949798707,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-08-11",
+   "to": "2026-08-17",
+   "rows": 583297,
+   "ic": 0.055812666645043314,
+   "t_stat": 5.5030317581887696,
+   "top_decile_gross_bps": 0.3000356621345571,
+   "top_decile_net_taker_bps": -8.699964337865444,
+   "top_decile_net_maker_bps": -2.6999643378654423,
+   "forecast_p99_abs_bps": 0.3145601193888081,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-08-18",
+   "to": "2026-08-24",
+   "rows": 602215,
+   "ic": 0.008413353012286386,
+   "t_stat": 0.8428868353545772,
+   "top_decile_gross_bps": 0.07078202867024859,
+   "top_decile_net_taker_bps": -8.929217971329752,
+   "top_decile_net_maker_bps": -2.929217971329751,
+   "forecast_p99_abs_bps": 0.35010069903630264,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-08-25",
+   "to": "2026-08-31",
+   "rows": 602078,
+   "ic": 0.01884950603362298,
+   "t_stat": 1.8882118882019845,
+   "top_decile_gross_bps": 0.22451325034585273,
+   "top_decile_net_taker_bps": -8.775486749654148,
+   "top_decile_net_maker_bps": -2.7754867496541467,
+   "forecast_p99_abs_bps": 0.270040612808309,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-09-01",
+   "to": "2026-09-07",
+   "rows": 601233,
+   "ic": 0.02282104439405514,
+   "t_stat": 2.2844480982802047,
+   "top_decile_gross_bps": 0.1487579743633095,
+   "top_decile_net_taker_bps": -8.85124202563669,
+   "top_decile_net_maker_bps": -2.85124202563669,
+   "forecast_p99_abs_bps": 0.3431400060024517,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-09-08",
+   "to": "2026-09-14",
+   "rows": 599757,
+   "ic": 0.02484059978449816,
+   "t_stat": 2.4835569053628714,
+   "top_decile_gross_bps": 0.25231032795729297,
+   "top_decile_net_taker_bps": -8.747689672042707,
+   "top_decile_net_maker_bps": -2.7476896720427066,
+   "forecast_p99_abs_bps": 0.3116796223579304,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-09-15",
+   "to": "2026-09-21",
+   "rows": 602224,
+   "ic": 0.03208129785397654,
+   "t_stat": 3.2140700197409457,
+   "top_decile_gross_bps": 0.3909719971264553,
+   "top_decile_net_taker_bps": -8.609028002873545,
+   "top_decile_net_maker_bps": -2.6090280028735444,
+   "forecast_p99_abs_bps": 0.2647553716616745,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-09-22",
+   "to": "2026-09-28",
+   "rows": 601480,
+   "ic": 0.02107807134942016,
+   "t_stat": 2.11040516261147,
+   "top_decile_gross_bps": 0.17109424969258033,
+   "top_decile_net_taker_bps": -8.82890575030742,
+   "top_decile_net_maker_bps": -2.828905750307419,
+   "forecast_p99_abs_bps": 0.3662416261185665,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  },
+  {
+   "from": "2026-09-29",
+   "to": "2026-10-02",
+   "rows": 344148,
+   "ic": 0.02552698601729631,
+   "t_stat": 1.9332879333836517,
+   "top_decile_gross_bps": 0.314586863881019,
+   "top_decile_net_taker_bps": -8.685413136118981,
+   "top_decile_net_maker_bps": -2.6854131361189806,
+   "forecast_p99_abs_bps": 0.2550180906821184,
+   "share_above_taker_cost": 0.0,
+   "realised_when_above_bps": null
+  }
+ ],
+ "importance": {
+  "ret_5s": 40096,
+  "tfi_5s": 38646,
+  "z_300s": 23051,
+  "rsi_15s": 14901,
+  "tfi_30s": 13269,
+  "ret_300s": 8805,
+  "ret_30s": 6808
+ }
+}

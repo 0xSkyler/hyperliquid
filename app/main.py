@@ -6,14 +6,14 @@ import argparse
 import asyncio
 import dataclasses
 import logging
-import os
 import signal
 import time
 from pathlib import Path
 from typing import Any
 
 from app.brain.engine import Engine
-from app.config.settings import Mode, Settings
+from app.config.settings import Mode
+from app.control import ControlStore, Startup, load_startup
 from app.exchange.base import Venue
 from app.exchange.hyperliquid import HyperliquidData, HyperliquidLive, parse_event
 from app.exchange.paper import PaperVenue
@@ -25,11 +25,17 @@ from app.persistence.sink import JsonlSink, PostgresSink
 log = logging.getLogger("app")
 
 
-async def run(s: Settings, duration: float | None) -> Engine:
+async def run(st: Startup, duration: float | None) -> bool:
+    """Run the engine until stopped. Returns True if the control panel asked for a restart."""
+    s = st.settings
     if s.mode in (Mode.RESEARCH, Mode.BACKTEST):
         raise SystemExit("use `python -m backtest.run` for backtest/research")
+    store = ControlStore(s.data_dir)
+    startup_error = st.error
     data = HyperliquidData(s.api_url)
     meta = await data.meta(s.coin)
+    if s.max_leverage_cap > 0:
+        meta = dataclasses.replace(meta, max_leverage=min(meta.max_leverage, s.max_leverage_cap))
     fees = await data.fees(s.account_address)
     if fees:
         s = dataclasses.replace(s, taker_fee=fees[0], maker_fee=fees[1])
@@ -39,15 +45,29 @@ async def run(s: Settings, duration: float | None) -> Engine:
     venue: Venue
     live: HyperliquidLive | None = None
     if s.mode in (Mode.TESTNET, Mode.LIVE):
-        live = HyperliquidLive(s.api_url, s.account_address, os.environ["HL_API_SECRET_KEY"], meta)
-        await asyncio.to_thread(live.set_max_cross_leverage)
-        await asyncio.to_thread(live.refresh)  # reconcile before the first decision
+        try:
+            live = HyperliquidLive(s.api_url, s.account_address, st.secret_key, meta)
+            await asyncio.to_thread(live.set_max_cross_leverage)
+            await asyncio.to_thread(live.refresh)  # reconcile before the first decision
+            if not live.account(time.time()).known:
+                raise RuntimeError("the exchange did not return this account's state")
+        except Exception as e:  # noqa: BLE001 - never crash-loop on a bad key or missing library
+            log.error("could not start %s mode (%s: %s); falling back to paper", s.mode.value, type(e).__name__, e)
+            startup_error = (f"Could not start {s.mode.value} mode: {type(e).__name__}: {e}. "
+                             "Running in paper mode instead.")  # fmt: skip
+            live = None
+            if s.mode is Mode.TESTNET:  # paper mode should watch the real market, not testnet
+                s = dataclasses.replace(s, mode=Mode.PAPER)
+                data = HyperliquidData(s.api_url)
+            s = dataclasses.replace(s, mode=Mode.PAPER)
+    if live is not None:
         venue = live
     else:
         venue = PaperVenue(s.paper_equity, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
 
     sink = PostgresSink(s.database_url) if s.database_url else JsonlSink(s.data_dir)
     engine = Engine(s, venue, meta, sink)
+    engine.paused = st.paused
     state_file = Path(s.state_file)
     if state_file.is_file():
         why = engine.load_state(state_file.read_bytes())
@@ -83,7 +103,8 @@ async def run(s: Settings, duration: float | None) -> Engine:
         age = time.time() - engine.market.feed_ts if b else None
         faults = engine.last.get("faults", ["starting"])
         chart_info = {"loaded": list(charts), "scores": engine.market.chart_scores}
-        health = {"ok": not faults, "chart": chart_info, "faults": faults, "feed_age_s": age,
+        health = {"ok": not faults, "paused": engine.paused, "startup_error": startup_error, "chart": chart_info,
+                  "faults": faults, "feed_age_s": age,
                   "ws_reconnects": data.reconnects,
                   "sink_dropped": sink.dropped, "loop_lag_ms": loop_lag}  # fmt: skip
         return {"engine": engine.snapshot(), "news": news.snapshot(), "health": health}
@@ -159,8 +180,58 @@ async def run(s: Settings, duration: float | None) -> Engine:
                          j["equity"], j["fills"], champ.model.name, champ.model.n_obs, champ.cal.ic(),
                          engine.last.get("extra", {}).get("beta"))  # fmt: skip
 
-    runner = await serve(state, s.dashboard_host, s.dashboard_port)
-    log.info("dashboard: http://%s:%d", s.dashboard_host, s.dashboard_port)
+    # --- control panel actions ---------------------------------------------
+    restart = asyncio.Event()
+
+    def restart_soon(message: str) -> dict[str, Any]:
+        asyncio.get_running_loop().call_later(0.5, restart.set)  # let the reply go out first
+        return {"message": message}
+
+    def c_get(_: dict[str, Any]) -> dict[str, Any]:
+        eff = {"risk_aversion": s.risk_aversion, "max_leverage": meta.max_leverage, "paper_equity": s.paper_equity}
+        return store.public() | {"mode": s.mode.value, "paused": engine.paused, "effective": eff,
+                                 "startup_error": startup_error}  # fmt: skip
+
+    def c_mode(b: dict[str, Any]) -> dict[str, Any]:
+        store.set_mode(str(b.get("mode", "")), str(b.get("confirm", "")))
+        log.warning("control panel: mode change to %s requested", b.get("mode"))
+        return restart_soon(f"switching to {b.get('mode')}; the engine is restarting")
+
+    def c_pause(b: dict[str, Any]) -> dict[str, Any]:
+        engine.paused = bool(b.get("paused"))
+        store.set_paused(engine.paused)
+        log.warning("control panel: trading %s", "paused" if engine.paused else "resumed")
+        return {"message": "trading paused: no orders will be sent" if engine.paused else "trading resumed"}
+
+    def c_flatten(_: dict[str, Any]) -> dict[str, Any]:
+        message = engine.flatten(time.time())
+        store.set_paused(True)
+        log.warning("control panel: flatten requested -> %s", message)
+        return {"message": message}
+
+    def c_credentials(b: dict[str, Any]) -> dict[str, Any]:
+        store.set_credentials(str(b.get("account_address", "")), str(b.get("api_secret_key", "")))
+        log.warning("control panel: credentials saved")
+        if s.mode in (Mode.TESTNET, Mode.LIVE):
+            return restart_soon("credentials saved; the engine is restarting to use them")
+        return {"message": "credentials saved; you can now choose Testnet or Live"}
+
+    def c_credentials_clear(_: dict[str, Any]) -> dict[str, Any]:
+        was_trading = s.mode in (Mode.TESTNET, Mode.LIVE)
+        store.clear_credentials()
+        log.warning("control panel: credentials removed")
+        if was_trading:
+            return restart_soon("credentials removed; restarting in paper mode")
+        return {"message": "credentials removed"}
+
+    def c_preferences(b: dict[str, Any]) -> dict[str, Any]:
+        store.set_preferences(b.get("risk_aversion"), b.get("max_leverage"), b.get("paper_equity"))
+        return restart_soon("preferences saved; the engine is restarting")
+
+    control = {"get": c_get, "mode": c_mode, "pause": c_pause, "flatten": c_flatten, "credentials": c_credentials,
+               "credentials_clear": c_credentials_clear, "preferences": c_preferences}  # fmt: skip
+    runner = await serve(state, s.dashboard_host, s.dashboard_port, store.token(), control)
+    log.info("dashboard and control panel: http://%s:%d (token in %s)", s.dashboard_host, s.dashboard_port, store.token_path)
     # systemd stops the service with SIGTERM: shut down cleanly so the learned state is saved.
     stop = asyncio.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
@@ -169,23 +240,26 @@ async def run(s: Settings, duration: float | None) -> Engine:
         except NotImplementedError:  # Windows: Ctrl-C still raises KeyboardInterrupt
             pass
     stopper = asyncio.create_task(stop.wait())
+    restarter = asyncio.create_task(restart.wait())
     tasks = [asyncio.create_task(c) for c in (stream(), ticker(), news.run(), chart_loop())]
     try:
-        done, _ = await asyncio.wait([*tasks[:3], stopper], timeout=duration, return_when=asyncio.FIRST_COMPLETED)
+        waiting = [*tasks[:3], stopper, restarter]
+        done, _ = await asyncio.wait(waiting, timeout=duration, return_when=asyncio.FIRST_COMPLETED)
         for t in done:
-            if t is not stopper:
+            if t is not stopper and t is not restarter:
                 t.result()  # the worker loops never return, so a finished one means it raised
         if stopper in done:
             log.info("stop requested: shutting down")
     finally:
         stopper.cancel()
+        restarter.cancel()
         for t in tasks:
             t.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
         await runner.cleanup()
         save_state()
         sink.close()
-    return engine
+    return restart.is_set() and not stop.is_set()
 
 
 def main() -> None:
@@ -199,7 +273,8 @@ def main() -> None:
         uvloop.install()
     except ImportError:
         pass
-    asyncio.run(run(Settings.from_env(), args.duration))
+    while asyncio.run(run(load_startup(), args.duration)):
+        log.info("restarting with the control panel's new settings")
 
 
 if __name__ == "__main__":

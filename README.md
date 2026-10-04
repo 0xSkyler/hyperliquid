@@ -176,6 +176,12 @@ passed as quoted data and cannot instruct the system. If the primary model decli
 the API's server-side fallback retries it on another model. News arrives minutes late and the
 models forecast one minute ahead, so do not expect this feature to matter at the default horizon.
 
+## Control panel
+
+The dashboard at `http://127.0.0.1:8787` is also the control panel: switch between Paper, Shadow,
+Testnet and Live, pause or resume, close the position, save Hyperliquid credentials and set risk
+preferences, all protected by a token (`data/control_token`). See `docs/DEPLOY.md`.
+
 ## Run
 
 ```bash

@@ -44,6 +44,30 @@ jobs:
           assert s['health']['chart']['loaded'] == ['5m', '1h', '4h', '1d']
           "
           sudo journalctl -u hltrader -n 15 --no-pager
+      - name: control panel - token required, pause, mode switch, safe fallback
+        run: |
+          /opt/hltrader/app/.venv/bin/python -c "import hyperliquid, eth_account; print('order-signing libraries installed')"
+          TOKEN="$(sudo cat /opt/hltrader/app/data/control_token)"
+          test "$(sudo stat -c %a /opt/hltrader/app/data/control_token)" = 600
+          call() { curl -sS -o /tmp/out -w '%{http_code}' -H "X-Control-Token: $1" -H 'Content-Type: application/json' -X POST "http://127.0.0.1:8787/api/control/$2" -d "$3"; }
+          test "$(call wrong-token pause '{"paused":true}')" = 401
+          test "$(call "$TOKEN" pause '{"paused":true}')" = 200 && cat /tmp/out && echo
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; assert json.load(sys.stdin)['health']['paused'] is True"
+          test "$(call "$TOKEN" mode '{"mode":"testnet"}')" = 400 && cat /tmp/out && echo    # no credentials saved
+          test "$(call "$TOKEN" mode '{"mode":"live","confirm":"I_UNDERSTAND_REAL_MONEY"}')" = 400   # still no credentials
+          test "$(call "$TOKEN" mode '{"mode":"shadow"}')" = 200 && cat /tmp/out && echo
+          sleep 12
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "
+          import sys, json
+          s = json.load(sys.stdin)
+          print('after switch:', s['engine']['mode'], 'paused', s['health']['paused'])
+          assert s['engine']['mode'] == 'shadow' and s['health']['paused'] is True
+          "
+          systemctl is-active hltrader
+          test "$(sudo stat -c %a /opt/hltrader/app/data/control.json)" = 600
+          test "$(call "$TOKEN" mode '{"mode":"paper"}')" = 200
+          test "$(call "$TOKEN" pause '{"paused":false}')" = 200 || { sleep 6; test "$(call "$TOKEN" pause '{"paused":false}')" = 200; }
+          sleep 8
       - name: re-running the installer keeps configuration and learned state
         run: |
           echo "HL_PAPER_EQUITY=777" | sudo tee -a /opt/hltrader/app/.env >/dev/null

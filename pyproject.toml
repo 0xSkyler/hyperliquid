@@ -22,7 +22,7 @@ build-backend = "setuptools.build_meta"
 include = ["app*", "backtest*"]
 
 [tool.ruff]
-line-length = 120
+line-length = 130
 target-version = "py312"
 
 [tool.ruff.lint]
@@ -40,4 +40,5 @@ testpaths = ["tests"]
 
 [tool.ruff.lint.per-file-ignores]
 "app/monitoring/dashboard.py" = ["E501"]
+"tests/*.py" = ["S105", "S106"]
 "app/research/*.py" = ["E501"]

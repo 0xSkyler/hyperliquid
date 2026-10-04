@@ -10,6 +10,13 @@ calibration block. If `trusted_beta` is 0 in every regime, the engine has found 
 defend statistically and it will not trade live either. Paper results are an upper bound on live
 results: real queues are longer and real latency is worse than the simulation.
 
+## The easy way: the control panel
+
+Open the control panel (docs/DEPLOY.md), save your account address and API wallet key under
+"Hyperliquid account", then press **Testnet**. To go further, press **LIVE** and type the
+confirmation phrase. The steps below are the equivalent by hand, and the checks in step 4 apply
+either way.
+
 ## 1. Testnet
 
 1. Create an **API (agent) wallet** at app.hyperliquid-testnet.xyz -> More -> API. An agent wallet

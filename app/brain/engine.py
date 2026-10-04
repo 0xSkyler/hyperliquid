@@ -16,7 +16,7 @@ import numpy as np
 from app.brain.decision import Decision, Forecast, decide
 from app.config.settings import Mode, Settings
 from app.ensemble.arena import build_arena
-from app.exchange.base import AssetCtx, AssetMeta, Book, Trade, Venue, merge_bbo
+from app.exchange.base import AssetCtx, AssetMeta, Book, OrderIntent, Trade, Venue, merge_bbo
 from app.learning.journal import Journal
 from app.market.state import FEATURE_NAMES, REGIMES, MarketState
 from app.models.online import HalfLife, Standardizer
@@ -45,6 +45,7 @@ class Engine:
         self.decisions: deque[dict[str, Any]] = deque(maxlen=100)
         self.ticks = 0
         self.orders_sent = 0
+        self.paused = False  # operator switch: keep watching and learning, send no orders
         self.halted_ticks = 0  # ticks on which the safety kernel blocked trading
         self.max_abs_exposure = 0.0  # largest |notional / equity| actually held
         self.state = "OBSERVING"
@@ -97,6 +98,21 @@ class Engine:
             if hasattr(e.model, "set_async"):
                 e.model.set_async(self.s.mode is not Mode.BACKTEST)
         return ""
+
+    def flatten(self, now: float) -> str:
+        """Operator emergency stop: pause, cancel resting orders, close the whole position at market."""
+        self.paused = True
+        acct, book = self.venue.account(now), self.market.book
+        self.venue.cancel_all(now)
+        if not acct.known or book is None or not book.valid():
+            return "paused; the position is unknown right now, so nothing was sent - check the exchange directly"
+        if acct.position == 0:
+            return "paused; there was no position to close"
+        is_buy = acct.position < 0
+        px = self.meta.round_px(book.best_ask * 1.01 if is_buy else book.best_bid * 0.99)
+        self.venue.submit(OrderIntent(self.meta.coin, is_buy, abs(acct.position), px, "Ioc", True, client_id="flatten"), now)
+        self.orders_sent += 1
+        return f"paused; closing {abs(acct.position):g} {self.meta.coin} at market"
 
     def on_news(self, score: float) -> None:
         self.market.news_score = score
@@ -184,6 +200,8 @@ class Engine:
                 d.action, d.reason, d.order = "HOLD", "waiting for a previous order to be acknowledged", None
             elif s.mode is Mode.SHADOW:
                 d.extra["shadow"] = True
+            elif self.paused:
+                d.extra["paused"] = True  # decided, deliberately not sent
             else:
                 if acct.open_orders:
                     self.venue.cancel_all(now)

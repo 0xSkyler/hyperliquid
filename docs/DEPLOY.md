@@ -43,6 +43,26 @@ To run research on the VPS recordings:
 cd /opt/hltrader/app && sudo -u hltrader .venv/bin/python -m app.research.discovery "data/raw-*.jsonl*"
 ```
 
+## Control panel
+
+Open `http://127.0.0.1:8787` in a browser **on the server** (for example through RustDesk), or
+from your own computer through an SSH tunnel. The top bar always shows the mode in force: green
+for paper and shadow, amber for testnet, red for LIVE.
+
+Paste the control token once to unlock the controls (the installer prints it; to see it again:
+`sudo cat /opt/hltrader/app/data/control_token`). Then you can:
+
+- **Switch mode** - Paper, Shadow, Testnet, Live. The engine restarts itself in a few seconds and
+  keeps what it has learned. Testnet and Live are disabled until credentials are saved; Live also
+  asks you to type the confirmation phrase, every time you enter it.
+- **Pause / resume** - paused, it keeps watching and learning but sends no orders.
+- **Close position and pause** - cancels resting orders, closes the whole position at market.
+- **Save or remove Hyperliquid credentials** - account address and API wallet key.
+- **Risk preferences** - risk aversion, a leverage cap, and the paper balance.
+
+If a mode cannot be started (wrong key, exchange unreachable), the engine runs in paper mode and
+shows the reason in a red banner instead of failing.
+
 ## Docker
 
 ```bash

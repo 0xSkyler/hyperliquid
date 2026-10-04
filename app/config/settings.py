@@ -53,6 +53,7 @@ class Settings:
     jump_prob: float = 1e-4  # per-horizon probability of a gap move, each direction
     jump_size: float = 0.015  # size of that gap as a fraction of price
     ruin_floor: float = 0.02  # wealth fraction assumed left after liquidation
+    max_leverage_cap: float = 0.0  # operator's cap on exposure; 0 = the venue's own maximum
 
     # Costs (overridden by the venue's real fee schedule when an address is known)
     taker_fee: float = 0.00045
@@ -90,10 +91,10 @@ class Settings:
         return max(1, round(self.horizon_s / self.decision_interval_s))
 
     @classmethod
-    def from_env(cls) -> Settings:
+    def from_env(cls, check_live: bool = True) -> Settings:
         env = os.environ
         mode = Mode(env.get("HL_MODE", "paper").lower())
-        if mode is Mode.LIVE and env.get("HL_LIVE_CONFIRM") != LIVE_CONFIRM_PHRASE:
+        if check_live and mode is Mode.LIVE and env.get("HL_LIVE_CONFIRM") != LIVE_CONFIRM_PHRASE:
             raise SystemExit(
                 "HL_MODE=live requires HL_LIVE_CONFIRM=" + LIVE_CONFIRM_PHRASE + " (see docs/LIVE.md)"
             )
@@ -107,6 +108,7 @@ class Settings:
             risk_aversion=float(env.get("HL_RISK_AVERSION", d.risk_aversion)),
             jump_prob=float(env.get("HL_JUMP_PROB", d.jump_prob)),
             jump_size=float(env.get("HL_JUMP_SIZE", d.jump_size)),
+            max_leverage_cap=float(env.get("HL_MAX_LEVERAGE", d.max_leverage_cap)),
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
             models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
             discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),

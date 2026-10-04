@@ -40,7 +40,7 @@ mkdir -p "$APP/data"
 echo "==> python environment"
 [ -x "$APP/.venv/bin/python" ] || python3 -m venv "$APP/.venv"
 "$APP/.venv/bin/pip" install -q --upgrade pip
-"$APP/.venv/bin/pip" install -q -e "$APP[fast]"
+"$APP/.venv/bin/pip" install -q -e "$APP[fast,live]"   # "live" = order-signing libraries, so Testnet/Live can be chosen in the panel
 
 echo "==> configuration"
 if [ ! -f "$APP/.env" ]; then
@@ -71,14 +71,19 @@ if ! systemctl is-active -q hltrader; then
 fi
 curl -fsS -m 5 http://127.0.0.1:8787/api/state >/dev/null || { echo "dashboard not responding"; journalctl -u hltrader -n 40 --no-pager; exit 1; }
 
+TOKEN="$(cat "$APP/data/control_token" 2>/dev/null || echo "(not created yet - run: sudo cat $APP/data/control_token)")"
 cat <<EOF
 
 Installed and running. Mode: ${MODE}
+
+  CONTROL PANEL: open http://127.0.0.1:8787 in a browser ON THIS SERVER (e.g. through RustDesk)
+  Control token: ${TOKEN}
+                 (paste it into the panel once; to see it again: sudo cat $APP/data/control_token)
+
   logs:       journalctl -u hltrader -f
   status:     systemctl status hltrader
   health:     curl -s http://127.0.0.1:8787/health
-  dashboard:  from your own computer run   ssh -L 8787:127.0.0.1:8787 <user>@<this-server>
-              then open http://127.0.0.1:8787
+  from your own computer instead:  ssh -L 8787:127.0.0.1:8787 <user>@<this-server>, then open http://127.0.0.1:8787
   stop:       sudo systemctl stop hltrader
   update:     re-run this installer
 EOF

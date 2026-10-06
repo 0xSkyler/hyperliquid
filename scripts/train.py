@@ -68,6 +68,15 @@ def _summary(coin: str, st: dict[str, Any] | None) -> dict[str, Any]:
     }  # fmt: skip
 
 
+def _stay_awake() -> None:
+    """Ask Windows not to idle-sleep while this process runs. Changes no settings and ends with the process.
+    A closed laptop lid or a manual Sleep still stops the run."""
+    if sys.platform == "win32":
+        import ctypes
+
+        ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)  # ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+
+
 def _git(*args: str) -> int:
     ident = ["-c", "user.name=nahian", "-c", "user.email=nahian@ordnur.com"]
     return subprocess.run(["git", *ident, *args], cwd=ROOT, check=False).returncode  # noqa: S603, S607
@@ -111,6 +120,7 @@ def main() -> None:
     ap.add_argument("--progress-min", type=float, default=30.0)
     args = ap.parse_args()
     coins = [c.strip().upper() for c in args.coins.split(",") if c.strip()]
+    _stay_awake()
     end = time.time() + args.hours * 3600
     out = ROOT / "models" / "training"
     out.mkdir(parents=True, exist_ok=True)

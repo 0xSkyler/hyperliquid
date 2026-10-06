@@ -81,7 +81,7 @@ pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto;margin:0}h3{
   <div class=hint>Max leverage caps how large a position can be relative to the balance. Risk aversion: 1 = most aggressive, 4 = default, higher = smaller positions. Saving restarts the engine (a few seconds).</div></div>
 </div>
 <h3>Status</h3><div class=g id=g></div>
-<h3>Model arena</h3><pre id=a></pre><h3>Last decision</h3><pre id=d></pre>
+<h3>Lessons learned</h3><pre id=les></pre><h3>Model arena</h3><pre id=a></pre><h3>Last decision</h3><pre id=d></pre>
 <h3>Calibration (out-of-sample)</h3><pre id=m></pre><h3>Recent orders</h3><pre id=r></pre>
 <h3>News (context only)</h3><pre id=n></pre>
 </main>
@@ -159,7 +159,7 @@ if(sc.enabled)tiles($('sg'),[['Our bid',w.bid??'-'],['Our ask',w.ask??'-'],['Mar
  ['Fast forecast accuracy',f((sc.fast_alpha||{}).oos_ic,2)],['Trades taken on forecast',sc.takes??0]]);
 const pre=(id,o)=>$(id).textContent=JSON.stringify(o,null,1);
 pre('a',e.model.arena.map(x=>`${x.champion?'CHAMPION ':'          '}${x.name.padEnd(16)} ic ${f(x.oos_ic,4)}  trusted beta ${f(x.max_trusted_beta,3)}  vs champion t ${f(x.vs_champion_t,2)}  resolved ${x.resolved}`));
-pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));
+const L=(sc.lessons||{}),lt=(L.takes||[]).map(x=>`take on a ${x.forecast_bps.padEnd(8)} bps forecast: seen ${String(x.times).padStart(6)} times, worth ${f(x.worth_bps,2).padStart(6)} bps (at least ${f(x.worth_lower_bound_bps,2)})  -> ${x.verdict}`),lq=(L.quotes||[]).filter(x=>x.verdict!=='not enough hits yet').map(x=>`${x.side} ${String(x.bps_behind_touch).padStart(3)} bps behind, ${x.situation.padEnd(16)}: hit ${String(x.hits).padStart(5)} times, worth ${f(x.worth_per_hit_bps,2).padStart(6)} bps  -> ${x.verdict}`);$('les').textContent=sc.enabled?[...lt,...lq].join('\n')||'still collecting: nothing judged yet':'';pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));
 }catch(err){$('mode').textContent='engine not responding (restarting?)';$('sub').textContent=''}}
 go();loadCtl();setInterval(go,2000);setInterval(()=>{if(!busy)loadCtl()},4000);</script>"""
 

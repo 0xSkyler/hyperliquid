@@ -76,6 +76,28 @@ Order handling requotes at once when a resting quote has become too aggressive a
 is merely less competitive, inside an action budget, because Hyperliquid gives each account a
 limited number of order actions. Bad data, Stop, or an unknown account state cancels every quote.
 
+**Lessons** (`lessons.py`) - every second the scalper also scores the quotes and takes it *could*
+have made, and files each result under the situation it happened in: which side, how far behind
+the best price, and whether its forecast pointed with it, against it, or nowhere; for takes, how
+strong the forecast was. Before acting for real it looks the situation up. Where the record (at its
+lower confidence bound) says a hit or a take is worth more than the fee, it acts; where the record
+says it loses, it does not, for as long as the record says so. Old lessons fade over a few hours so
+it re-learns when the market changes. The panel lists every lesson and its verdict. This is how it
+stops repeating its own mistakes; it cannot promise a mistake never recurs, because markets change.
+
+### Training runs
+
+```bash
+python scripts/train.py --hours 24 --coins BTC,ETH,SOL --push
+```
+
+runs the engine on the live feed with no account connected (so it cannot place an order): it trains
+the forecasts, practises quoting, files lessons, and records the market. At the end it exports each
+market's learned state to `models/state/`, writes `models/training/REPORT.md`, and pushes both. The
+engine loads that state at start-up whenever it is more experienced than the state it already has,
+so re-running the installer on a server brings the training with it. An installed engine also keeps
+learning in exactly the same way by itself, all the time, connected or not.
+
 ### What it measures on real Hyperliquid data
 
 `python -m app.research.scalp_lab "data/rec/*.jsonl"` replays recordings through the scalper twice:

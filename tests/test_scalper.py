@@ -14,7 +14,7 @@ from backtest.run import synthetic_events
 
 BTC = AssetMeta("BTC", 5, 40.0)
 ALT = AssetMeta("ENA", 0, 10.0)
-FREE = dataclasses.replace(Settings(), maker_fee=0.0, taker_fee=0.0)
+FREE = dataclasses.replace(Settings(), maker_fee=0.0, taker_fee=0.0, scalp_lessons=False)  # mechanics only
 UNGATED = dataclasses.replace(FREE, scalp_gate_fills=0)  # real quoting without first proving it in practice
 
 
@@ -208,7 +208,7 @@ def test_scalper_sends_nothing_when_stopped_and_pulls_quotes_when_data_goes_bad(
 
 
 def test_with_real_fees_on_a_tight_market_the_scalper_refuses_to_quote_at_a_loss() -> None:
-    eng, _ = _scalp(1500, dataclasses.replace(Settings(), scalp_gate_fills=0))  # BTC-like 0.12 bps spread against a 1.5 bps maker fee
+    eng, _ = _scalp(1500, dataclasses.replace(Settings(), scalp_gate_fills=0, scalp_lessons=False))  # BTC-like 0.12 bps spread against a 1.5 bps maker fee
     q = eng.last_quotes
     assert eng.journal.n_fills == 0 or eng.journal.summary()["spread_capture_bps"] > 1.0
     assert q.get("bid_behind_touch_bps") is None or q["bid_behind_touch_bps"] >= 1.4  # never at the touch for free
@@ -285,7 +285,7 @@ def test_fast_forecast_pulls_the_vulnerable_quote_and_takes_only_when_it_pays() 
         return eng.takes
 
     assert takes(FREE) > 10  # free to trade: it acts on the forecast
-    assert takes(Settings()) == 0  # 4.5 bps taker fee: a ~1 bp forecast never pays for it, so it never takes
+    assert takes(dataclasses.replace(Settings(), scalp_lessons=False)) == 0  # 4.5 bps taker fee: a ~1 bp forecast never pays for it, so it never takes
 
 
 # --- practice before real money ---------------------------------------------------------------------------
@@ -325,3 +325,80 @@ def test_when_practice_is_convincingly_profitable_real_quoting_switches_on() -> 
     continue_for(5, 710)
     assert eng.making_allowed and eng.quotes.placed >= 2 and eng.quotes.working  # now it rests real quotes
     assert eng.snapshot()["scalper"]["practice"]["edge_lower_bound_bps"] > 0
+
+
+# --- lessons: learning from every trade it could have made -------------------------------------------------
+def test_quote_lessons_avoid_situations_that_lose_and_quote_those_that_pay() -> None:
+    from app.scalp.lessons import QuoteLedger
+
+    led = QuoteLedger(min_fills=30)
+    assert not led.informed(True, 0.0) and led.best_distance(True, 0.0, 0.0) is None  # no record: no opinion yet
+    mid = 100.0
+    for t in range(4000):
+        # Whenever the forecast is up (alpha > 0) sellers hit the bid and the price then RISES (good fill);
+        # when it is down, sellers hit the bid and the price keeps FALLING (picked off).
+        up = (t // 20) % 2 == 0
+        alpha = 0.5 if up else -0.5
+        mid += (0.004 if up else -0.004)
+        bid, ask = mid - 0.005, mid + 0.005
+        led.on_tick(float(t), bid, ask, 1.0, 1.0, 0.01, alpha, [(bid - 0.01, 5.0, False)])  # a sell sweeps through the bid
+    assert led.informed(True, 0.5) and led.informed(True, -0.5)
+    assert led.best_distance(True, 0.5, fee_bps=0.0) is not None  # forecast with us: resting a bid has paid
+    assert led.best_distance(True, -0.5, fee_bps=0.0) != 0.0  # forecast against us: a touch bid has lost, so never again
+    assert led.best_distance(True, 0.5, fee_bps=50.0) is None  # and nothing pays a 50 bps fee
+    verdicts = {(r["side"], r["situation"], r["bps_behind_touch"]): r["verdict"] for r in led.table(0.0)}
+    assert verdicts[("bid", "forecast against", 0.0)].startswith("avoid") and verdicts[("bid", "forecast with", 0.0)] == "quote here"
+
+
+def test_quote_lessons_respect_the_queue_at_the_touch() -> None:
+    from app.scalp.lessons import QuoteLedger
+
+    led = QuoteLedger()
+    led.on_tick(0.0, 99.99, 100.01, 5.0, 5.0, 0.01, 0.0, [])  # 5.0 already resting at the best bid ahead of us
+    led.on_tick(1.0, 99.99, 100.01, 5.0, 5.0, 0.01, 0.0, [(99.99, 3.0, False)])  # 3 trades at our price: not our turn
+    assert led.fills[0].sum() == 0
+    led.on_tick(2.0, 99.99, 100.01, 5.0, 5.0, 0.01, 0.0, [(99.99, 3.0, False)])  # 6 in total: the queue ahead has cleared
+    assert 0.99 < led.fills[0, 1, 0] <= 1  # the quote placed at t=0 at the touch is hit; later and deeper ones are not
+    led.on_tick(3.0, 99.99, 100.01, 5.0, 5.0, 0.01, 0.0, [(99.99, 9.0, True)])  # a BUY at that price cannot hit a bid
+    assert led.fills[0].sum() <= 1
+
+
+def test_take_lessons_only_allow_what_has_beaten_the_fee() -> None:
+    from app.scalp.lessons import TakeLedger
+
+    led = TakeLedger(min_n=50)
+    assert not led.allows(1.0, fee_bps=0.0, margin_bps=0.0)  # no record: do not take
+    mid = 100.0
+    for t in range(600):
+        strong = t < 300  # first a spell where strong forecasts come true, then one where weak forecasts do nothing
+        led.on_tick(float(t), mid - 0.0005, mid + 0.0005, 1.0 if strong else 0.15)
+        mid *= 1 + (0.4e-4 if strong else 0.0)
+    mean, lcb, n = led.worth(1.0)
+    assert n >= 50 and lcb > 0.5
+    assert led.allows(1.0, fee_bps=0.2, margin_bps=0.1) and not led.allows(1.0, fee_bps=4.5, margin_bps=0.1)
+    assert not led.allows(0.15, fee_bps=0.2, margin_bps=0.1)  # weak forecasts have not paid: avoided
+    assert {r["forecast_bps"]: r["verdict"] for r in led.table(4.5)}["0.8-1.6"] == "avoid: less than the fee"
+
+
+def test_lessons_survive_a_restart_and_a_slim_export_keeps_what_was_learned() -> None:
+    s = dataclasses.replace(Settings(), maker_fee=0.0, taker_fee=0.0, mode=Mode.BACKTEST, strategy="maker", horizon_s=5.0,
+                            tree_min_train=300, tree_refit_every=300)  # fmt: skip
+    eng = Engine(s, PaperVenue(1000.0, BTC, 0.0, 0.0, 0.15), BTC)
+    for t, kind, payload in synthetic_events(900, signal=0.3, seed=3, vol_bps=0.3):
+        if kind == "book":
+            eng.on_tick(t)
+            eng.on_book(payload)
+        else:
+            eng.on_trades(payload)
+    assert eng.quote_lessons.quotes.sum() > 1000 and eng.take_lessons.n.sum() > 100 and eng.experience() > 1000
+    full, slim = eng.dump_state(), eng.dump_state(slim=True)
+    assert len(slim) < len(full)  # the tree model's raw training rows are left out of the shipped seed
+    fresh = Engine(s, PaperVenue(1000.0, BTC, 0.0, 0.0, 0.15), BTC)
+    assert fresh.peek_experience(slim) == eng.experience() and fresh.peek_experience(b"junk") == -1
+    assert fresh.load_state(slim) == ""
+    assert np.allclose(fresh.quote_lessons.fills, eng.quote_lessons.fills) and np.allclose(fresh.take_lessons.sum, eng.take_lessons.sum)
+    assert fresh.practice.n_fills == eng.practice.n_fills and fresh.fast_alpha.beta == eng.fast_alpha.beta
+    tree_a = next(e.model for e in eng.arena.entries if e.model.name == "tree")
+    tree_b = next(e.model for e in fresh.arena.entries if e.model.name == "tree")
+    x = np.zeros(len(eng.arena.entries[0].model.w))
+    assert tree_a.fits >= 1 and tree_b.predict(x) == tree_a.predict(x) and tree_b._count == 0  # model kept, rows dropped

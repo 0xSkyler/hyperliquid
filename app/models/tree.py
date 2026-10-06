@@ -32,6 +32,7 @@ def available() -> bool:
 
 class TreeForecaster:
     name = "tree"
+    slim_pickle = False  # set while exporting a seed: keep the fitted model, drop the raw training rows
 
     def __init__(
         self, n: int, min_train: int = 3000, refit_every: int = 1500, max_buffer: int = 100_000,
@@ -58,6 +59,8 @@ class TreeForecaster:
         st = self.__dict__.copy()
         st["_pool"] = st["_job"] = None  # threads are not state
         X, y = self._chronological()
+        if TreeForecaster.slim_pickle:
+            X, y = X[:0], y[:0]
         st["_X"], st["_y"], st["_cap"] = X, y, len(self._y)
         return st
 

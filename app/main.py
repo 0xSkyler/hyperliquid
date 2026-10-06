@@ -82,11 +82,18 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
     if live is not None and engine.maker:
         live.heavy_interval_s = 4.0
     state_file = Path(s.state_file)
-    if state_file.is_file():
-        why = engine.load_state(state_file.read_bytes())
+    # Two possible sources of learned state: what this installation saved itself, and the seed that ships
+    # with the code (exported from a training run). Use whichever has learned from more of the market.
+    sources = {"saved": state_file, "trained seed": Path(s.chart_model_dir) / "state" / f"engine-{s.coin}.pkl"}
+    blobs = {name: p.read_bytes() for name, p in sources.items() if p.is_file()}
+    ranked = sorted(((engine.peek_experience(b), name) for name, b in blobs.items()), reverse=True)
+    if ranked and ranked[0][0] >= 0:
+        why = engine.load_state(blobs[ranked[0][1]])
         champ = engine.arena.champ
-        log.info("learned state: %s", why or f"restored ({champ.model.n_obs} resolved forecasts, "
+        log.info("learned state: %s", why or f"restored from the {ranked[0][1]} ({engine.experience():,} seconds of experience, "
                                              f"champion {champ.model.name})")  # fmt: skip
+    elif blobs:
+        log.info("learned state: found but made for different features or models; starting from scratch")
     else:
         log.info("learned state: none found, starting from scratch")
 

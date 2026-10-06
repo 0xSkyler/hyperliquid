@@ -52,13 +52,17 @@ spreads usually belong to thin markets that jump.
 
 ## What to expect
 
-After Start the scalper does three things, and only the third and fourth can cost money:
+After Start the scalper does five things, and only the last two can cost money:
 
 1. It **forecasts** the next 5 seconds from the order book. The Scalper box shows its accuracy.
 2. It **practises** passive quoting on a simulator with pretend money, and shows the result
    ("Practice edge per fill").
-3. It **rests real quotes** only while practice shows a profit after the maker fee, with confidence.
-4. It **takes liquidity** only when its forecast alone is larger than the taker fee plus the spread.
+3. It **keeps a record of lessons**: what every quote and take it could have made was worth, by
+   situation. The panel's "Lessons learned" lists them with a verdict each.
+4. It **rests real quotes** only where the lessons say a hit pays and practice confirms a profit
+   after the maker fee, with confidence.
+5. It **takes liquidity** only where takes at that forecast strength have been worth more than the
+   taker fee, at the lower bound of the record.
 
 On the Hyperliquid data recorded so far, practice quotes lose on every market tested (resting
 quotes are picked off), and the forecast, although real, is worth about a tenth of the taker fee.

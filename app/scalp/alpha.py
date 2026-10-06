@@ -54,6 +54,11 @@ class FastAlpha:
     def beta(self) -> float:
         return self.cal.beta(_ONE)
 
+    def raw(self, x: np.ndarray) -> float:
+        """The model's own forecast in bps, before any trust is applied. Used to file lessons by situation."""
+        lim = 5.0 * math.sqrt(self.model.resid_var) if self.model.resid_var > 0 else 0.0
+        return max(-lim, min(lim, self.model.predict(x)[0]))
+
     def predict(self, x: np.ndarray) -> float:
         """Calibrated forecast of the mid's move over the horizon, in bps (0 until the model has earned trust)."""
         b = self.beta

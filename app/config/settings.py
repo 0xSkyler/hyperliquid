@@ -57,6 +57,7 @@ class Settings:
     scalp_quote_interval_s: float = 0.25  # how often quotes are re-evaluated
     scalp_min_requote_s: float = 1.0  # minimum time between non-urgent requotes per side (request budget)
     scalp_max_distance_bps: float = 25.0  # do not rest quotes further than this from the market
+    scalp_lessons: bool = True  # let the record of past situations decide where (and whether) to quote and take
     scalp_gate_fills: int = 20  # passive fills needed before judging whether resting quotes pay
     scalp_gate_cooldown_s: float = 900.0  # how long passive quoting is rested once it is shown to lose
     scalp_take_margin_bps: float = 0.1  # extra edge required, beyond fee and spread, before taking liquidity

@@ -21,8 +21,10 @@ from app.exchange.paper import PaperVenue
 from app.learning.journal import Journal
 from app.market.state import FEATURE_NAMES, REGIMES, MarketState
 from app.models.online import HalfLife, Standardizer
+from app.models.tree import TreeForecaster
 from app.risk.kernel import SafetyKernel
 from app.scalp.alpha import FastAlpha
+from app.scalp.lessons import QuoteLedger, TakeLedger
 from app.scalp.quoter import Desired, QuoteInputs, QuoteManager, desired_quotes
 
 
@@ -67,6 +69,11 @@ class Engine:
         self.practice_quotes = QuoteManager(meta.coin, s.scalp_min_requote_s, actions_per_min=s.scalp_actions_per_min)
         self.practice = Journal()
         self.making_allowed = False
+        # Lessons: every second, score the quotes and takes it could have made, filed by situation.
+        self.quote_lessons = QuoteLedger()
+        self.take_lessons = TakeLedger()
+        self._raw_alpha = 0.0
+        self._tick_trades: list[tuple[float, float, bool]] = []  # trades since the last tick, for the ledgers
         self._last_take_ts = 0.0
         self.last_quotes: dict[str, Any] = {}
         self.halted_ticks = 0  # ticks on which the safety kernel blocked trading
@@ -113,6 +120,35 @@ class Engine:
     def pull_quotes(self, now: float) -> None:
         self._apply(self.quotes.pull_all(), now)
 
+    def _apply_lessons(self, want: Desired, acct: Any, book: Book) -> None:
+        """Where the record is long enough to decide, it decides: quote where it says a hit pays, nowhere it says it loses."""
+        if not self.s.scalp_lessons:
+            return
+        fee, tick = self.s.maker_fee * 1e4, self.meta.tick(book.mid)
+        for is_buy in (True, False):
+            cur = want.bid if is_buy else want.ask
+            name = "bid" if is_buy else "ask"
+            if not self.quote_lessons.informed(is_buy, self._raw_alpha):
+                want.info[f"lesson_{name}"] = "no record yet"
+                continue
+            dist = self.quote_lessons.best_distance(is_buy, self._raw_alpha, fee)
+            reducing = acct.position < 0 if is_buy else acct.position > 0
+            if dist is None:
+                want.info[f"lesson_{name}"] = "avoid"
+                if not reducing:  # a quote that only reduces inventory is kept: getting flat is not a bet
+                    if is_buy:
+                        want.bid = None
+                    else:
+                        want.ask = None
+                continue
+            want.info[f"lesson_{name}"] = f"{dist:g} bps behind"
+            if cur is None:
+                continue  # inventory limit or size already ruled this side out
+            if is_buy:
+                cur.px = self.meta.round_px(min(math.floor(book.best_bid * (1 - dist * 1e-4) / tick + 1e-9) * tick, book.best_ask - tick))
+            else:
+                cur.px = self.meta.round_px(max(math.ceil(book.best_ask * (1 + dist * 1e-4) / tick - 1e-9) * tick, book.best_bid + tick))
+
     def _practice_cycle(self, now: float, book: Book, q: QuoteInputs) -> None:
         """Quote against the simulator with pretend money and keep score. Runs whether or not real trading is on."""
         v, lot = self.practice_venue, 10.0**-self.meta.sz_decimals
@@ -126,6 +162,7 @@ class Engine:
         pq = QuoteInputs(q.sigma_tick, q.tick_s, q.flow, q.alpha_bps, q.horizon_s, self.practice.adverse_bps(True, prior),
                          self.practice.adverse_bps(False, prior), q.fast_alpha_bps)  # fmt: skip
         want = desired_quotes(book, acct, pq, self.meta, self.s)
+        self._apply_lessons(want, acct, book)
         for kind, arg in self.practice_quotes.reconcile(want, acct, now, self.meta.tick(book.mid)):
             if kind == "cancel":
                 v.cancel(arg, now)
@@ -165,6 +202,7 @@ class Engine:
         q.adverse_bid_bps = self.journal.adverse_bps(True, self.practice.adverse_bps(True, prior))
         q.adverse_ask_bps = self.journal.adverse_bps(False, self.practice.adverse_bps(False, prior))
         want: Desired = desired_quotes(book, acct, q, self.meta, s)
+        self._apply_lessons(want, acct, book)
         # Evidence gate, the same rule the forecasts live under: once enough passive fills exist, resting
         # quotes must be worth more than their fee 5 s later, or passive quoting is rested for a while.
         edge, n_fills = self.journal.maker_edge()
@@ -193,9 +231,15 @@ class Engine:
                 self.orders_sent += 1
         # Take liquidity when the fast forecast alone pays for the taker fee and the spread. With real
         # fees this is rare by construction; it is the scalper's other hand, not its habit.
-        fa = q.fast_alpha_bps
-        cost_bps = s.taker_fee * 1e4 + want.info["half_spread_bps"] + s.scalp_take_margin_bps
-        if abs(fa) > cost_bps and not acct.inflight and now - self._last_take_ts >= 1.0:
+        # The decision is the record's, not the forecast's: take only where takes at this forecast strength have,
+        # at their lower confidence bound, been worth more than the fee after paying the spread.
+        if s.scalp_lessons:
+            fa = self._raw_alpha
+            take = fa != 0.0 and self.take_lessons.allows(fa, s.taker_fee * 1e4, s.scalp_take_margin_bps)
+        else:  # without the record: trust the calibrated forecast against fee and spread
+            fa = q.fast_alpha_bps
+            take = abs(fa) > s.taker_fee * 1e4 + want.info["half_spread_bps"] + s.scalp_take_margin_bps
+        if take and not acct.inflight and now - self._last_take_ts >= 1.0:
             is_buy = fa > 0
             room = (limit - f if is_buy else limit + f) * acct.equity
             notional = min(max(self.meta.min_notional * 1.1, acct.equity * s.scalp_clip_x), max(room, 0.0))
@@ -225,12 +269,32 @@ class Engine:
             "models": [(e.model.name, e.feature_names) for e in self.arena.entries],
         }  # fmt: skip
 
-    def dump_state(self) -> bytes:
-        return pickle.dumps({
-            "sig": self._signature(), "std": self.std, "entries": self.arena.entries,
-            "champion": self.arena.champion, "promotions": self.arena.promotions, "half_life": self.half_life,
-            "fast_alpha": self.fast_alpha,
-        })  # fmt: skip
+    def experience(self) -> int:
+        """Seconds of market it has learned from: used to prefer the more experienced of two saved states."""
+        return int(self.arena.champ.model.n_obs + self.fast_alpha.model.n_obs)
+
+    def dump_state(self, slim: bool = False) -> bytes:
+        """Everything learned. `slim` drops the tree model's raw training rows (for a seed that ships with the code)."""
+        TreeForecaster.slim_pickle = slim
+        try:
+            return pickle.dumps({
+                "sig": self._signature(), "std": self.std, "entries": self.arena.entries,
+                "champion": self.arena.champion, "promotions": self.arena.promotions, "half_life": self.half_life,
+                "fast_alpha": self.fast_alpha, "practice": self.practice, "quote_lessons": self.quote_lessons,
+                "take_lessons": self.take_lessons, "experience": self.experience(),
+            })  # fmt: skip
+        finally:
+            TreeForecaster.slim_pickle = False
+
+    def peek_experience(self, blob: bytes) -> int:
+        """How experienced a saved state is, or -1 if it cannot be used by this engine."""
+        try:
+            st = pickle.loads(blob)  # noqa: S301
+        except Exception:  # noqa: BLE001
+            return -1
+        if not isinstance(st, dict) or st.get("sig") != self._signature():
+            return -1
+        return int(st.get("experience", st["entries"][st["champion"]].model.n_obs))
 
     def load_state(self, blob: bytes) -> str:
         """Restore learned state. Returns '' on success, otherwise why it was not used."""
@@ -246,6 +310,13 @@ class Engine:
         if isinstance(st.get("fast_alpha"), FastAlpha):
             self.fast_alpha = st["fast_alpha"]
             self.fast_alpha.reset()
+        if isinstance(st.get("practice"), Journal):
+            self.practice = st["practice"]
+        if isinstance(st.get("quote_lessons"), QuoteLedger) and isinstance(st.get("take_lessons"), TakeLedger):
+            self.quote_lessons, self.take_lessons = st["quote_lessons"], st["take_lessons"]
+            self.quote_lessons._open.clear()  # hypothetical quotes from before the restart cannot be scored fairly
+            self.quote_lessons._filled.clear()
+            self.take_lessons._pending.clear()
         for e in self.arena.entries:
             if hasattr(e.model, "set_async"):
                 e.model.set_async(self.s.mode is not Mode.BACKTEST)
@@ -280,6 +351,7 @@ class Engine:
         self.venue.on_trades(trades)
         if self.maker:
             self.practice_venue.on_trades(trades)
+            self._tick_trades.extend((t.px, t.sz, t.is_buy) for t in trades)
 
     def on_ctx(self, ctx: AssetCtx) -> None:
         self.market.on_ctx(ctx)
@@ -302,7 +374,13 @@ class Engine:
                 if pa.known:
                     self.practice.on_tick(now, book.mid, pa.equity)
             if self.maker and not faults and (m := mkt.micro(now)) is not None:
-                self.fast_alpha.on_tick(now, FastAlpha.vector(*m), book.mid)
+                xv = FastAlpha.vector(*m)
+                self.fast_alpha.on_tick(now, xv, book.mid)
+                self._raw_alpha = self.fast_alpha.raw(xv)
+                self.quote_lessons.on_tick(now, book.best_bid, book.best_ask, float(book.bids[0, 1]), float(book.asks[0, 1]),
+                                           self.meta.tick(book.mid), self._raw_alpha, self._tick_trades)  # fmt: skip
+                self.take_lessons.on_tick(now, book.best_bid, book.best_ask, self._raw_alpha)
+            self._tick_trades = []
             # Learn from forecasts whose horizon has elapsed (calibrate first: out-of-sample).
             while self._pending and self._pending[0][0] <= now:
                 _, xs, mid0, mus, regime, _, betas = self._pending.popleft()
@@ -417,6 +495,8 @@ class Engine:
                 "takes": self.takes, "making_timeouts": self.making_timeouts,
                 "passive_edge_bps": self.journal.maker_edge()[0], "passive_fills_judged": self.journal.maker_edge()[1],
                 "making_allowed": self.making_allowed,
+                "lessons": {"quotes": self.quote_lessons.table(self.s.maker_fee * 1e4),
+                            "takes": self.take_lessons.table(self.s.taker_fee * 1e4)},
                 "practice": {
                     "fills": self.practice.n_fills, "edge_bps_5s": self.practice.maker_edge()[0],
                     "edge_lower_bound_bps": self.practice.maker_edge_lcb(),

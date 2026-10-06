@@ -43,5 +43,6 @@ testpaths = ["tests"]
 
 [tool.ruff.lint.per-file-ignores]
 "app/monitoring/dashboard.py" = ["E501"]
-"tests/*.py" = ["S105", "S106"]
+"tests/*.py" = ["S105", "S106", "E501"]
+"scripts/*.py" = ["E501"]
 "app/research/*.py" = ["E501"]

@@ -80,16 +80,19 @@ limited number of order actions. Bad data, Stop, or an unknown account state can
 
 `python -m app.research.scalp_lab "data/rec/*.jsonl"` replays recordings through the scalper twice:
 with fees set to zero (raw skill) and with real fees (what reaches the account). Results:
-`models/scalp_lab.json`. On the recordings so far (seven markets, about an hour each - a small
-sample of one market mood):
+`models/scalp_lab.json`. On 75 minutes recorded simultaneously on seven markets (a small sample of
+one market mood, with simulated fills):
 
-- **The fast forecast is real.** Out-of-sample correlation with the next 5 seconds is about 0.36 on
-  BTC, ETH and SOL, trusted within minutes. On thin small-caps it is weak (0.06 - 0.18).
-- **Taking on that forecast has positive skill before fees**: about +0.3 to +0.5 bps per trade after
-  paying the spread on BTC, ETH and SOL. The taker fee is 4.5 bps, so with real fees it never takes.
-- **Resting quotes are picked off on every market tested**: their fills are worth -0.6 to -4 bps five
-  seconds later, before fees. With the engine's latency (about 150 ms plus a book feed that updates
-  a few times a second) it is the slow party at the touch. Practice therefore keeps real quoting off.
+- **The fast forecast is real.** Out-of-sample correlation with the next 5 seconds: 0.45 on BTC,
+  0.34 on ETH, 0.36 on SOL, 0.21 on HYPE, trusted within minutes. On thin small-caps (ENA, XPL, ZRO)
+  it is weak, 0.05 - 0.14.
+- **Taking on that forecast has positive skill before fees**: +0.3 to +0.4 bps per trade after
+  paying the spread, on BTC, ETH, SOL and HYPE. With fees at zero the BTC run made +1.5% on about a
+  thousand trades. The same thousand trades at the real 4.5 bps taker fee would cost roughly fifteen
+  times what they earned, so with real fees it never takes.
+- **Resting quotes are picked off on every market tested**: practice fills are worth -0.5 to -3 bps
+  five seconds later, before fees. With the engine's latency (about 150 ms plus a book feed that
+  updates a few times a second) it is the slow party at the touch. Practice keeps real quoting off.
 - **Net of real fees, the scalper places no real orders on any of the seven markets and loses nothing.**
 
 So the skill is there and it is roughly a tenth of the fee. Closing that gap takes a lower fee tier

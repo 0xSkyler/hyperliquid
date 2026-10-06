@@ -89,6 +89,26 @@ class MarketState:
             out.append(v)
         return out
 
+    def micro(self, now: float) -> tuple[float, float, float, float, float] | None:
+        """Top-of-book state for the fast alpha: (L1 imbalance, microprice - mid in bps, order-flow
+        imbalance over 1 s, trade-flow imbalance over 5 s, last 1 s return in bps). Needs no warm-up."""
+        b = self.book
+        if b is None or not b.valid() or len(self.mids) < 2:
+            return None
+        bq, aq = float(b.bids[0, 1]), float(b.asks[0, 1])
+        if bq + aq <= 0:
+            return None
+        mid = b.mid
+        micro = (b.best_ask * bq + b.best_bid * aq) / (bq + aq)
+        k = min(5, len(b.bids), len(b.asks))
+        depth = float(b.bids[:k, 1].sum() + b.asks[:k, 1].sum()) / 2.0
+        ofi1 = sum(self._window(self._ofi, now, 1.0)) / depth if depth > 0 else 0.0
+        v = self._window(self._trades, now, 5.0)
+        tot = sum(abs(x) for x in v)
+        tfi5 = sum(v) / tot if tot > 0 else 0.0
+        ret1 = math.log(mid / self.mids[-2]) * 1e4
+        return (bq - aq) / (bq + aq), (micro - mid) / mid * 1e4, ofi1, tfi5, ret1
+
     def features(self, now: float) -> Features | None:
         b = self.book
         if b is None or not b.valid() or len(self.mids) <= self.n_look:
@@ -116,7 +136,7 @@ class MarketState:
             return ((buy - sell) / tot if tot > 0 else 0.0), buy, sell
 
         def ret(secs: float) -> float:
-            n = max(1, round(secs / self.interval_s))
+            n = min(max(1, round(secs / self.interval_s)), len(arr) - 1)
             return math.log(arr[-1] / arr[-1 - n]) / (sig * math.sqrt(n))
 
         tfi5, _, _ = tfi(5)

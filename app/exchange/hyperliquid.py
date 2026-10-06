@@ -209,6 +209,9 @@ class HyperliquidLive:
         self._heavy_ts = 0.0  # open orders and fills cost 10x the rate-limit weight of account state
         self._last_pos: float | None = None
         self._last_submit = 0.0
+        self.heavy_interval_s = 10.0  # the scalper lowers this: it needs a fresher view of its resting orders
+        self._working: tuple[str, ...] = ()
+        self._working_ts = 0.0
         self._address = address
         self._meta = meta
         self._pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="hl-orders")
@@ -232,12 +235,17 @@ class HyperliquidLive:
     def cancel_all(self, now: float) -> None:
         self._pool.submit(self._cancel_all)
 
+    def cancel(self, client_id: str, now: float) -> None:
+        self._last_submit = time.time()
+        self._pool.submit(self._cancel_one, client_id)
+
     def account(self, now: float) -> AccountState:
         a = self._acct
         oldest = min(self._inflight.values(), default=0.0)
         return AccountState(
-            a.ts, a.known, a.equity, a.position, a.entry_px, a.open_orders, len(self._inflight), oldest
-        )
+            a.ts, a.known, a.equity, a.position, a.entry_px, a.open_orders, len(self._inflight), oldest,
+            self._working, self._working_ts,
+        )  # fmt: skip
 
     def drain_fills(self) -> list[Fill]:
         out, self._fills = self._fills, []
@@ -264,12 +272,14 @@ class HyperliquidLive:
             spot = self._info.spot_user_state(self._address)
             snap = parse_account(self._abstraction, perp, spot, self._meta.coin)
             pos = snap["position"]
-            heavy = now - self._heavy_ts > 10 or pos != self._last_pos or now - self._last_submit < 5
+            heavy = now - self._heavy_ts > self.heavy_interval_s or pos != self._last_pos or now - self._last_submit < 5
             open_n = self._acct.open_orders
             if heavy:
                 self._heavy_ts = now
                 oo = [o for o in self._info.open_orders(self._address) if o["coin"] == self._meta.coin]
                 open_n = len(oo)
+                self._working = tuple(str(o["cloid"]) for o in oo if o.get("cloid"))
+                self._working_ts = now
                 for o in oo:
                     if self._resting.get(o["oid"], now + 1) <= now:
                         self._ex.cancel(self._meta.coin, o["oid"])
@@ -280,7 +290,7 @@ class HyperliquidLive:
                     self._seen_fills.add(key)
                     self._fills.append(
                         Fill(f["time"] / 1000.0, f["coin"], f["side"] == "B", float(f["px"]), float(f["sz"]),
-                             float(f["fee"]), not f.get("crossed", True))
+                             float(f["fee"]), not f.get("crossed", True), str(f.get("cloid") or ""))
                     )  # fmt: skip
             self._last_pos = pos
             self.snapshot = snap | {"address": self._address, "ts": now}
@@ -290,13 +300,28 @@ class HyperliquidLive:
             log.exception("account refresh failed; account state is now UNKNOWN")
             self._acct = AccountState(self._acct.ts, known=False)
 
+    def requests_left(self) -> int | None:
+        """Order actions left in the account's Hyperliquid budget, or None if it cannot be read."""
+        try:
+            r = self._info.post("/info", {"type": "userRateLimit", "user": self._address})
+            left = int(r["nRequestsCap"]) - int(r["nRequestsUsed"])
+            self.snapshot = self.snapshot | {"requests_left": left}
+            return left
+        except Exception:  # noqa: BLE001 - informational
+            return None
+
     def set_max_cross_leverage(self) -> None:
         self._ex.update_leverage(int(self._meta.max_leverage), self._meta.coin, is_cross=True)
 
     def _place(self, seq: int, it: OrderIntent, now: float) -> None:
         try:
+            cloid = None
+            if it.client_id.startswith("0x") and len(it.client_id) == 34:
+                from hyperliquid.utils.types import Cloid
+
+                cloid = Cloid.from_str(it.client_id)
             r = self._ex.order(
-                it.coin, it.is_buy, it.sz, it.limit_px, {"limit": {"tif": it.tif}}, reduce_only=it.reduce_only
+                it.coin, it.is_buy, it.sz, it.limit_px, {"limit": {"tif": it.tif}}, reduce_only=it.reduce_only, cloid=cloid
             )
             if r.get("status") != "ok":
                 raise RuntimeError(f"order rejected: {r}")
@@ -311,6 +336,15 @@ class HyperliquidLive:
             # and the kernel blocks trading until an operator restarts and reconciles.
             self.errors += 1
             log.exception("order placement failed or unacknowledged")
+
+    def _cancel_one(self, client_id: str) -> None:
+        try:
+            from hyperliquid.utils.types import Cloid
+
+            self._ex.cancel_by_cloid(self._meta.coin, Cloid.from_str(client_id))
+        except Exception:  # noqa: BLE001 - usually "already filled or cancelled"; the next refresh shows the truth
+            self.errors += 1
+            log.warning("cancel of %s failed", client_id, exc_info=True)
 
     def _cancel_all(self) -> None:
         try:

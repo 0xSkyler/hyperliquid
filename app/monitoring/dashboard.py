@@ -67,6 +67,13 @@ pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto;margin:0}h3{
    <button id=flat class=danger>Close position and stop</button></div>
   <div id=why></div>
   <div class=hint>Started: the engine sends real orders whenever it finds a trade it trusts. Stopped: it keeps watching and learning but sends nothing. Stopping does not close an open position; use "Close position and stop" for that.</div></div>
+ <div class=panel id=scalpbox style="display:none"><h4>Scalper</h4>
+  <div class=g id=sg></div>
+  <div class=hint>It rests a buy below and a sell above the price and earns the gap when both fill. "Edge per fill" = spread captured plus where the price went 5 s later; it has to stay above the fee for the scalper to make money.</div></div>
+ <div class=panel id=mktbox><h4>Market</h4>
+  <div class=row><span id=mkt class=big></span><button id=scan>Scan all markets</button></div>
+  <div id=mktlist></div>
+  <div class=hint>A passive scalper only gets paid where the bid-ask spread is wider than the fee on both legs. "Margin" is spread minus those fees, before any losses to fast price moves. Wide spreads usually mean thin, jumpy markets.</div></div>
  <div class=panel id=prefbox style="display:none"><h4>Risk</h4>
   <div class=row><label>Max leverage <input id=ml type=number step=1 min=1 max=100 style="width:90px"></label>
    <label>Risk aversion <input id=ra type=number step=0.5 min=1 max=100 style="width:90px"></label>
@@ -110,7 +117,18 @@ async function loadCtl(){
     $('start').disabled=ctl.running||!a.equity;$('stop').disabled=!ctl.running;
     $('why').textContent=ctl.running?('Running. '+(ctl.reason||'')):'Stopped. No orders will be sent until you press Start trading.'}
   for(const [id,k] of [['ra','risk_aversion'],['ml','max_leverage']])if(document.activeElement!==$(id))$(id).value=ctl.effective[k]??'';
+  $('mkt').textContent=ctl.coin;
 }
+function tiles(el,cards){el.replaceChildren(...cards.map(([k,v])=>{const c=document.createElement('div');c.className='c';
+ const a=document.createElement('div');a.className='k';a.textContent=k;const b=document.createElement('div');b.className='v';b.textContent=v;c.append(a,b);return c}))}
+$('scan').onclick=async()=>{say('scanning markets...',true);try{const j=await api('/api/control/scan',{});say(j.message,true);
+  const box=$('mktlist');box.replaceChildren();
+  for(const m of j.markets){const row=document.createElement('div');row.className='row';
+    const txt=document.createElement('span');txt.style.cssText='font-family:monospace;white-space:pre';
+    txt.textContent=m.coin.padEnd(10)+' spread '+f(m.spread_bps,2).padStart(6)+' bps   margin '+f(m.margin_bps,2).padStart(6)+' bps   volume $'+(m.volume_usd/1e6).toFixed(1).padStart(7)+'M   size at touch $'+Math.round(m.touch_depth_usd);
+    const b=document.createElement('button');b.textContent=m.coin===j.current?'current':'Use';b.disabled=m.coin===j.current;
+    b.onclick=()=>{if(confirm('Switch the engine to '+m.coin+'? Trading stops until you press Start again.'))act('/api/control/market',{coin:m.coin},'switching market...')};
+    row.append(b,txt);box.append(row)}}catch(e){say(e.message,false)}};
 $('tokbtn').onclick=async()=>{token=$('tok').value.trim();localStorage.setItem('hl_token',token);await loadCtl();if(!ctl)alert('That token was not accepted.')};
 $('connect').onclick=async()=>{await act('/api/control/connect',{api_secret_key:$('key').value,account_address:$('addr').value},'checking the key with Hyperliquid...');$('key').value=''};
 $('refresh').onclick=()=>act('/api/control/refresh',{},'reading balance...');
@@ -129,8 +147,13 @@ const cards=[['Balance',h.connected?f(j.equity):'-'],['Net return %',h.connected
 ['BTC price',f(e.mid,1)],['Position (x balance)',h.connected?f(l.f_current,2):'-'],['Expected edge bps',f(l.expected_edge_bps,3)],
 ['Trust in forecasts',f(l.extra&&l.extra.beta,3)],['Champion model',e.model.champion],['Fills',h.connected?j.fills:'-'],['Fees paid',h.connected?f(j.fees,4):'-'],
 ['Faults',(h.faults||[]).join(', ')||'none'],['Feed age s',f(h.feed_age_s,2)]];
-const g=$('g');g.replaceChildren(...cards.map(([k,v])=>{const c=document.createElement('div');c.className='c';
- const a=document.createElement('div');a.className='k';a.textContent=k;const b=document.createElement('div');b.className='v';b.textContent=v;c.append(a,b);return c}));
+tiles($('g'),cards);
+const sc=e.scalper||{},q=sc.quotes||{},w=q.working||{},mv=j.move_after_fill_bps||{};
+show('scalpbox',sc.enabled&&h.connected);
+if(sc.enabled)tiles($('sg'),[['Our bid',w.bid??'-'],['Our ask',w.ask??'-'],['Market spread bps',f(q.half_spread_bps==null?null:q.half_spread_bps*2,2)],
+ ['Inventory (x balance)',f(q.inventory_x,2)+' / '+f(q.inventory_limit_x,1)],['Fills',j.fills],['Spread captured bps',f(j.spread_capture_bps,2)],
+ ['Price move 5s after fill bps',f(mv['5s'],2)],['Edge per fill bps',f((j.spread_capture_bps||0)+(mv['5s']||0),2)],
+ ['Fees paid',f(j.fees,4)],['Time with quotes up %',f(sc.quote_uptime_pct,0)],['Orders placed / cancelled',(sc.orders_placed||0)+' / '+(sc.orders_cancelled||0)]]);
 const pre=(id,o)=>$(id).textContent=JSON.stringify(o,null,1);
 pre('a',e.model.arena.map(x=>`${x.champion?'CHAMPION ':'          '}${x.name.padEnd(16)} ic ${f(x.oos_ic,4)}  trusted beta ${f(x.max_trusted_beta,3)}  vs champion t ${f(x.vs_champion_t,2)}  resolved ${x.resolved}`));
 pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));

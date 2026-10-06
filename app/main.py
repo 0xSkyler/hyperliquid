@@ -24,6 +24,7 @@ from app.models.chart import TIMEFRAMES, ChartModel
 from app.monitoring.dashboard import Handler, serve
 from app.news.monitor import NewsMonitor, RssSource
 from app.persistence.sink import JsonlSink, PostgresSink
+from app.scalp.scanner import scan
 
 log = logging.getLogger("app")
 
@@ -37,7 +38,12 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
     startup_error = st.error
     connected = st.connected
     data = HyperliquidData(s.api_url)
-    meta = await data.meta(s.coin)
+    try:
+        meta = await data.meta(s.coin)
+    except ValueError:  # a market chosen earlier has been delisted or mistyped: fall back, do not crash-loop
+        startup_error = f"Market {s.coin} is not listed on Hyperliquid; using BTC instead."
+        s = dataclasses.replace(s, coin="BTC")
+        meta = await data.meta(s.coin)
     if s.max_leverage_cap > 0:
         meta = dataclasses.replace(meta, max_leverage=min(meta.max_leverage, s.max_leverage_cap))
     fees = await data.fees(s.account_address) if connected else None
@@ -73,6 +79,8 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
     sink = PostgresSink(s.database_url) if s.database_url else JsonlSink(s.data_dir)
     engine = Engine(s, venue, meta, sink)
     engine.paused = not ((st.running and connected) or developer_mode)
+    if live is not None and engine.maker:
+        live.heavy_interval_s = 4.0
     state_file = Path(s.state_file)
     if state_file.is_file():
         why = engine.load_state(state_file.read_bytes())
@@ -165,6 +173,10 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
             loop_lag["max_ms"] = max(loop_lag["max_ms"], (time.time() - nxt) * 1000)
             if live is not None and n % 2 == 0:
                 await asyncio.to_thread(live.refresh)
+            if live is not None and engine.maker and n % 60 == 0:
+                left = await asyncio.to_thread(live.requests_left)
+                if left is not None:  # nearly out of budget: fall back to the rate Hyperliquid always allows
+                    engine.quotes.actions_per_min = 6.0 if left < 2000 else s.scalp_actions_per_min
             now = time.time()
             score = news.score(now) if analyst is not None else 0.0
             if abs(score - engine.market.news_score) > 1e-6:
@@ -203,6 +215,15 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
         if last.get("warmup"):
             return "Warming up: it needs five minutes of market data after every start."
         n = engine.arena.champ.model.n_obs
+        if engine.maker:
+            q = engine.last_quotes
+            if engine.quotes.working:
+                return (f"Scalping: quotes resting at bid {q.get('bid')} / ask {q.get('ask')}, "
+                        f"inventory {q.get('inventory_x', 0):.2f}x. It earns when both sides get filled.")  # fmt: skip
+            if q.get("bid") is None and q.get("ask") is None and q:
+                return ("Scalping, but no quote is worth resting right now: fees plus what its fills have been losing "
+                        "exceed what this market's spread pays.")  # fmt: skip
+            return "Scalping: waiting for the next quote cycle."
         if last.get("extra", {}).get("beta") == 0:
             return (f"Watching, no trade: none of its forecasts has yet proven accurate enough to beat trading costs "
                     f"({n:,} forecasts checked so far). It trades only when one does.")  # fmt: skip
@@ -257,9 +278,10 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
 
     def c_stop(_: dict[str, Any]) -> dict[str, Any]:
         engine.paused = True
+        engine.pull_quotes(time.time())  # resting quotes are cancelled at once; a position stays open
         store.set_running(False)
         log.warning("control panel: trading STOPPED")
-        return {"message": "Trading stopped. No orders will be sent. Any open position is still open."}
+        return {"message": "Trading stopped. Resting quotes are cancelled and nothing more will be sent. Any open position is still open."}
 
     def c_flatten(_: dict[str, Any]) -> dict[str, Any]:
         message = engine.flatten(time.time())
@@ -267,12 +289,37 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
         log.warning("control panel: close position requested -> %s", message)
         return {"message": message}
 
+    async def c_scan(_: dict[str, Any]) -> dict[str, Any]:
+        try:
+            rows = await scan(data, s.maker_fee)
+        except Exception as e:  # noqa: BLE001
+            raise ControlError(f"Could not scan markets ({type(e).__name__}). Try again.") from None
+        return {"message": f"Scanned {len(rows)} markets.", "markets": rows[:25], "current": s.coin}
+
+    async def c_market(b: dict[str, Any]) -> dict[str, Any]:
+        coin = str(b.get("coin", "")).strip()
+        if coin == s.coin:
+            return {"message": f"Already trading {coin}."}
+        acct_now = venue.account(time.time())
+        if connected and (not acct_now.known or acct_now.position != 0):
+            raise ControlError(f"Close the {s.coin} position first (Close position and stop), then switch market.")
+        try:
+            await data.meta(coin)
+        except ValueError:
+            raise ControlError(f"{coin} is not a listed Hyperliquid perpetual.") from None
+        engine.paused = True
+        engine.pull_quotes(time.time())
+        store.set_coin(coin)
+        store.set_running(False)
+        log.warning("control panel: market changed to %s", coin)
+        return restart_soon(f"Switching to {coin}. Trading is stopped; press Start when the new market has warmed up.")
+
     def c_preferences(b: dict[str, Any]) -> dict[str, Any]:
         store.set_preferences(b.get("risk_aversion"), b.get("max_leverage"))
         return restart_soon("Saved. The engine is restarting with the new settings.")
 
     control: dict[str, Handler] = {"get": c_get, "connect": c_connect, "refresh": c_refresh, "disconnect": c_disconnect, "start": c_start,
-               "stop": c_stop, "flatten": c_flatten, "preferences": c_preferences}  # fmt: skip
+               "stop": c_stop, "flatten": c_flatten, "preferences": c_preferences, "scan": c_scan, "market": c_market}  # fmt: skip
     runner = await serve(state, s.dashboard_host, s.dashboard_port, store.token(), control)
     log.info("dashboard and control panel: http://%s:%d (token in %s)", s.dashboard_host, s.dashboard_port, store.token_path)
     # systemd stops the service with SIGTERM: shut down cleanly so the learned state is saved.

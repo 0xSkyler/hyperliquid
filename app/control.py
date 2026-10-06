@@ -89,6 +89,12 @@ class ControlStore:
             d.pop(k, None)
         self.save(d | {"running": False})
 
+    def set_coin(self, coin: str) -> None:
+        coin = coin.strip()
+        if not re.fullmatch(r"[A-Za-z0-9]{1,12}", coin):
+            raise ControlError("That is not a market name.")
+        self.save(self.load() | {"coin": coin})
+
     def set_running(self, running: bool) -> None:
         self.save(self.load() | {"running": bool(running)})
 
@@ -180,6 +186,8 @@ def load_startup(store_dir: str | None = None) -> Startup:
     d = store.load()
     address, key = store.credentials()
     changes: dict[str, Any] = {"account_address": address}
+    if isinstance(d.get("coin"), str) and d["coin"]:
+        changes["coin"] = d["coin"]
     if isinstance(d.get("risk_aversion"), (int, float)):
         changes["risk_aversion"] = float(d["risk_aversion"])
     if isinstance(d.get("max_leverage"), (int, float)):

@@ -47,6 +47,19 @@ class Settings:
     llm_model: str = "claude-opus-5-5"
     llm_max_per_poll: int = 5
 
+    # Strategy: "maker" = two-sided passive quoting (the scalper); "taker" = directional entries only.
+    strategy: str = "taker"
+    scalp_inventory_x: float = 2.0  # largest inventory the scalper carries, as a multiple of the balance
+    scalp_clip_x: float = 0.5  # size of each quote, as a multiple of the balance (never below the venue minimum)
+    scalp_hold_s: float = 15.0  # how long inventory is expected to be held; sets the volatility unit
+    scalp_skew: float = 1.0  # how hard quotes lean against inventory
+    scalp_toxicity: float = 1.0  # how much one-sided aggressive flow widens the exposed quote
+    scalp_quote_interval_s: float = 0.25  # how often quotes are re-evaluated
+    scalp_min_requote_s: float = 1.0  # minimum time between non-urgent requotes per side (request budget)
+    scalp_max_distance_bps: float = 25.0  # do not rest quotes further than this from the market
+    scalp_take_margin_bps: float = 0.1  # extra edge required, beyond fee and spread, before taking liquidity
+    scalp_actions_per_min: float = 30.0  # order actions the scalper may spend; lowered automatically when the account's budget runs low
+
     # Preferences (these are the operator's risk preferences, not trading rules)
     risk_aversion: float = 4.0  # CRRA gamma; 1 = full Kelly, 4 ~ quarter Kelly
     jump_prob: float = 1e-4  # per-horizon probability of a gap move, each direction
@@ -111,6 +124,10 @@ class Settings:
             max_leverage_cap=float(env.get("HL_MAX_LEVERAGE", d.max_leverage_cap)),
             api_url_override=env.get("HL_API_URL", "").rstrip("/"),
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
+            strategy=env.get("HL_STRATEGY", "maker").lower(),
+            scalp_inventory_x=float(env.get("HL_SCALP_INVENTORY_X", d.scalp_inventory_x)),
+            scalp_clip_x=float(env.get("HL_SCALP_CLIP_X", d.scalp_clip_x)),
+            scalp_min_requote_s=float(env.get("HL_SCALP_MIN_REQUOTE_S", d.scalp_min_requote_s)),
             models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
             discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),
             chart_model_dir=env.get("HL_CHART_MODEL_DIR", d.chart_model_dir),

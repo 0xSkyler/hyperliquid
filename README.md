@@ -44,6 +44,35 @@ unknown or stale account state, unacknowledged orders, or a position the engine 
 all stop new orders. On startup the exchange's position is adopted as truth; a restart never
 assumes flat.
 
+## The scalper
+
+By default (`HL_STRATEGY=maker`) the engine trades as a passive scalper (`app/scalp/quoter.py`):
+it rests a post-only buy below the price and a sell above it, and earns the gap when both fill.
+Several times a second it decides each quote from:
+
+- **Fair value** - the size-weighted microprice, leaned by any forecast the models have earned trust in.
+- **Inventory** - quotes shift against the position so the reducing side fills first; the adding
+  side stops at the inventory limit (`HL_SCALP_INVENTORY_X`, default 2x the balance), and inventory
+  far past the limit is cut at market.
+- **Required edge** - a quote must sit at least *maker fee + adverse selection + flow penalty* from
+  fair value. Adverse selection is learned from its own fills: how far the price moves against it
+  in the 5 seconds after one.
+- **Toxic flow** - one-sided aggressive trading against a quote widens that side.
+- **Queue priority** - join the touch; step one tick inside only when the spread is wide.
+
+Order handling requotes at once when a resting quote has become too aggressive and lazily when it
+is merely less competitive, because Hyperliquid gives each account a request budget. Bad data,
+Stop, or an unknown account state cancels every quote.
+
+Because fees are part of the required edge, on a market whose spread is narrower than the fees
+(BTC: 0.12 bps spread against 3 bps of maker fees per round trip) the scalper rests its quotes
+well behind the touch and rarely trades. The panel's **Scan all markets** ranks every Hyperliquid
+perpetual by spread minus fees and lets you switch market.
+
+`python -m app.research.scalp_lab "data/rec/*.jsonl"` replays recordings through the scalper twice,
+with fees set to zero (its raw skill) and with real fees (what reaches the account). Results are
+in `models/scalp_lab.json`. Set `HL_STRATEGY=taker` for the older directional-entry behaviour.
+
 ## Champion / challenger
 
 All models are scored on the same resolved forecasts. A challenger replaces the champion when its
@@ -115,6 +144,8 @@ python -m app.research.swing_lab                   # 1-hour signal as a maker-or
 python -m app.research.ticks --days 90             # download and featurise tick trades (~2 GB)
 python -m app.research.flow_train                  # train the trade-flow model, walk-forward
 python -m app.research.stress                      # engine behaviour in hostile environments
+python scripts/record.py --coins BTC,ETH,ENA --minutes 60   # record several markets at once
+python -m app.research.scalp_lab "data/rec/*.jsonl"  # the scalper's skill per fill, gross and net
 python -m app.research.warmstart "data/raw-*.jsonl"  # teach the order-flow models from recordings
 ```
 
@@ -203,13 +234,15 @@ Built and tested: Hyperliquid market-data adapter, paper venue (latency, book-wa
 queue-aware maker fills, fees, funding, margin rejects, liquidation), feature set, indicator
 library, linear / neural / tree models, chart models for four timeframes trained on 10 years of
 candles, strategy lab, stress lab, learned-state persistence and warm start, champion-challenger promotion, regime-aware calibration,
-utility decision engine, maker/taker selection, safety kernel with reconciliation, control panel, journal
+utility decision engine, the scalper (two-sided quoting, inventory and flow control, market scanner), safety kernel
+with reconciliation, control panel, journal
 (drawdown, fees, markouts), JSONL persistence off the hot path, dashboard, RSS news ingestion with
 de-duplication, feature discovery, RL study, replay backtester, CI (including the Docker build).
 
 Tested end to end against a mock exchange through the real Hyperliquid SDK (`tests/test_e2e_live.py`):
 connect, balance in a unified account, Start, an order to close a position, fill reconciliation,
-disconnect. Key checking and balance reading have also been run against the real Hyperliquid API.
+disconnect; and the scalper resting two post-only quotes, handling a fill, and cancelling on Stop
+(`tests/test_e2e_scalper.py`). Key checking and balance reading have also been run against the real Hyperliquid API.
 
 **Not verified** against the real service: an actual order on a funded account (none has ever been
 sent), `PostgresSink`, and the LLM news call (tested with a stand-in client only).

@@ -39,6 +39,7 @@ jobs:
           print('connected', h['connected'], '| running', h['running'], '| ticks', e['ticks'], '| mid', e['mid'])
           print('models', [m['name'] for m in e['model']['arena']], '| charts', h['chart']['loaded'], '| faults', h['faults'])
           assert h['connected'] is False and h['running'] is False and e['ticks'] > 10 and e['mid']
+          assert e['scalper']['enabled'] is True and e['orders_sent'] == 0
           assert [m['name'] for m in e['model']['arena']] == ['ridge', 'mlp', 'tree', 'flow_pretrained']
           assert h['chart']['loaded'] == ['5m', '1h', '4h', '1d']
           "
@@ -59,6 +60,9 @@ jobs:
           grep -q "does not recognise this API wallet" /tmp/out                           # checked against the real exchange
           test "$(call "$TOKEN" connect '{"api_secret_key":"hello"}')" = 400
           ! sudo grep -q api_secret_key /opt/hltrader/app/data/control.json 2>/dev/null   # refused keys are never stored
+          test "$(call "$TOKEN" scan '{}')" = 200                                          # market scanner against the real exchange
+          python3 -c "import json; m = json.load(open('/tmp/out'))['markets']; print(len(m), 'markets; best:', m[0]['coin'], round(m[0]['margin_bps'], 2), 'bps'); assert len(m) > 5 and 'spread_bps' in m[0]"
+          grep -q "Scan all markets" /tmp/page
           test "$(call "$TOKEN" preferences '{"max_leverage":"5"}')" = 200 && cat /tmp/out && echo
           sleep 12
           curl -fsS -H "X-Control-Token: $TOKEN" http://127.0.0.1:8787/api/control | python3 -c "

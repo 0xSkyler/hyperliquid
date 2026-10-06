@@ -74,6 +74,7 @@ class Fill:
     maker: bool
     client_id: str = ""
     liquidation: bool = False
+    mid: float = 0.0  # mid just before the fill, when the venue knows it (0 = unknown)
 
 
 @dataclass(slots=True)
@@ -86,6 +87,8 @@ class AccountState:
     open_orders: int = 0
     inflight: int = 0  # submitted, not yet acknowledged
     oldest_inflight_ts: float = 0.0
+    working: tuple[str, ...] = ()  # client ids of our resting orders, as of working_ts
+    working_ts: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -99,6 +102,10 @@ class AssetMeta:
     def maintenance_margin(self) -> float:
         # Hyperliquid: maintenance margin is half the initial margin at max leverage.
         return 1.0 / (2.0 * self.max_leverage)
+
+    def tick(self, px: float) -> float:
+        """Smallest price step at this price: 5 significant figures, at most (6 - szDecimals) decimals."""
+        return max(min(10.0 ** (math.floor(math.log10(px)) - 4), 1.0), 10.0 ** -(6 - self.sz_decimals))  # integers always valid
 
     def round_sz(self, sz: float) -> float:
         q = 10**self.sz_decimals
@@ -114,6 +121,7 @@ class AssetMeta:
 class Venue(Protocol):
     def submit(self, intent: OrderIntent, now: float) -> None: ...
     def cancel_all(self, now: float) -> None: ...
+    def cancel(self, client_id: str, now: float) -> None: ...
     def account(self, now: float) -> AccountState: ...
     def drain_fills(self) -> list[Fill]: ...
     def on_book(self, book: Book) -> None: ...

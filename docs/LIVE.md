@@ -33,24 +33,40 @@ Hyperliquid's minimum order is $10. A balance near that leaves the engine very f
 
 ## Start and stop
 
-- **Start trading** - real orders are sent whenever the engine finds a trade it trusts. The top
-  bar turns red and reads "LIVE - TRADING". The choice survives restarts and reboots.
-- **Stop trading** - nothing more is sent. An open position stays open.
+- **Start trading** - after a five-minute warm-up the scalper rests a post-only buy and sell around
+  the price whenever a quote can pay for its fees, and keeps adjusting them. The top bar turns red
+  and reads "LIVE - TRADING". The choice survives restarts and reboots.
+- **Stop trading** - resting quotes are cancelled and nothing more is sent. An open position stays open.
 - **Close position and stop** - cancels resting orders and closes the whole position at market.
 - **Disconnect** - stops, and removes the key from the server. An open position stays open.
 
 Connecting never starts trading on its own.
 
+## Market
+
+The **Market** box shows the market being traded. **Scan all markets** lists every Hyperliquid
+perpetual with its spread, the margin left after maker fees on both legs, volume, and the size
+resting at the touch. **Use** switches market (only when flat; trading stops until you press Start
+again). A positive margin is necessary for a passive scalper to get paid, not sufficient: wide
+spreads usually belong to thin markets that jump.
+
 ## What to expect
 
-The engine trades only when one of its models has shown, on live data, forecasts accurate enough
-to beat trading costs. The panel says in plain words why it is not trading. On everything measured
-so far (README, "What the models have been trained on") no such edge has been found, so it may run
-for a long time without placing an order. That is the engine protecting the balance, not a fault.
+The scalper quotes only where a fill is expected to pay for itself: its quote must sit at least
+the maker fee plus the adverse selection it has measured away from fair value. On BTC the spread
+(about 0.12 bps) is far narrower than the fees (1.5 bps per leg), so its quotes rest well behind
+the best price and fill rarely, mostly in fast moves. The **Scalper** box shows where its quotes
+are, every fill's spread capture, where the price went afterwards, and the resulting edge per fill.
+If "edge per fill" stays below the fee, it is losing money on each trade and will widen by itself.
 
-When it does trade it sizes positions itself, up to the **Max leverage** you set under Risk. With
-the default of 40x a 1.5% move against a full-size position costs about half the account; set a
-lower cap if that is not what you want.
+Inventory is limited to 2x the balance by default (and never above the **Max leverage** you set
+under Risk). With a $10 balance each quote is the exchange minimum of about $10, so one fill is
+already 1x.
+
+Hyperliquid gives each account a budget of order actions (10,000 to start, plus one per dollar
+traded). The scalper spaces its requotes to respect it, but a very small account that quotes for
+many hours without fills can run the budget down; quotes then start being rejected until volume
+is traded.
 
 On connecting, the engine sets BTC to cross margin at the venue's maximum leverage so the exchange
 does not reject a size the engine chose. Actual exposure is whatever the engine sizes, within your cap.

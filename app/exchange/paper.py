@@ -37,9 +37,11 @@ class PaperVenue:
         self.rejects = 0
         self.liquidations = 0
         self._pending: list[tuple[float, OrderIntent]] = []
+        self._pending_cancels: list[tuple[float, str]] = []
         self._resting: list[_Resting] = []
         self._fills: list[Fill] = []
         self._funding_hour: int | None = None
+        self._ref_mid = 0.0
 
     # --- Venue protocol -------------------------------------------------
     def submit(self, intent: OrderIntent, now: float) -> None:
@@ -47,14 +49,20 @@ class PaperVenue:
 
     def cancel_all(self, now: float) -> None:
         self._resting.clear()
+        self._pending_cancels.clear()
+
+    def cancel(self, client_id: str, now: float) -> None:
+        """A cancel travels as slowly as an order: the quote can still be hit before it lands."""
+        self._pending_cancels.append((now + self.latency_s, client_id))
 
     def account(self, now: float) -> AccountState:
         if self.book is None or not self.book.valid():
             return AccountState(now, known=False)
         oldest = min((t - self.latency_s for t, _ in self._pending), default=0.0)
+        working = tuple(o.intent.client_id for o in self._resting) + tuple(it.client_id for _, it in self._pending)
         return AccountState(
             now, True, self._equity(self.book.mid), self.pos, self.entry, len(self._resting),
-            len(self._pending), oldest,
+            len(self._pending), oldest, working, now,
         )  # fmt: skip
 
     def drain_fills(self) -> list[Fill]:
@@ -62,13 +70,22 @@ class PaperVenue:
         return out
 
     def on_book(self, book: Book) -> None:
+        if self.book is not None and self.book.valid():
+            self._ref_mid = self.book.mid  # the mid before this update: the reference for fills it causes
         self.book = book
         if not book.valid():
             return
+        if not self._ref_mid:
+            self._ref_mid = book.mid
         ready = [it for t, it in self._pending if t <= book.ts]
         self._pending = [(t, it) for t, it in self._pending if t > book.ts]
         for it in ready:
             self._activate(it, book)
+        due = {cid for t, cid in self._pending_cancels if t <= book.ts}
+        if due:
+            self._pending_cancels = [(t, cid) for t, cid in self._pending_cancels if t > book.ts]
+            self._resting = [o for o in self._resting if o.intent.client_id not in due]
+            self._pending = [(t, it) for t, it in self._pending if it.client_id not in due]
         for o in list(self._resting):
             crossed = book.best_ask <= o.intent.limit_px if o.intent.is_buy else book.best_bid >= o.intent.limit_px
             if crossed:
@@ -79,6 +96,8 @@ class PaperVenue:
         self._check_liquidation(book)
 
     def on_trades(self, trades: list[Trade]) -> None:
+        if self.book is not None and self.book.valid():
+            self._ref_mid = self.book.mid
         for t in trades:
             for o in list(self._resting):
                 if o.intent.is_buy == t.is_buy:
@@ -162,7 +181,8 @@ class PaperVenue:
         fee = sz * px * (self.maker_fee if maker else self.taker_fee)
         self.cash -= fee
         self.fees_paid += fee
-        self._fills.append(Fill(ts, it.coin, it.is_buy, px, sz, fee, maker, it.client_id, liq))
+        ref = self._ref_mid if maker else (self.book.mid if self.book is not None else px)
+        self._fills.append(Fill(ts, it.coin, it.is_buy, px, sz, fee, maker, it.client_id, liq, ref))
 
     def _check_liquidation(self, book: Book) -> None:
         if self.pos == 0:

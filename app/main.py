@@ -220,6 +220,11 @@ async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = 
             if engine.quotes.working:
                 return (f"Scalping: quotes resting at bid {q.get('bid')} / ask {q.get('ask')}, "
                         f"inventory {q.get('inventory_x', 0):.2f}x. It earns when both sides get filled.")  # fmt: skip
+            if q.get("making"):
+                p = engine.snapshot()["scalper"]["practice"]
+                return (f"Scalping, but not resting real quotes: in practice (simulated) its resting quotes are worth "
+                        f"{p['edge_bps_5s']:.2f} bps per fill over {p['fills']} fills and need more than {p['needed_bps']:.1f} bps "
+                        "to cover the fee. It trades for real once practice is profitable or a forecast pays for a fee.")  # fmt: skip
             if q.get("bid") is None and q.get("ask") is None and q:
                 return ("Scalping, but no quote is worth resting right now: fees plus what its fills have been losing "
                         "exceed what this market's spread pays.")  # fmt: skip

@@ -52,21 +52,26 @@ spreads usually belong to thin markets that jump.
 
 ## What to expect
 
-The scalper quotes only where a fill is expected to pay for itself: its quote must sit at least
-the maker fee plus the adverse selection it has measured away from fair value. On BTC the spread
-(about 0.12 bps) is far narrower than the fees (1.5 bps per leg), so its quotes rest well behind
-the best price and fill rarely, mostly in fast moves. The **Scalper** box shows where its quotes
-are, every fill's spread capture, where the price went afterwards, and the resulting edge per fill.
-If "edge per fill" stays below the fee, it is losing money on each trade and will widen by itself.
+After Start the scalper does three things, and only the third and fourth can cost money:
+
+1. It **forecasts** the next 5 seconds from the order book. The Scalper box shows its accuracy.
+2. It **practises** passive quoting on a simulator with pretend money, and shows the result
+   ("Practice edge per fill").
+3. It **rests real quotes** only while practice shows a profit after the maker fee, with confidence.
+4. It **takes liquidity** only when its forecast alone is larger than the taker fee plus the spread.
+
+On the Hyperliquid data recorded so far, practice quotes lose on every market tested (resting
+quotes are picked off), and the forecast, although real, is worth about a tenth of the taker fee.
+So expect "Real quoting: off (practising)" and no orders. That is the engine declining to lose your
+balance, and the panel says so in plain words. If conditions change, it switches itself on.
 
 Inventory is limited to 2x the balance by default (and never above the **Max leverage** you set
 under Risk). With a $10 balance each quote is the exchange minimum of about $10, so one fill is
 already 1x.
 
 Hyperliquid gives each account a budget of order actions (10,000 to start, plus one per dollar
-traded). The scalper spaces its requotes to respect it, but a very small account that quotes for
-many hours without fills can run the budget down; quotes then start being rejected until volume
-is traded.
+traded; after that, one action every 10 seconds). The scalper stays inside an action budget and
+drops to the always-allowed rate when the account's budget runs low.
 
 On connecting, the engine sets BTC to cross margin at the venue's maximum leverage so the exchange
 does not reject a size the engine chose. Actual exposure is whatever the engine sizes, within your cap.

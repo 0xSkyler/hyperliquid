@@ -34,7 +34,7 @@ class Journal:
         self._mid = 0.0
         # (due, horizon, is_buy, mid at fill, maker)
         self._pending: deque[tuple[float, float, bool, float, bool]] = deque()
-        self._markout = {True: [0.0, 0], False: [0.0, 0]}  # maker? -> [mean bps at 5s vs fill px, n]
+        self._markout = {True: [0.0, 0, 0.0], False: [0.0, 0, 0.0]}  # maker? -> [mean bps at 5s vs fill px, n, variance]
         self._px_pending: deque[tuple[float, bool, float, bool]] = deque()
         self._move: dict[float, list[float]] = {h: [0.0, 0.0] for h in HORIZONS}  # horizon -> [mean bps in our favour, n]
         self._adverse = {True: [0.0, 0.0], False: [0.0, 0.0]}  # is_buy -> [mean adverse bps at 5s, n] (maker fills)
@@ -67,7 +67,11 @@ class Journal:
             _, is_buy, px, maker = self._px_pending.popleft()
             acc = self._markout[maker]
             acc[1] += 1
-            acc[0] += ((mid - px) / px * 1e4 * (1 if is_buy else -1) - acc[0]) / min(acc[1], 200)
+            k = min(acc[1], 200)
+            m = (mid - px) / px * 1e4 * (1 if is_buy else -1)
+            d = m - acc[0]
+            acc[0] += d / k
+            acc[2] += (d * (m - acc[0]) - acc[2]) / k
         keep: deque[tuple[float, float, bool, float, bool]] = deque()
         for item in self._pending:  # horizons differ, so the queue is not sorted by due time
             due, h, is_buy, m0, maker = item
@@ -90,8 +94,21 @@ class Journal:
 
     def maker_adverse_bps(self) -> float:
         """Measured cost of being picked off as a maker (vs fill price); a 1 bp prior until there is evidence."""
-        mean, n = self._markout[True]
+        mean, n = self._markout[True][0], self._markout[True][1]
         return max(-mean, 0.0) if n >= 10 else 1.0
+
+    def maker_edge(self) -> tuple[float, int]:
+        """(mean bps a passive fill is worth 5 s later, measured from the fill price and before fees; fills counted)."""
+        return float(self._markout[True][0]), int(self._markout[True][1])
+
+    def maker_edge_lcb(self, z: float = 2.0) -> float:
+        """Lower confidence bound of that mean: what a passive fill is worth, allowing for luck."""
+        mean, n, var = self._markout[True]
+        return float(mean) - z * (max(float(var), 0.0) / max(int(n), 1)) ** 0.5
+
+    def retest_maker(self, keep: int = 10) -> None:
+        """After a time-out, keep the estimate but let a few new fills move it."""
+        self._markout[True][1] = min(int(self._markout[True][1]), keep)
 
     def adverse_bps(self, is_buy: bool, prior_bps: float) -> float:
         """How far the mid moves against a resting order on this side in the 5 s after it fills.

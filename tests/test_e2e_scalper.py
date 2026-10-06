@@ -40,7 +40,7 @@ def test_scalper_rests_two_quotes_handles_a_fill_and_cancels_on_stop(tmp_path: P
         monkeypatch.setattr(market_state, "LOOKBACK_S", 8.0)  # warm up in seconds instead of five minutes
         for k, v in {"HL_API_URL": f"http://127.0.0.1:{server.port}", "HL_DATA_DIR": str(tmp_path), "HL_DASHBOARD_PORT": str(port),
                      "HL_NEWS_FEEDS": "", "HL_CHART_MODEL_DIR": str(tmp_path / "none"), "HL_MODELS": "ridge",
-                     "HL_STRATEGY": "maker", "HL_SCALP_MIN_REQUOTE_S": "0.5"}.items():  # fmt: skip
+                     "HL_STRATEGY": "maker", "HL_SCALP_MIN_REQUOTE_S": "0.5", "HL_SCALP_GATE_FILLS": "0"}.items():  # fmt: skip
             monkeypatch.setenv(k, v)
         monkeypatch.delenv("HL_MODE", raising=False)
         stop = asyncio.Event()

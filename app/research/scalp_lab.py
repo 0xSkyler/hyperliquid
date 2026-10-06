@@ -75,7 +75,8 @@ def replay(path: str, s: Settings, meta: AssetMeta, equity: float) -> dict[str, 
         "max_drawdown_pct": j["max_drawdown_pct"], "max_inventory_x": eng.max_abs_exposure,
         "quote_uptime_pct": eng.snapshot()["scalper"]["quote_uptime_pct"],
         "orders_placed": eng.quotes.placed, "orders_cancelled": eng.quotes.cancelled, "liquidations": j["liquidations"],
-        "fast_alpha": eng.fast_alpha.snapshot(), "takes": eng.takes,
+        "fast_alpha": eng.fast_alpha.snapshot(), "takes": eng.takes, "making_timeouts": eng.making_timeouts,
+        "practice": eng.snapshot()["scalper"]["practice"], "making_allowed_at_end": eng.making_allowed,
         "markout_5s_vs_fill_bps": j["markout_5s_bps"],
     }  # fmt: skip
 

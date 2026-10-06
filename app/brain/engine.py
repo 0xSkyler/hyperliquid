@@ -17,6 +17,7 @@ from app.brain.decision import Decision, Forecast, decide
 from app.config.settings import Mode, Settings
 from app.ensemble.arena import build_arena
 from app.exchange.base import AssetCtx, AssetMeta, Book, OrderIntent, Trade, Venue, merge_bbo
+from app.exchange.paper import PaperVenue
 from app.learning.journal import Journal
 from app.market.state import FEATURE_NAMES, REGIMES, MarketState
 from app.models.online import HalfLife, Standardizer
@@ -57,6 +58,15 @@ class Engine:
         self._last_quote_ts = 0.0
         self.quote_cycles = self.quoting_cycles = 0
         self.takes = 0  # times the scalper crossed the spread on a strong fast forecast
+        self.making_off_until = 0.0  # passive quoting is rested while its own fills show it losing
+        self.making_timeouts = 0
+        # Practice book: the same quoting logic runs against a simulator on the live feed, with pretend
+        # money, all the time. Real passive quotes are allowed only while this practice shows that resting
+        # quotes are worth more than their fee. The scalper earns the right to quote before it risks a cent.
+        self.practice_venue = PaperVenue(1000.0, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
+        self.practice_quotes = QuoteManager(meta.coin, s.scalp_min_requote_s, actions_per_min=s.scalp_actions_per_min)
+        self.practice = Journal()
+        self.making_allowed = False
         self._last_take_ts = 0.0
         self.last_quotes: dict[str, Any] = {}
         self.halted_ticks = 0  # ticks on which the safety kernel blocked trading
@@ -68,6 +78,8 @@ class Engine:
     def on_book(self, book: Book) -> None:
         self.market.on_book(book)
         self.venue.on_book(book)
+        if self.maker:
+            self.practice_venue.on_book(book)
         # Forecasts are scored from the first price we could actually have traded at
         # (decision time + latency), not from the price we were looking at when deciding.
         while self._unref and self._unref[0][5] <= book.ts:
@@ -101,11 +113,44 @@ class Engine:
     def pull_quotes(self, now: float) -> None:
         self._apply(self.quotes.pull_all(), now)
 
+    def _practice_cycle(self, now: float, book: Book, q: QuoteInputs) -> None:
+        """Quote against the simulator with pretend money and keep score. Runs whether or not real trading is on."""
+        v, lot = self.practice_venue, 10.0**-self.meta.sz_decimals
+        for f in v.drain_fills():
+            self.practice.on_fill(f, book.mid)
+            self.practice_quotes.on_fill(f, lot)
+        acct = v.account(now)
+        if not acct.known or acct.equity <= 0:
+            return
+        prior = (book.best_ask - book.best_bid) / 2 / book.mid * 1e4
+        pq = QuoteInputs(q.sigma_tick, q.tick_s, q.flow, q.alpha_bps, q.horizon_s, self.practice.adverse_bps(True, prior),
+                         self.practice.adverse_bps(False, prior), q.fast_alpha_bps)  # fmt: skip
+        want = desired_quotes(book, acct, pq, self.meta, self.s)
+        for kind, arg in self.practice_quotes.reconcile(want, acct, now, self.meta.tick(book.mid)):
+            if kind == "cancel":
+                v.cancel(arg, now)
+            else:
+                v.submit(arg, now)
+        f, limit = want.info["inventory_x"], want.info["inventory_limit_x"]
+        if abs(f) > 1.5 * limit and not acct.inflight:  # same inventory discipline as the real book
+            sz = self.meta.round_sz(min((abs(f) - limit) * acct.equity / book.mid, abs(acct.position)))
+            px = self.meta.round_px(book.best_ask * 1.01 if f < 0 else book.best_bid * 0.99)
+            if sz * book.mid >= self.meta.min_notional:
+                v.submit(OrderIntent(self.meta.coin, f < 0, sz, px, "Ioc", True, client_id="inventory"), now)
+        edge, n = self.practice.maker_edge()
+        gate = self.s.scalp_gate_fills  # <= 0 switches the requirement off (tests and experiments only)
+        # Not just a positive average: positive after allowing for luck (lower confidence bound), so it does not flap.
+        self.making_allowed = gate <= 0 or (n >= gate and self.practice.maker_edge_lcb() > self.s.maker_fee * 1e4)
+
     def _quote_cycle(self, now: float) -> None:
         """Decide both quotes and send the fewest order actions that get the book there."""
         self._take_fills()
         book, q, s = self.market.book, self._quote_inputs, self.s
         self.quote_cycles += 1
+        if self._quote_ok and q is not None and book is not None and book.valid():
+            m0 = self.market.micro(now)
+            q.fast_alpha_bps = self.fast_alpha.predict(FastAlpha.vector(*m0)) if m0 is not None else 0.0
+            self._practice_cycle(now, book, q)
         live = self._quote_ok and not self.paused and s.mode is not Mode.SHADOW
         if not live or q is None or book is None or not book.valid():
             if self.quotes.working:
@@ -115,12 +160,25 @@ class Engine:
         if not acct.known or acct.equity <= 0:
             self.pull_quotes(now)
             return
-        m = self.market.micro(now)
-        q.fast_alpha_bps = self.fast_alpha.predict(FastAlpha.vector(*m)) if m is not None else 0.0
         prior = (book.best_ask - book.best_bid) / 2 / book.mid * 1e4
-        q.adverse_bid_bps = self.journal.adverse_bps(True, prior)
-        q.adverse_ask_bps = self.journal.adverse_bps(False, prior)
+        # What practice has measured is the starting belief; real fills then move it.
+        q.adverse_bid_bps = self.journal.adverse_bps(True, self.practice.adverse_bps(True, prior))
+        q.adverse_ask_bps = self.journal.adverse_bps(False, self.practice.adverse_bps(False, prior))
         want: Desired = desired_quotes(book, acct, q, self.meta, s)
+        # Evidence gate, the same rule the forecasts live under: once enough passive fills exist, resting
+        # quotes must be worth more than their fee 5 s later, or passive quoting is rested for a while.
+        edge, n_fills = self.journal.maker_edge()
+        if 0 < s.scalp_gate_fills <= n_fills and edge < s.maker_fee * 1e4 and now >= self.making_off_until:
+            self.making_off_until = now + s.scalp_gate_cooldown_s
+            self.making_timeouts += 1
+            self.journal.retest_maker()
+        if now < self.making_off_until or not self.making_allowed:  # keep only a quote that reduces inventory
+            if acct.position <= 0:
+                want.ask = None
+            if acct.position >= 0:
+                want.bid = None
+            want.info["making"] = ("resting: real passive fills have been losing" if now < self.making_off_until
+                                   else "not yet: practice quotes have not shown a profit after fees")  # fmt: skip
         f = want.info["inventory_x"]
         limit = want.info["inventory_limit_x"]
         self.max_abs_exposure = max(self.max_abs_exposure, abs(f))
@@ -220,6 +278,8 @@ class Engine:
     def on_trades(self, trades: list[Trade]) -> None:
         self.market.on_trades(trades)
         self.venue.on_trades(trades)
+        if self.maker:
+            self.practice_venue.on_trades(trades)
 
     def on_ctx(self, ctx: AssetCtx) -> None:
         self.market.on_ctx(ctx)
@@ -237,6 +297,10 @@ class Engine:
         book = mkt.book
         if book is not None and book.valid() and acct.known:
             self.journal.on_tick(now, book.mid, acct.equity)
+            if self.maker:
+                pa = self.practice_venue.account(now)
+                if pa.known:
+                    self.practice.on_tick(now, book.mid, pa.equity)
             if self.maker and not faults and (m := mkt.micro(now)) is not None:
                 self.fast_alpha.on_tick(now, FastAlpha.vector(*m), book.mid)
             # Learn from forecasts whose horizon has elapsed (calibrate first: out-of-sample).
@@ -350,7 +414,15 @@ class Engine:
                 "enabled": self.maker, "quotes": self.last_quotes, "orders_placed": self.quotes.placed,
                 "orders_cancelled": self.quotes.cancelled, "actions_per_min": self.quotes.actions_per_min,
                 "skipped_for_budget": self.quotes.skipped_for_budget, "fast_alpha": self.fast_alpha.snapshot(),
-                "takes": self.takes,
+                "takes": self.takes, "making_timeouts": self.making_timeouts,
+                "passive_edge_bps": self.journal.maker_edge()[0], "passive_fills_judged": self.journal.maker_edge()[1],
+                "making_allowed": self.making_allowed,
+                "practice": {
+                    "fills": self.practice.n_fills, "edge_bps_5s": self.practice.maker_edge()[0],
+                    "edge_lower_bound_bps": self.practice.maker_edge_lcb(),
+                    "needed_bps": self.s.maker_fee * 1e4, "fills_needed": self.s.scalp_gate_fills,
+                    "pnl_pct": self.practice.summary()["net_return_pct"],
+                },
                 "quote_uptime_pct": 100.0 * self.quoting_cycles / self.quote_cycles if self.quote_cycles else 0.0,
             },
             "model": {

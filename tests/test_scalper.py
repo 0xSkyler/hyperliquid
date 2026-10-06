@@ -15,6 +15,7 @@ from backtest.run import synthetic_events
 BTC = AssetMeta("BTC", 5, 40.0)
 ALT = AssetMeta("ENA", 0, 10.0)
 FREE = dataclasses.replace(Settings(), maker_fee=0.0, taker_fee=0.0)
+UNGATED = dataclasses.replace(FREE, scalp_gate_fills=0)  # real quoting without first proving it in practice
 
 
 def book(bid: float, ask: float, bq: float = 2.0, aq: float = 2.0, ts: float = 100.0) -> Book:
@@ -180,7 +181,7 @@ def _scalp(seconds: int, s: Settings, seed: int = 1, paused: bool = False, equit
 
 
 def test_scalper_quotes_both_sides_fills_as_maker_and_respects_its_inventory_limit() -> None:
-    eng, venue = _scalp(2500, FREE)
+    eng, venue = _scalp(2500, UNGATED)
     j = eng.journal.summary()
     assert j["fills"] > 20 and j["maker_ratio"] > 0.9  # it trades by being hit, not by crossing
     assert j["spread_capture_bps"] > 0  # every maker fill is on the right side of the mid
@@ -191,10 +192,10 @@ def test_scalper_quotes_both_sides_fills_as_maker_and_respects_its_inventory_lim
 
 
 def test_scalper_sends_nothing_when_stopped_and_pulls_quotes_when_data_goes_bad() -> None:
-    eng, venue = _scalp(800, FREE, paused=True)
+    eng, venue = _scalp(800, UNGATED, paused=True)
     assert eng.orders_sent == 0 and venue.pos == 0.0 and eng.arena.champ.model.n_obs > 300  # still learning
 
-    eng, venue = _scalp(700, FREE)
+    eng, venue = _scalp(700, UNGATED)
     assert eng.quotes.working  # quoting
     t = 1_000_000.0 + 700
     eng.on_tick(t + 30)  # the feed has been silent for 30 s: instruments cannot be trusted
@@ -207,7 +208,7 @@ def test_scalper_sends_nothing_when_stopped_and_pulls_quotes_when_data_goes_bad(
 
 
 def test_with_real_fees_on_a_tight_market_the_scalper_refuses_to_quote_at_a_loss() -> None:
-    eng, _ = _scalp(1500, Settings())  # BTC-like 0.12 bps spread against a 1.5 bps maker fee
+    eng, _ = _scalp(1500, dataclasses.replace(Settings(), scalp_gate_fills=0))  # BTC-like 0.12 bps spread against a 1.5 bps maker fee
     q = eng.last_quotes
     assert eng.journal.n_fills == 0 or eng.journal.summary()["spread_capture_bps"] > 1.0
     assert q.get("bid_behind_touch_bps") is None or q["bid_behind_touch_bps"] >= 1.4  # never at the touch for free
@@ -285,3 +286,42 @@ def test_fast_forecast_pulls_the_vulnerable_quote_and_takes_only_when_it_pays() 
 
     assert takes(FREE) > 10  # free to trade: it acts on the forecast
     assert takes(Settings()) == 0  # 4.5 bps taker fee: a ~1 bp forecast never pays for it, so it never takes
+
+
+# --- practice before real money ---------------------------------------------------------------------------
+def test_real_quotes_wait_until_practice_quotes_have_shown_a_profit() -> None:
+    eng, venue = _scalp(2500, FREE)  # a random-walk market runs over resting quotes: practice loses
+    p = eng.snapshot()["scalper"]["practice"]
+    assert p["fills"] >= FREE.scalp_gate_fills and p["edge_bps_5s"] < 0
+    assert not eng.making_allowed and eng.quotes.placed == 0 and venue.pos == 0.0  # so not one real quote was sent
+    assert eng.last_quotes["making"].startswith("not yet")
+
+
+def test_when_practice_is_convincingly_profitable_real_quoting_switches_on() -> None:
+    eng, venue = _scalp(700, FREE)
+    assert not eng.making_allowed and eng.quotes.placed == 0
+
+    def practice_history(move_bps: float, n: int) -> Journal:
+        j = Journal()
+        j.on_tick(0.0, 100.0, 1000.0)
+        for k in range(n):  # each practice fill is followed by the price moving `move_bps` in our favour (plus noise)
+            j.on_fill(Fill(10.0 * k, "BTC", True, 100.0, 1.0, 0.0, True), mid=100.0)
+            j.on_tick(10.0 * k + 6.0, 100.0 * (1 + (move_bps + 0.3 * (-1) ** k) * 1e-4), 1000.0)
+        return j
+
+    def continue_for(seconds: int, offset: float) -> None:
+        for t, kind, payload in synthetic_events(seconds, seed=9, vol_bps=0.3):
+            t += offset
+            if kind == "book":
+                eng.on_tick(t)
+                eng.on_book(dataclasses.replace(payload, ts=t))
+            else:
+                eng.on_trades([dataclasses.replace(x, ts=t) for x in payload])
+
+    eng.practice = practice_history(move_bps=0.2, n=5)  # promising, but five fills prove nothing
+    continue_for(5, 700)
+    assert not eng.making_allowed and eng.quotes.placed == 0
+    eng.practice = practice_history(move_bps=2.0, n=60)  # sixty fills, each clearly worth more than the (zero) fee
+    continue_for(5, 710)
+    assert eng.making_allowed and eng.quotes.placed >= 2 and eng.quotes.working  # now it rests real quotes
+    assert eng.snapshot()["scalper"]["practice"]["edge_lower_bound_bps"] > 0

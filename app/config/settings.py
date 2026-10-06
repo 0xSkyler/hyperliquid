@@ -57,6 +57,8 @@ class Settings:
     scalp_quote_interval_s: float = 0.25  # how often quotes are re-evaluated
     scalp_min_requote_s: float = 1.0  # minimum time between non-urgent requotes per side (request budget)
     scalp_max_distance_bps: float = 25.0  # do not rest quotes further than this from the market
+    scalp_gate_fills: int = 20  # passive fills needed before judging whether resting quotes pay
+    scalp_gate_cooldown_s: float = 900.0  # how long passive quoting is rested once it is shown to lose
     scalp_take_margin_bps: float = 0.1  # extra edge required, beyond fee and spread, before taking liquidity
     scalp_actions_per_min: float = 30.0  # order actions the scalper may spend; lowered automatically when the account's budget runs low
 
@@ -128,6 +130,7 @@ class Settings:
             scalp_inventory_x=float(env.get("HL_SCALP_INVENTORY_X", d.scalp_inventory_x)),
             scalp_clip_x=float(env.get("HL_SCALP_CLIP_X", d.scalp_clip_x)),
             scalp_min_requote_s=float(env.get("HL_SCALP_MIN_REQUOTE_S", d.scalp_min_requote_s)),
+            scalp_gate_fills=int(env.get("HL_SCALP_GATE_FILLS", d.scalp_gate_fills)),
             models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
             discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),
             chart_model_dir=env.get("HL_CHART_MODEL_DIR", d.chart_model_dir),

@@ -69,7 +69,7 @@ pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto;margin:0}h3{
   <div class=hint>Started: the engine sends real orders whenever it finds a trade it trusts. Stopped: it keeps watching and learning but sends nothing. Stopping does not close an open position; use "Close position and stop" for that.</div></div>
  <div class=panel id=scalpbox style="display:none"><h4>Scalper</h4>
   <div class=g id=sg></div>
-  <div class=hint>It rests a buy below and a sell above the price and earns the gap when both fill. "Edge per fill" = spread captured plus where the price went 5 s later; it has to stay above the fee for the scalper to make money.</div></div>
+  <div class=hint>It rests a buy below and a sell above the price and earns the gap when both fill. It always practises this on a simulator with pretend money first; real quotes are switched on only while "Practice edge per fill" is above the fee. "Fast forecast accuracy" is how well it predicts the next 5 seconds (0 = not at all, 1 = perfectly).</div></div>
  <div class=panel id=mktbox><h4>Market</h4>
   <div class=row><span id=mkt class=big></span><button id=scan>Scan all markets</button></div>
   <div id=mktlist></div>
@@ -153,7 +153,10 @@ show('scalpbox',sc.enabled&&h.connected);
 if(sc.enabled)tiles($('sg'),[['Our bid',w.bid??'-'],['Our ask',w.ask??'-'],['Market spread bps',f(q.half_spread_bps==null?null:q.half_spread_bps*2,2)],
  ['Inventory (x balance)',f(q.inventory_x,2)+' / '+f(q.inventory_limit_x,1)],['Fills',j.fills],['Spread captured bps',f(j.spread_capture_bps,2)],
  ['Price move 5s after fill bps',f(mv['5s'],2)],['Edge per fill bps',f((j.spread_capture_bps||0)+(mv['5s']||0),2)],
- ['Fees paid',f(j.fees,4)],['Time with quotes up %',f(sc.quote_uptime_pct,0)],['Orders placed / cancelled',(sc.orders_placed||0)+' / '+(sc.orders_cancelled||0)]]);
+ ['Fees paid',f(j.fees,4)],['Time with quotes up %',f(sc.quote_uptime_pct,0)],['Orders placed / cancelled',(sc.orders_placed||0)+' / '+(sc.orders_cancelled||0)],
+ ['Real quoting',sc.making_allowed?'ON':'off (practising)'],['Practice fills',(sc.practice||{}).fills??'-'],
+ ['Practice edge per fill bps',f((sc.practice||{}).edge_bps_5s,2)+' (needs > '+f((sc.practice||{}).needed_bps,1)+')'],
+ ['Fast forecast accuracy',f((sc.fast_alpha||{}).oos_ic,2)],['Trades taken on forecast',sc.takes??0]]);
 const pre=(id,o)=>$(id).textContent=JSON.stringify(o,null,1);
 pre('a',e.model.arena.map(x=>`${x.champion?'CHAMPION ':'          '}${x.name.padEnd(16)} ic ${f(x.oos_ic,4)}  trusted beta ${f(x.max_trusted_beta,3)}  vs champion t ${f(x.vs_champion_t,2)}  resolved ${x.resolved}`));
 pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));

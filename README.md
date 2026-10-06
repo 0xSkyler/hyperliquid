@@ -46,32 +46,55 @@ assumes flat.
 
 ## The scalper
 
-By default (`HL_STRATEGY=maker`) the engine trades as a passive scalper (`app/scalp/quoter.py`):
-it rests a post-only buy below the price and a sell above it, and earns the gap when both fill.
-Several times a second it decides each quote from:
+By default (`HL_STRATEGY=maker`) the engine trades as a scalper (`app/scalp/`). It has two hands.
 
-- **Fair value** - the size-weighted microprice, leaned by any forecast the models have earned trust in.
+**Passive quoting** (`quoter.py`) - rest a post-only buy below the price and a sell above it, and
+earn the gap when both fill. Several times a second each quote is decided from:
+
+- **Fair value** - the size-weighted microprice, moved by the fast forecast below.
 - **Inventory** - quotes shift against the position so the reducing side fills first; the adding
   side stops at the inventory limit (`HL_SCALP_INVENTORY_X`, default 2x the balance), and inventory
   far past the limit is cut at market.
 - **Required edge** - a quote must sit at least *maker fee + adverse selection + flow penalty* from
-  fair value. Adverse selection is learned from its own fills: how far the price moves against it
-  in the 5 seconds after one.
+  fair value. Adverse selection is learned from fills: how far the price moves against a quote in
+  the 5 seconds after it is hit.
 - **Toxic flow** - one-sided aggressive trading against a quote widens that side.
 - **Queue priority** - join the touch; step one tick inside only when the spread is wide.
 
+**Fast forecast** (`alpha.py`) - an online model predicts the next 5 seconds of the mid from the top
+of the book (queue imbalance, microprice, the last second of order flow). It pulls the vulnerable
+quote before it is hit, and when the forecast alone is larger than the taker fee plus the spread,
+the scalper takes liquidity at the touch.
+
+**Practice before real money.** The same quoting logic runs all the time against a simulator on
+the live feed, with pretend money. Real passive quotes are switched on only while that practice
+shows resting quotes are worth more than their fee, with statistical confidence (lower confidence
+bound over at least 20 practice fills). Real fills are then judged the same way, and passive
+quoting is rested if they lose.
+
 Order handling requotes at once when a resting quote has become too aggressive and lazily when it
-is merely less competitive, because Hyperliquid gives each account a request budget. Bad data,
-Stop, or an unknown account state cancels every quote.
+is merely less competitive, inside an action budget, because Hyperliquid gives each account a
+limited number of order actions. Bad data, Stop, or an unknown account state cancels every quote.
 
-Because fees are part of the required edge, on a market whose spread is narrower than the fees
-(BTC: 0.12 bps spread against 3 bps of maker fees per round trip) the scalper rests its quotes
-well behind the touch and rarely trades. The panel's **Scan all markets** ranks every Hyperliquid
-perpetual by spread minus fees and lets you switch market.
+### What it measures on real Hyperliquid data
 
-`python -m app.research.scalp_lab "data/rec/*.jsonl"` replays recordings through the scalper twice,
-with fees set to zero (its raw skill) and with real fees (what reaches the account). Results are
-in `models/scalp_lab.json`. Set `HL_STRATEGY=taker` for the older directional-entry behaviour.
+`python -m app.research.scalp_lab "data/rec/*.jsonl"` replays recordings through the scalper twice:
+with fees set to zero (raw skill) and with real fees (what reaches the account). Results:
+`models/scalp_lab.json`. On the recordings so far (seven markets, about an hour each - a small
+sample of one market mood):
+
+- **The fast forecast is real.** Out-of-sample correlation with the next 5 seconds is about 0.36 on
+  BTC, ETH and SOL, trusted within minutes. On thin small-caps it is weak (0.06 - 0.18).
+- **Taking on that forecast has positive skill before fees**: about +0.3 to +0.5 bps per trade after
+  paying the spread on BTC, ETH and SOL. The taker fee is 4.5 bps, so with real fees it never takes.
+- **Resting quotes are picked off on every market tested**: their fills are worth -0.6 to -4 bps five
+  seconds later, before fees. With the engine's latency (about 150 ms plus a book feed that updates
+  a few times a second) it is the slow party at the touch. Practice therefore keeps real quoting off.
+- **Net of real fees, the scalper places no real orders on any of the seven markets and loses nothing.**
+
+So the skill is there and it is roughly a tenth of the fee. Closing that gap takes a lower fee tier
+or a faster connection to the exchange, not a better model. The panel's **Scan all markets** ranks
+every perpetual by spread minus fees; `HL_STRATEGY=taker` restores the older directional behaviour.
 
 ## Champion / challenger
 

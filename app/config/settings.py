@@ -6,7 +6,6 @@ from enum import StrEnum
 
 MAINNET_API = "https://api.hyperliquid.xyz"
 TESTNET_API = "https://api.hyperliquid-testnet.xyz"
-LIVE_CONFIRM_PHRASE = "I_UNDERSTAND_REAL_MONEY"
 
 
 class Mode(StrEnum):
@@ -54,6 +53,7 @@ class Settings:
     jump_size: float = 0.015  # size of that gap as a fraction of price
     ruin_floor: float = 0.02  # wealth fraction assumed left after liquidation
     max_leverage_cap: float = 0.0  # operator's cap on exposure; 0 = the venue's own maximum
+    api_url_override: str = ""  # HL_API_URL: point everything at another endpoint (used by the end-to-end test)
 
     # Costs (overridden by the venue's real fee schedule when an address is known)
     taker_fee: float = 0.00045
@@ -80,6 +80,8 @@ class Settings:
 
     @property
     def api_url(self) -> str:
+        if self.api_url_override:
+            return self.api_url_override
         return TESTNET_API if self.mode is Mode.TESTNET else MAINNET_API
 
     @property
@@ -91,13 +93,11 @@ class Settings:
         return max(1, round(self.horizon_s / self.decision_interval_s))
 
     @classmethod
-    def from_env(cls, check_live: bool = True) -> Settings:
+    def from_env(cls) -> Settings:
         env = os.environ
-        mode = Mode(env.get("HL_MODE", "paper").lower())
-        if check_live and mode is Mode.LIVE and env.get("HL_LIVE_CONFIRM") != LIVE_CONFIRM_PHRASE:
-            raise SystemExit(
-                "HL_MODE=live requires HL_LIVE_CONFIRM=" + LIVE_CONFIRM_PHRASE + " (see docs/LIVE.md)"
-            )
+        # Live is the product's one trading mode. It trades only once an account is connected and
+        # Start has been pressed in the control panel; paper/shadow/testnet are developer switches.
+        mode = Mode(env.get("HL_MODE", "live").lower())
         d = cls()
         feeds = env.get("HL_NEWS_FEEDS")
         return cls(
@@ -109,6 +109,7 @@ class Settings:
             jump_prob=float(env.get("HL_JUMP_PROB", d.jump_prob)),
             jump_size=float(env.get("HL_JUMP_SIZE", d.jump_size)),
             max_leverage_cap=float(env.get("HL_MAX_LEVERAGE", d.max_leverage_cap)),
+            api_url_override=env.get("HL_API_URL", "").rstrip("/"),
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
             models=tuple(m for m in env.get("HL_MODELS", ",".join(d.models)).split(",") if m),
             discovered_path=env.get("HL_DISCOVERED_PATH", d.discovered_path),

@@ -1,14 +1,14 @@
 # hyperliquid-autonomous-trader
 
-An expected-utility trading engine for Hyperliquid perpetuals (BTC first). It installs and runs in
-**PAPER** mode: real market data, simulated fills, no keys, no money.
+An expected-utility trading engine for Hyperliquid perpetuals (BTC first) with a control panel:
+connect your account with an API wallet key, see the balance, press Start.
 
 **Read this first.** Nothing in this repository has a demonstrated edge on real markets. The engine
 is built so that it *knows* that: it will not open a position until its own forecasts have shown a
 statistically significant out-of-sample relationship with realized returns, net of fees. On BTC at
-base-tier fees (9 bps taker round trip) the most likely behaviour is that it watches and does
-nothing. That is the system working, not failing. Do not fund it on the strength of the synthetic
-backtest: that test plants an artificial edge to prove the machinery, nothing more.
+base-tier fees (9 bps taker round trip) the most likely behaviour after you press Start is that it
+watches and places no orders. That is the system protecting the balance, not failing. The control
+panel tells you in plain words why it is not trading.
 
 ## How it decides
 
@@ -178,23 +178,24 @@ models forecast one minute ahead, so do not expect this feature to matter at the
 
 ## Control panel
 
-The dashboard at `http://127.0.0.1:8787` is also the control panel: switch between Paper, Shadow,
-Testnet and Live, pause or resume, close the position, save Hyperliquid credentials and set risk
-preferences, all protected by a token (`data/control_token`). See `docs/DEPLOY.md`.
+`http://127.0.0.1:8787` on the machine it runs on. Unlock it with the token in
+`data/control_token`, paste a Hyperliquid API wallet key, press **Connect and fetch balance**, then
+**Start trading**. Live is the only trading mode; nothing is sent until both steps are done. Also
+there: Stop, Close position and stop, Disconnect, and a leverage cap. See `docs/LIVE.md`.
 
 ## Run
+
+On a server, use the installer in `docs/DEPLOY.md`. For development:
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 pytest -q && ruff check . && mypy app backtest
-python -m app.main                      # paper mode, dashboard on http://127.0.0.1:8787
+python -m app.main                      # control panel on http://127.0.0.1:8787, connected to nothing
+HL_MODE=paper python -m app.main        # developer switch: trade the built-in simulator instead
 HL_RECORD_RAW=1 python -m app.main      # also record raw market data to data/raw-YYYYMMDD.jsonl
 python -m backtest.run "data/raw-*.jsonl"  # replay through the same engine
 ```
-
-Modes (`HL_MODE`): `paper` (default), `shadow` (decides, never sends), `testnet`, `live`,
-plus `python -m backtest.run` for backtest. See `.env.example`, `docs/DEPLOY.md`, `docs/LIVE.md`.
 
 ## What is and is not built
 
@@ -202,13 +203,16 @@ Built and tested: Hyperliquid market-data adapter, paper venue (latency, book-wa
 queue-aware maker fills, fees, funding, margin rejects, liquidation), feature set, indicator
 library, linear / neural / tree models, chart models for four timeframes trained on 10 years of
 candles, strategy lab, stress lab, learned-state persistence and warm start, champion-challenger promotion, regime-aware calibration,
-utility decision engine, maker/taker selection, safety kernel with reconciliation, journal
+utility decision engine, maker/taker selection, safety kernel with reconciliation, control panel, journal
 (drawdown, fees, markouts), JSONL persistence off the hot path, dashboard, RSS news ingestion with
 de-duplication, feature discovery, RL study, replay backtester, CI (including the Docker build).
 
-Written but **not verified** against the real service: `HyperliquidLive` order placement (needs
-keys; test on testnet first), `PostgresSink`, and the LLM news call (tested with a stand-in
-client only; no API credentials were available).
+Tested end to end against a mock exchange through the real Hyperliquid SDK (`tests/test_e2e_live.py`):
+connect, balance in a unified account, Start, an order to close a position, fill reconciliation,
+disconnect. Key checking and balance reading have also been run against the real Hyperliquid API.
+
+**Not verified** against the real service: an actual order on a funded account (none has ever been
+sent), `PostgresSink`, and the LLM news call (tested with a stand-in client only).
 
 Not built (from the original brief): economic calendar and surprise scoring, cross-exchange
 lead/lag feeds, multi-asset ranking, market-making quoting, whole-strategy generation,

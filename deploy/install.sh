@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Install or update the trader on Ubuntu 24.04 and run it in PAPER mode under systemd.
+# Install or update the trader on Ubuntu 24.04 and run it under systemd.
 #
 #   curl -fsSL https://raw.githubusercontent.com/0xSkyler/hyperliquid/main/deploy/install.sh | sudo bash
 #
-# Safe to re-run: it updates the code and restarts the service, and never touches an existing
-# .env, recordings or learned state. It does not ask for, create or store any keys: paper mode
-# needs none. Going beyond paper mode is a manual edit of /opt/hltrader/app/.env (docs/LIVE.md).
+# After installing, nothing is traded: the engine watches the market until you connect your
+# Hyperliquid account in the control panel and press Start. This script never asks for a key.
+# Safe to re-run: it updates the code and restarts the service, and keeps your saved account,
+# the Start/Stop state, recordings and learned state.
 set -euo pipefail
 
 REPO="${HL_REPO:-https://github.com/0xSkyler/hyperliquid.git}"
@@ -45,12 +46,13 @@ echo "==> python environment"
 echo "==> configuration"
 if [ ! -f "$APP/.env" ]; then
     cp "$APP/.env.example" "$APP/.env"
-    sed -i 's/^HL_MODE=.*/HL_MODE=paper/; s/^HL_RECORD_RAW=.*/HL_RECORD_RAW=1/' "$APP/.env"
-    echo "    created .env (paper mode, recording on)"
+    sed -i 's/^HL_RECORD_RAW=.*/HL_RECORD_RAW=1/' "$APP/.env"
+    echo "    created .env (recording on)"
 else
+    # Earlier versions installed in paper mode. There is one mode now, live, gated by Connect and Start.
+    sed -i -E 's/^HL_MODE=(paper|shadow|testnet)$/HL_MODE=live/; /^#? ?HL_LIVE_CONFIRM=/d' "$APP/.env"
     echo "    kept existing .env"
 fi
-MODE="$(grep -E '^HL_MODE=' "$APP/.env" | tail -1 | cut -d= -f2)"
 chmod 600 "$APP/.env"
 chown -R "$SVC_USER:$SVC_USER" "$HOME_DIR"
 
@@ -74,9 +76,10 @@ curl -fsS -m 5 http://127.0.0.1:8787/api/state >/dev/null || { echo "dashboard n
 TOKEN="$(cat "$APP/data/control_token" 2>/dev/null || echo "(not created yet - run: sudo cat $APP/data/control_token)")"
 cat <<EOF
 
-Installed and running. Mode: ${MODE}
+Installed and running. Nothing is traded until you connect your account and press Start.
 
   CONTROL PANEL: open http://127.0.0.1:8787 in a browser ON THIS SERVER (e.g. through RustDesk)
+                 1. paste the control token   2. paste your API wallet key, Connect   3. Start trading
   Control token: ${TOKEN}
                  (paste it into the panel once; to see it again: sudo cat $APP/data/control_token)
 

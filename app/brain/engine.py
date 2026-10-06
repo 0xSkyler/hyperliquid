@@ -105,14 +105,14 @@ class Engine:
         acct, book = self.venue.account(now), self.market.book
         self.venue.cancel_all(now)
         if not acct.known or book is None or not book.valid():
-            return "paused; the position is unknown right now, so nothing was sent - check the exchange directly"
+            return "Stopped. The position could not be read just now, so nothing was sent - check Hyperliquid directly."
         if acct.position == 0:
-            return "paused; there was no position to close"
+            return "Stopped. There was no position to close."
         is_buy = acct.position < 0
         px = self.meta.round_px(book.best_ask * 1.01 if is_buy else book.best_bid * 0.99)
         self.venue.submit(OrderIntent(self.meta.coin, is_buy, abs(acct.position), px, "Ioc", True, client_id="flatten"), now)
         self.orders_sent += 1
-        return f"paused; closing {abs(acct.position):g} {self.meta.coin} at market"
+        return f"Stopped. Closing {abs(acct.position):g} {self.meta.coin} at market."
 
     def on_news(self, score: float) -> None:
         self.market.news_score = score

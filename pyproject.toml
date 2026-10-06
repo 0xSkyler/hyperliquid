@@ -3,12 +3,15 @@ name = "hyperliquid-autonomous-trader"
 version = "0.1.0"
 description = "Expected-utility trading engine for Hyperliquid perpetuals (paper mode by default)"
 requires-python = ">=3.12"
-dependencies = ["numpy>=2.0", "aiohttp>=3.10", "lightgbm>=4.5", "anthropic>=1.0"]
+dependencies = [
+    "numpy>=2.0", "aiohttp>=3.10", "lightgbm>=4.5", "anthropic>=1.0",
+    "hyperliquid-python-sdk>=0.20", "eth-account>=0.13",  # order signing: live trading is the product
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
 # Needed only for TESTNET / LIVE order placement.
-live = ["hyperliquid-python-sdk>=0.9", "eth-account>=0.13"]
+live = []  # kept so older install commands still work; the libraries are core dependencies now
 postgres = ["asyncpg>=0.30"]
 # Only for python -m app.research.ticks (fast CSV parsing of tick archives).
 research = ["polars>=1.0"]
@@ -22,7 +25,7 @@ build-backend = "setuptools.build_meta"
 include = ["app*", "backtest*"]
 
 [tool.ruff]
-line-length = 130
+line-length = 140
 target-version = "py312"
 
 [tool.ruff.lint]

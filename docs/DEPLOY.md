@@ -20,8 +20,9 @@ curl -fsSL https://raw.githubusercontent.com/0xSkyler/hyperliquid/main/deploy/in
 ```
 
 It installs system packages, creates an unprivileged `hltrader` user, puts the code in
-`/opt/hltrader/app`, writes a `.env` for **paper mode with recording on**, installs the systemd
-service and starts it, then checks that it came up. It asks for no keys and stores none. Re-run the
+`/opt/hltrader/app`, writes a `.env` with recording on, installs the systemd service and starts
+it, then checks that it came up. Nothing is traded until you connect an account and press Start
+in the control panel. The installer asks for no keys. Re-run the
 same command to update: it never touches an existing `.env`, recordings or learned state. This
 installer is exercised on a clean Ubuntu 24.04 machine by CI on every push.
 
@@ -34,7 +35,7 @@ gzips previous days and the research tools read `.jsonl.gz` directly.
 journalctl -u hltrader -f                 # logs
 systemctl status hltrader                 # status
 curl -s http://127.0.0.1:8787/health      # 200 when healthy, 503 with the fault list otherwise
-sudo systemctl stop hltrader              # stop (does not close positions; irrelevant in paper mode)
+sudo systemctl stop hltrader              # stop the service (does NOT close an open position)
 ```
 
 To run research on the VPS recordings:
@@ -46,22 +47,20 @@ cd /opt/hltrader/app && sudo -u hltrader .venv/bin/python -m app.research.discov
 ## Control panel
 
 Open `http://127.0.0.1:8787` in a browser **on the server** (for example through RustDesk), or
-from your own computer through an SSH tunnel. The top bar always shows the mode in force: green
-for paper and shadow, amber for testnet, red for LIVE.
+from your own computer through an SSH tunnel. The top bar shows the state: grey "NOT CONNECTED",
+amber "LIVE - STOPPED", red "LIVE - TRADING".
 
-Paste the control token once to unlock the controls (the installer prints it; to see it again:
-`sudo cat /opt/hltrader/app/data/control_token`). Then you can:
+1. Paste the control token once to unlock the controls (the installer prints it; to see it again:
+   `sudo cat /opt/hltrader/app/data/control_token`).
+2. Paste your Hyperliquid API wallet key and press **Connect and fetch balance**. The key is
+   checked with Hyperliquid and your balance is shown.
+3. Press **Start trading**.
 
-- **Switch mode** - Paper, Shadow, Testnet, Live. The engine restarts itself in a few seconds and
-  keeps what it has learned. Testnet and Live are disabled until credentials are saved; Live also
-  asks you to type the confirmation phrase, every time you enter it.
-- **Pause / resume** - paused, it keeps watching and learning but sends no orders.
-- **Close position and pause** - cancels resting orders, closes the whole position at market.
-- **Save or remove Hyperliquid credentials** - account address and API wallet key.
-- **Risk preferences** - risk aversion, a leverage cap, and the paper balance.
+Also there: Stop trading, Close position and stop, Disconnect, and Risk (a leverage cap and risk
+aversion). See `docs/LIVE.md` for what each does and what the messages mean.
 
-If a mode cannot be started (wrong key, exchange unreachable), the engine runs in paper mode and
-shows the reason in a red banner instead of failing.
+If the saved key stops working (revoked, exchange unreachable), the engine stays up, sends
+nothing, and shows the reason in a red banner.
 
 ## Docker
 

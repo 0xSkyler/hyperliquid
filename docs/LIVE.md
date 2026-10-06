@@ -1,57 +1,64 @@
-# Going from paper to real orders
+# Live trading
 
-The order path (`HyperliquidLive`) was written against the official `hyperliquid-python-sdk` but
-has **not** been run against a funded account. Treat the first steps below as its test plan.
+Live is the only trading mode. Two things gate it, both in the control panel
+(`http://127.0.0.1:8787` on the server): an account must be **connected**, and **Start** must be
+pressed. Until then the engine only watches the market and learns.
 
-## Before you consider it
+## Connect
 
-Run paper mode with `HL_RECORD_RAW=1` for at least several days and look at the dashboard's
-calibration block. If `trusted_beta` is 0 in every regime, the engine has found no edge it can
-defend statistically and it will not trade live either. Paper results are an upper bound on live
-results: real queues are longer and real latency is worse than the simulation.
+1. In Hyperliquid open **More > API**, create an API wallet, and press **Authorize**. Copy the
+   private key it shows. An API wallet can trade but cannot withdraw.
+2. In the control panel paste that key into "API wallet private key" and press **Connect and
+   fetch balance**. The wallet address field is optional: the account the API wallet belongs to
+   is looked up from the key.
 
-## The easy way: the control panel
+The key is checked with Hyperliquid before anything is saved:
 
-Open the control panel (docs/DEPLOY.md), save your account address and API wallet key under
-"Hyperliquid account", then press **Testnet**. To go further, press **LIVE** and type the
-confirmation phrase. The steps below are the equivalent by hand, and the checks in step 4 apply
-either way.
+| What you see | What it means |
+|---|---|
+| Connected, balance shown | The key is valid; the account and its balance were found. |
+| "does not recognise this API wallet" | The API wallet was not authorised, or the key was copied wrongly. |
+| "main wallet ... not accepted" | You pasted your main wallet's private key. It can withdraw funds, so it is refused. |
+| "authorised for account X, not Y" | The address you typed is not the one this API wallet trades for. Clear the address field. |
 
-## 1. Testnet
+### About the balance
 
-1. Create an **API (agent) wallet** at app.hyperliquid-testnet.xyz -> More -> API. An agent wallet
-   can trade but cannot withdraw. Never put your main wallet's private key on a server.
-2. `pip install -e ".[live]"`
-3. In `.env` (chmod 600, never committed):
+New Hyperliquid accounts use the **unified** account mode, where your USDC sits in the Spot
+balance and is used directly as collateral for perpetuals. The panel shows the account mode and
+reads the balance from the right place for it. In the older classic mode, USDC in Spot must be
+moved to Perps before it can be traded (Portfolio > Transfer in Hyperliquid); the panel tells you
+if that is the case.
 
-   ```
-   HL_MODE=testnet
-   HL_ACCOUNT_ADDRESS=0x...      # the main account address the agent trades for
-   HL_API_SECRET_KEY=0x...       # the agent wallet's private key
-   ```
-4. Start it and check, in order: the startup log shows your real testnet equity; a position opened
-   by hand in the UI appears in the dashboard within a few seconds and the engine does not treat
-   the account as flat; killing and restarting the process with an open position resumes with that
-   position; pulling the network cable produces `HALTED_INSTRUMENTATION` and no orders.
+Hyperliquid's minimum order is $10. A balance near that leaves the engine very few position sizes.
 
-On startup in testnet/live the engine sets BTC to cross margin at the venue's maximum leverage so
-the venue never rejects for margin a size the utility engine chose. Actual exposure is whatever
-the engine sizes, not that setting.
+## Start and stop
 
-## 2. Mainnet
+- **Start trading** - real orders are sent whenever the engine finds a trade it trusts. The top
+  bar turns red and reads "LIVE - TRADING". The choice survives restarts and reboots.
+- **Stop trading** - nothing more is sent. An open position stays open.
+- **Close position and stop** - cancels resting orders and closes the whole position at market.
+- **Disconnect** - stops, and removes the key from the server. An open position stays open.
 
-Same as above with a mainnet agent wallet and:
+Connecting never starts trading on its own.
 
-```
-HL_MODE=live
-HL_LIVE_CONFIRM=I_UNDERSTAND_REAL_MONEY
-```
+## What to expect
 
-Without the confirmation variable the process refuses to start. Fund the account with an amount
-you can lose entirely: with default preferences a 1.5% gap against a full-size position costs
-about half the account.
+The engine trades only when one of its models has shown, on live data, forecasts accurate enough
+to beat trading costs. The panel says in plain words why it is not trading. On everything measured
+so far (README, "What the models have been trained on") no such edge has been found, so it may run
+for a long time without placing an order. That is the engine protecting the balance, not a fault.
 
-## Stopping
+When it does trade it sizes positions itself, up to the **Max leverage** you set under Risk. With
+the default of 40x a 1.5% move against a full-size position costs about half the account; set a
+lower cap if that is not what you want.
 
-`systemctl stop hltrader` (or Ctrl-C) stops decisions; it does **not** close positions or cancel
-resting orders. Do that in the Hyperliquid UI.
+On connecting, the engine sets BTC to cross margin at the venue's maximum leverage so the exchange
+does not reject a size the engine chose. Actual exposure is whatever the engine sizes, within your cap.
+
+## How this has been tested
+
+The whole journey (connect, balance, Start, close position, disconnect) runs in the test suite
+against a mock exchange through the real Hyperliquid SDK and its signing code, and the installer and
+control panel run on a clean Ubuntu machine on every push. Checking a key, reading roles and reading
+balances have been run against the real Hyperliquid API. **A real order has never been sent to the
+real exchange by this code.** The first one will be yours; start with an amount you can lose.

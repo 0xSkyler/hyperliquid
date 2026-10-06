@@ -10,6 +10,7 @@ must originate from this page (blocks other websites open in the same browser).
 from __future__ import annotations
 
 import hmac
+import inspect
 import json
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any
@@ -25,52 +26,52 @@ _PAGE = r"""<!doctype html><meta charset=utf-8><title>HL trader</title>
 <style>
 body{font:14px system-ui,sans-serif;margin:0;background:#111;color:#ddd}
 main{max-width:1100px;margin:0 auto;padding:16px}
-#bar{padding:14px 16px;font-size:20px;font-weight:600;background:#1c3a2a;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
-#bar.live{background:#7a1616}#bar.testnet{background:#5a4a12}#bar.paused{outline:3px solid #e0a020;outline-offset:-3px}
-#bar small{font-weight:400;font-size:13px;opacity:.85}
+#bar{padding:14px 16px;font-size:20px;font-weight:600;background:#333;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+#bar.running{background:#7a1616}#bar.stopped{background:#3a3a1c}
+#bar small{font-weight:400;font-size:13px;opacity:.9}
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .c,.panel{background:#1c1c1c;padding:10px 12px;border-radius:6px}.k{color:#888;font-size:12px}.v{font-size:18px}
 .panel{margin-top:10px}.panel h4{margin:0 0 8px;font-size:13px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
 button{font:inherit;padding:8px 14px;border-radius:5px;border:1px solid #444;background:#2a2a2a;color:#eee;cursor:pointer}
-button:hover{background:#383838}button.on{background:#2d6a4f;border-color:#3d8a66}
-button.danger{background:#7a1616;border-color:#a32222}button.warn{background:#6b5310;border-color:#927218}
-button:disabled{opacity:.45;cursor:not-allowed}
+button:hover{background:#383838}button.go{background:#2d6a4f;border-color:#3d8a66;font-size:17px;padding:12px 28px;font-weight:600}
+button.stop{background:#7a1616;border-color:#a32222;font-size:17px;padding:12px 28px;font-weight:600}
+button.danger{background:#5a1a1a;border-color:#8a2a2a}button:disabled{opacity:.45;cursor:not-allowed}
 input{font:inherit;padding:7px 9px;border-radius:5px;border:1px solid #444;background:#151515;color:#eee;min-width:0}
 input.wide{flex:1 1 320px}label{color:#aaa;font-size:13px}
-#msg{min-height:20px;margin:8px 0;font-size:13px}#msg.err{color:#ff7b7b}#msg.ok{color:#7bd88f}
+#msg{min-height:20px;margin:8px 0;font-size:14px}#msg.err{color:#ff7b7b}#msg.ok{color:#7bd88f}
 #err{background:#4a1a1a;padding:10px 12px;border-radius:6px;margin-top:10px;display:none}
+#why{font-size:14px;margin:8px 0 2px}.big{font-size:26px;font-weight:600}
 pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto;margin:0}h3{margin:18px 0 6px;font-size:15px}
-.hint{color:#888;font-size:12px;margin:4px 0}
+.hint{color:#888;font-size:12px;margin:4px 0}.warn{color:#e0b040}
 </style>
 <div id=bar><span id=mode>loading</span><small id=sub></small></div>
 <main>
 <div id=err></div>
-<h3>Control</h3>
 <div id=locked class=panel><h4>Unlock controls</h4>
  <div class=row><input id=tok class=wide type=password placeholder="control token"><button id=tokbtn>Unlock</button></div>
  <div class=hint>On the server run: <code>sudo cat /opt/hltrader/app/data/control_token</code> and paste the result here. It is remembered in this browser.</div></div>
 <div id=ctl style="display:none">
  <div id=msg></div>
- <div class=panel><h4>Trading mode</h4>
-  <div class=row>
-   <button data-mode=paper>Paper</button><button data-mode=shadow>Shadow</button>
-   <button data-mode=testnet class=warn>Testnet</button><button data-mode=live class=danger>LIVE (real money)</button></div>
-  <div class=hint>Paper: real prices, simulated money. Shadow: decides but sends nothing. Testnet: real orders with test money. Live: real orders with real money. Changing mode restarts the engine (a few seconds).</div></div>
- <div class=panel><h4>Trading switch</h4>
-  <div class=row><button id=pause></button><button id=flat class=danger>Close position and pause</button></div>
-  <div class=hint>Paused: the engine keeps watching and learning but sends no orders. "Close position" cancels resting orders, closes the whole position at market and pauses.</div></div>
- <div class=panel><h4>Hyperliquid account (needed for Testnet and Live)</h4>
-  <div class=row><input id=addr class=wide placeholder="account address 0x... (your main wallet, public)"></div>
-  <div class=row><input id=key class=wide type=password autocomplete=off placeholder="API wallet private key (never your main wallet key)"></div>
-  <div class=row><button id=savecred>Save credentials</button><button id=clearcred>Remove credentials</button><span id=credstate class=hint></span></div>
-  <div class=hint>Create an API wallet in Hyperliquid under More &rarr; API. It can trade but cannot withdraw. The key is stored on this server only and is never shown again.</div></div>
- <div class=panel><h4>Risk preferences</h4>
-  <div class=row><label>Risk aversion <input id=ra type=number step=0.5 min=1 max=100 style="width:90px"></label>
-   <label>Max leverage <input id=ml type=number step=1 min=1 max=100 style="width:90px"></label>
-   <label>Paper balance $ <input id=pe type=number step=100 min=10 style="width:120px"></label>
-   <button id=saveprefs>Save and restart</button></div>
-  <div class=hint>Risk aversion: 1 = most aggressive, 4 = default, higher = smaller positions. Max leverage caps exposure below the venue's limit.</div></div>
+ <div class=panel id=connectbox><h4>1. Connect your Hyperliquid account</h4>
+  <div class=row><input id=key class=wide type=password autocomplete=off placeholder="API wallet private key"></div>
+  <div class=row><input id=addr class=wide placeholder="wallet address 0x... (optional - found automatically from the key)"></div>
+  <div class=row><button id=connect>Connect and fetch balance</button></div>
+  <div class=hint>In Hyperliquid open More &rarr; API, create an API wallet, press Authorize, and paste the private key it shows. An API wallet can trade but cannot withdraw. The key is checked with Hyperliquid, stored on this server only, and never shown again.</div></div>
+ <div class=panel id=acctbox style="display:none"><h4>Account</h4>
+  <div class=row><span class=big id=bal>-</span><span id=acct class=hint></span></div>
+  <div id=balnote class="hint warn"></div>
+  <div class=row><button id=refresh>Refresh balance</button><button id=disconnect>Disconnect</button></div></div>
+ <div class=panel id=runbox style="display:none"><h4>2. Trading</h4>
+  <div class=row><button id=start class=go>Start trading</button><button id=stop class=stop>Stop trading</button>
+   <button id=flat class=danger>Close position and stop</button></div>
+  <div id=why></div>
+  <div class=hint>Started: the engine sends real orders whenever it finds a trade it trusts. Stopped: it keeps watching and learning but sends nothing. Stopping does not close an open position; use "Close position and stop" for that.</div></div>
+ <div class=panel id=prefbox style="display:none"><h4>Risk</h4>
+  <div class=row><label>Max leverage <input id=ml type=number step=1 min=1 max=100 style="width:90px"></label>
+   <label>Risk aversion <input id=ra type=number step=0.5 min=1 max=100 style="width:90px"></label>
+   <button id=saveprefs>Save</button></div>
+  <div class=hint>Max leverage caps how large a position can be relative to the balance. Risk aversion: 1 = most aggressive, 4 = default, higher = smaller positions. Saving restarts the engine (a few seconds).</div></div>
 </div>
 <h3>Status</h3><div class=g id=g></div>
 <h3>Model arena</h3><pre id=a></pre><h3>Last decision</h3><pre id=d></pre>
@@ -79,45 +80,54 @@ pre{background:#1c1c1c;padding:10px;border-radius:6px;overflow:auto;margin:0}h3{
 </main>
 <script>
 const $=id=>document.getElementById(id),f=(x,n=2)=>x==null?'-':Number(x).toFixed(n);
-let token=localStorage.getItem('hl_token')||'',ctl=null;
+let token=localStorage.getItem('hl_token')||'',ctl=null,busy=false;
 function say(t,ok){const m=$('msg');m.textContent=t;m.className=ok?'ok':'err'}
+function show(id,on){$(id).style.display=on?'':'none'}
 async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'X-Control-Token':token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   const j=await r.json().catch(()=>({}));
   if(r.status===401){token='';localStorage.removeItem('hl_token');ctl=null;throw new Error('wrong or missing control token')}
   if(!r.ok)throw new Error(j.error||('request failed ('+r.status+')'));return j}
-async function act(path,body,done){try{const j=await api(path,body||{});say(j.message||done||'done',true);await loadCtl()}catch(e){say(e.message,false)}}
+async function act(path,body,working){if(busy)return;busy=true;say(working||'working...',true);
+  try{const j=await api(path,body||{});say(j.message||'done',true)}catch(e){say(e.message,false)}
+  busy=false;await loadCtl()}
+function money(x){return x==null?'-':'$'+Number(x).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
 async function loadCtl(){
-  if(!token){$('locked').style.display='';$('ctl').style.display='none';return}
-  try{ctl=await api('/api/control')}catch(e){$('locked').style.display='';$('ctl').style.display='none';return}
-  $('locked').style.display='none';$('ctl').style.display='';
-  document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('on',b.dataset.mode===ctl.mode);
-    b.disabled=(b.dataset.mode==='testnet'||b.dataset.mode==='live')&&!ctl.has_key});
-  $('pause').textContent=ctl.paused?'Resume trading':'Pause trading';$('pause').className=ctl.paused?'on':'warn';
-  $('credstate').textContent=ctl.has_key?'key saved for '+(ctl.account_address||'(address from environment)'):'no key saved';
-  if(document.activeElement!==$('addr'))$('addr').value=ctl.account_address||'';
-  for(const [id,k] of [['ra','risk_aversion'],['ml','max_leverage'],['pe','paper_equity']])
-    if(document.activeElement!==$(id))$(id).value=ctl.effective[k]??'';
+  if(!token){show('locked',1);show('ctl',0);return}
+  try{ctl=await api('/api/control')}catch(e){if(!token){show('locked',1);show('ctl',0)}return}
+  show('locked',0);show('ctl',1);
+  const c=ctl.connected,a=ctl.account||{};
+  show('connectbox',!c);show('acctbox',c);show('runbox',c);show('prefbox',1);
+  if(c){$('bal').textContent=a.equity==null?'reading balance...':money(a.equity);
+    $('acct').textContent=(ctl.account_address||'')+(a.abstraction?'  |  account mode: '+a.abstraction:'')+
+      (a.position?'  |  position: '+a.position+' '+ctl.coin:'  |  no open position');
+    let note='';
+    if(a.equity!=null&&!a.unified&&a.perp_account_value===0&&a.spot_usdc>0)
+      note='Your '+money(a.spot_usdc)+' USDC is in the Spot balance. In this account mode it has to be moved to Perps before it can be traded: in Hyperliquid use Portfolio > Transfer.';
+    else if(a.equity===0)note='This account has no USDC available for trading. Deposit to Hyperliquid, then press Refresh balance.';
+    else if(a.equity!=null&&a.equity<11)note='Hyperliquid\'s minimum order is $10. With a balance this small the engine can only take very few position sizes.';
+    $('balnote').textContent=note;
+    $('start').disabled=ctl.running||!a.equity;$('stop').disabled=!ctl.running;
+    $('why').textContent=ctl.running?('Running. '+(ctl.reason||'')):'Stopped. No orders will be sent until you press Start trading.'}
+  for(const [id,k] of [['ra','risk_aversion'],['ml','max_leverage']])if(document.activeElement!==$(id))$(id).value=ctl.effective[k]??'';
 }
 $('tokbtn').onclick=async()=>{token=$('tok').value.trim();localStorage.setItem('hl_token',token);await loadCtl();if(!ctl)alert('That token was not accepted.')};
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
-  const mode=b.dataset.mode;let confirmText='';
-  if(mode==='live'){confirmText=prompt('LIVE mode places real orders with real money.\n\nTo confirm, type exactly:\n'+ctl.live_confirm_phrase)||'';if(!confirmText)return}
-  else if(mode==='testnet'&&!confirm('Switch to TESTNET? It will place real orders with test money.'))return;
-  act('/api/control/mode',{mode,confirm:confirmText},'switching to '+mode+'; the engine is restarting')});
-$('pause').onclick=()=>act('/api/control/pause',{paused:!ctl.paused});
-$('flat').onclick=()=>{if(confirm('Cancel all resting orders, close the whole position at market, and pause trading?'))act('/api/control/flatten')};
-$('savecred').onclick=async()=>{await act('/api/control/credentials',{account_address:$('addr').value,api_secret_key:$('key').value},'credentials saved');$('key').value=''};
-$('clearcred').onclick=()=>{if(confirm('Remove the saved key and address? Testnet/Live will switch back to paper.'))act('/api/control/credentials/clear')};
-$('saveprefs').onclick=()=>act('/api/control/preferences',{risk_aversion:$('ra').value,max_leverage:$('ml').value,paper_equity:$('pe').value},'saved; the engine is restarting');
+$('connect').onclick=async()=>{await act('/api/control/connect',{api_secret_key:$('key').value,account_address:$('addr').value},'checking the key with Hyperliquid...');$('key').value=''};
+$('refresh').onclick=()=>act('/api/control/refresh',{},'reading balance...');
+$('disconnect').onclick=()=>{if(confirm('Stop trading and remove the saved key from this server? An open position is NOT closed by this.'))act('/api/control/disconnect')};
+$('start').onclick=()=>act('/api/control/start');
+$('stop').onclick=()=>act('/api/control/stop');
+$('flat').onclick=()=>{if(confirm('Cancel all resting orders, close the whole position at market, and stop trading?'))act('/api/control/flatten')};
+$('saveprefs').onclick=()=>act('/api/control/preferences',{risk_aversion:$('ra').value,max_leverage:$('ml').value},'saving...');
 async function go(){try{const s=await (await fetch('/api/state')).json();const e=s.engine,j=e.journal,l=e.last||{},h=s.health;
-const bar=$('bar');bar.className=e.mode+(h.paused?' paused':'');
-$('mode').textContent=e.coin+' | '+e.mode.toUpperCase()+(e.mode==='live'?' - REAL MONEY':'')+' | '+(h.paused?'PAUSED':e.state);
-$('sub').textContent='equity '+f(j.equity)+'   position '+f(l.f_current,2)+'x   faults: '+((h.faults||[]).join(', ')||'none');
+const status=!h.connected?'NOT CONNECTED':(h.running?'LIVE - TRADING':'LIVE - STOPPED');
+$('bar').className=!h.connected?'':(h.running?'running':'stopped');
+$('mode').textContent=e.coin+' | '+status;
+$('sub').textContent=(h.connected?'balance '+f(j.equity)+'   position '+f(l.f_current,2)+'x   ':'watching the market, no account connected   ')+'faults: '+((h.faults||[]).join(', ')||'none');
 const er=$('err');er.style.display=h.startup_error?'':'none';er.textContent=h.startup_error||'';
-const cards=[['Equity',f(j.equity)],['Net return %',f(j.net_return_pct,3)],['Max drawdown %',f(j.max_drawdown_pct,3)],
-['Mid',f(e.mid,1)],['Exposure (x equity)',f(l.f_current,2)],['Edge bps (calibrated)',f(l.expected_edge_bps,3)],
-['Trusted beta',f(l.extra&&l.extra.beta,3)],['Champion',e.model.champion],['Fills',j.fills],['Fees',f(j.fees,4)],
+const cards=[['Balance',h.connected?f(j.equity):'-'],['Net return %',h.connected?f(j.net_return_pct,3):'-'],['Max drawdown %',h.connected?f(j.max_drawdown_pct,3):'-'],
+['BTC price',f(e.mid,1)],['Position (x balance)',h.connected?f(l.f_current,2):'-'],['Expected edge bps',f(l.expected_edge_bps,3)],
+['Trust in forecasts',f(l.extra&&l.extra.beta,3)],['Champion model',e.model.champion],['Fills',h.connected?j.fills:'-'],['Fees paid',h.connected?f(j.fees,4):'-'],
 ['Faults',(h.faults||[]).join(', ')||'none'],['Feed age s',f(h.feed_age_s,2)]];
 const g=$('g');g.replaceChildren(...cards.map(([k,v])=>{const c=document.createElement('div');c.className='c';
  const a=document.createElement('div');a.className='k';a.textContent=k;const b=document.createElement('div');b.className='v';b.textContent=v;c.append(a,b);return c}));
@@ -125,9 +135,9 @@ const pre=(id,o)=>$(id).textContent=JSON.stringify(o,null,1);
 pre('a',e.model.arena.map(x=>`${x.champion?'CHAMPION ':'          '}${x.name.padEnd(16)} ic ${f(x.oos_ic,4)}  trusted beta ${f(x.max_trusted_beta,3)}  vs champion t ${f(x.vs_champion_t,2)}  resolved ${x.resolved}`));
 pre('d',l);pre('m',e.model.calibration);pre('r',e.recent_decisions.slice(-5));pre('n',(s.news.latest||[]).map(x=>`${x.source} [${x.confirmations}] ${x.title}`));
 }catch(err){$('mode').textContent='engine not responding (restarting?)';$('sub').textContent=''}}
-go();loadCtl();setInterval(go,2000);setInterval(loadCtl,5000);</script>"""
+go();loadCtl();setInterval(go,2000);setInterval(()=>{if(!busy)loadCtl()},4000);</script>"""
 
-Handler = Callable[[dict[str, Any]], dict[str, Any]]
+Handler = Callable[[dict[str, Any]], dict[str, Any] | Awaitable[dict[str, Any]]]
 
 
 def make_app(
@@ -168,9 +178,11 @@ def make_app(
                 body = parsed if isinstance(parsed, dict) else {}
             try:
                 out = control[name](body)
+                if inspect.isawaitable(out):
+                    out = await out
             except ControlError as e:
                 return web.json_response({"error": str(e)}, status=400)
-            return web.json_response(out)
+            return web.Response(text=json.dumps(out, default=float), content_type="application/json")
 
         return handle
 

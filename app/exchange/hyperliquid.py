@@ -65,10 +65,46 @@ def parse_event(channel: str, data: Any, recv_ts: float) -> tuple[str, Any] | No
     return None
 
 
+UNIFIED_MODES = ("unifiedAccount", "portfolioMargin")
+
+
+def parse_account(abstraction: str, perp: dict[str, Any], spot: dict[str, Any], coin: str) -> dict[str, Any]:
+    """One view of an account from its abstraction mode, perp state and spot state.
+
+    Hyperliquid's default for new accounts is the *unified* mode, where collateral lives in the
+    spot USDC balance and the perp account value is "not meaningful" (it reads 0). Reading only
+    the perp state would report an empty account. In unified modes equity is taken as spot USDC
+    plus the unrealised PnL of open perp positions; in the classic modes it is the perp account value.
+    """
+    perp_value = float(perp.get("marginSummary", {}).get("accountValue", 0.0))
+    usdc: dict[str, Any] = next((b for b in spot.get("balances", []) if b.get("coin") == "USDC"), {})
+    spot_usdc, spot_hold = float(usdc.get("total", 0.0)), float(usdc.get("hold", 0.0))
+    pos, entry, upnl = 0.0, 0.0, 0.0
+    for ap in perp.get("assetPositions", []):
+        q = ap["position"]
+        upnl += float(q.get("unrealizedPnl") or 0.0)
+        if q["coin"] == coin:
+            pos, entry = float(q["szi"]), float(q.get("entryPx") or 0.0)
+    unified = abstraction in UNIFIED_MODES
+    return {
+        "abstraction": abstraction, "unified": unified,
+        "equity": spot_usdc + upnl if unified else perp_value,
+        "perp_account_value": perp_value, "spot_usdc": spot_usdc, "spot_usdc_hold": spot_hold,
+        "unrealized_pnl": upnl, "position": pos, "entry_px": entry,
+    }  # fmt: skip
+
+
+def agent_address(secret_key: str) -> str:
+    """The address an API wallet key signs as."""
+    import eth_account
+
+    return str(eth_account.Account.from_key(secret_key).address)
+
+
 class HyperliquidData:
     def __init__(self, api_url: str) -> None:
         self.api_url = api_url
-        self.ws_url = api_url.replace("https://", "wss://") + "/ws"
+        self.ws_url = api_url.replace("http", "ws", 1) + "/ws"  # https -> wss, http -> ws
         self.reconnects = 0
 
     async def info(self, payload: dict[str, Any]) -> Any:
@@ -93,6 +129,17 @@ class HyperliquidData:
         closed = [r for r in rows if r["T"] < now_ms]
         return np.array([[r["t"] / 1000, float(r["o"]), float(r["h"]), float(r["l"]), float(r["c"]), float(r["v"])]
                          for r in closed])  # fmt: skip
+
+    async def role(self, address: str) -> dict[str, Any]:
+        """{"role": "user" | "agent" | "vault" | "subAccount" | "missing", "data": {...}}"""
+        r = await self.info({"type": "userRole", "user": address})
+        return r if isinstance(r, dict) else {"role": "missing"}
+
+    async def account(self, address: str, coin: str) -> dict[str, Any]:
+        abstraction = await self.info({"type": "userAbstraction", "user": address})
+        perp = await self.info({"type": "clearinghouseState", "user": address})
+        spot = await self.info({"type": "spotClearinghouseState", "user": address})
+        return parse_account(str(abstraction), perp, spot, coin) | {"address": address}
 
     async def fees(self, address: str) -> tuple[float, float] | None:
         """(taker, maker) perp fee rates for this account, or None if unavailable."""
@@ -154,8 +201,14 @@ class HyperliquidLive:
         from hyperliquid.info import Info
 
         wallet = eth_account.Account.from_key(secret_key)
-        self._ex = Exchange(wallet, api_url, account_address=address)
-        self._info = Info(api_url, skip_ws=True)
+        self._ex = Exchange(wallet, api_url, account_address=address, timeout=10)
+        self._info = Info(api_url, skip_ws=True, timeout=10)
+        self.snapshot: dict[str, Any] = {}  # last parsed account view, for the control panel
+        self._abstraction = "default"
+        self._abstraction_ts = 0.0
+        self._heavy_ts = 0.0  # open orders and fills cost 10x the rate-limit weight of account state
+        self._last_pos: float | None = None
+        self._last_submit = 0.0
         self._address = address
         self._meta = meta
         self._pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="hl-orders")
@@ -173,6 +226,7 @@ class HyperliquidLive:
         self._seq += 1
         seq = self._seq
         self._inflight[seq] = now
+        self._last_submit = time.time()
         self._pool.submit(self._place, seq, intent, now)
 
     def cancel_all(self, now: float) -> None:
@@ -195,37 +249,42 @@ class HyperliquidLive:
 
     # --- worker-thread side --------------------------------------------
     def refresh(self) -> None:
-        """Reconcile from the exchange. Call via asyncio.to_thread every couple of seconds."""
+        """Reconcile from the exchange. Call via asyncio.to_thread every couple of seconds.
+
+        Account state is cheap (rate-limit weight 2) and read every call. Open orders and fills
+        cost weight 20 each, so they are read every 10 seconds, or immediately when the position
+        changed or an order was sent in the last few seconds.
+        """
         try:
-            st = self._info.user_state(self._address)
-            pos, entry = 0.0, 0.0
-            for ap in st.get("assetPositions", []):
-                p = ap["position"]
-                if p["coin"] == self._meta.coin:
-                    pos, entry = float(p["szi"]), float(p.get("entryPx") or 0.0)
-            oo = [o for o in self._info.open_orders(self._address) if o["coin"] == self._meta.coin]
             now = time.time()
-            for o in oo:
-                if self._resting.get(o["oid"], now + 1) <= now:
-                    self._ex.cancel(self._meta.coin, o["oid"])
-            for f in self._info.user_fills_by_time(self._address, self._fills_since_ms):
-                key = f"{f['tid']}"
-                if f["coin"] != self._meta.coin or key in self._seen_fills:
-                    continue
-                self._seen_fills.add(key)
-                self._fills.append(
-                    Fill(
-                        f["time"] / 1000.0,
-                        f["coin"],
-                        f["side"] == "B",
-                        float(f["px"]),
-                        float(f["sz"]),
-                        float(f["fee"]),
-                        not f.get("crossed", True),
-                    )
-                )
-            equity = float(st["marginSummary"]["accountValue"])
-            self._acct = AccountState(now, True, equity, pos, entry, len(oo))
+            if now - self._abstraction_ts > 300:
+                self._abstraction = str(self._info.query_user_abstraction_state(self._address))
+                self._abstraction_ts = now
+            perp = self._info.user_state(self._address)
+            spot = self._info.spot_user_state(self._address)
+            snap = parse_account(self._abstraction, perp, spot, self._meta.coin)
+            pos = snap["position"]
+            heavy = now - self._heavy_ts > 10 or pos != self._last_pos or now - self._last_submit < 5
+            open_n = self._acct.open_orders
+            if heavy:
+                self._heavy_ts = now
+                oo = [o for o in self._info.open_orders(self._address) if o["coin"] == self._meta.coin]
+                open_n = len(oo)
+                for o in oo:
+                    if self._resting.get(o["oid"], now + 1) <= now:
+                        self._ex.cancel(self._meta.coin, o["oid"])
+                for f in self._info.user_fills_by_time(self._address, self._fills_since_ms):
+                    key = f"{f['tid']}"
+                    if f["coin"] != self._meta.coin or key in self._seen_fills:
+                        continue
+                    self._seen_fills.add(key)
+                    self._fills.append(
+                        Fill(f["time"] / 1000.0, f["coin"], f["side"] == "B", float(f["px"]), float(f["sz"]),
+                             float(f["fee"]), not f.get("crossed", True))
+                    )  # fmt: skip
+            self._last_pos = pos
+            self.snapshot = snap | {"address": self._address, "ts": now}
+            self._acct = AccountState(now, True, snap["equity"], pos, snap["entry_px"], open_n)
         except Exception:  # noqa: BLE001
             self.errors += 1
             log.exception("account refresh failed; account state is now UNKNOWN")

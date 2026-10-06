@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: install
         run: sudo HL_SRC="$PWD" bash deploy/install.sh
-      - name: service is running as an unprivileged user in paper mode
+      - name: service is running as an unprivileged user, connected to nothing, trading nothing
         run: |
           systemctl is-active hltrader
           test "$(ps -o user= -p "$(systemctl show -p MainPID --value hltrader)")" = hltrader
@@ -35,48 +35,51 @@ jobs:
           curl -fsS http://127.0.0.1:8787/api/state | python3 -c "
           import sys, json
           s = json.load(sys.stdin)
-          e = s['engine']
-          print('mode', e['mode'], '| state', e['state'], '| ticks', e['ticks'], '| mid', e['mid'])
-          print('models', [m['name'] for m in e['model']['arena']], '| charts', s['health']['chart']['loaded'])
-          print('faults', s['health']['faults'])
-          assert e['mode'] == 'paper' and e['ticks'] > 10
+          e, h = s['engine'], s['health']
+          print('connected', h['connected'], '| running', h['running'], '| ticks', e['ticks'], '| mid', e['mid'])
+          print('models', [m['name'] for m in e['model']['arena']], '| charts', h['chart']['loaded'], '| faults', h['faults'])
+          assert h['connected'] is False and h['running'] is False and e['ticks'] > 10 and e['mid']
           assert [m['name'] for m in e['model']['arena']] == ['ridge', 'mlp', 'tree', 'flow_pretrained']
-          assert s['health']['chart']['loaded'] == ['5m', '1h', '4h', '1d']
+          assert h['chart']['loaded'] == ['5m', '1h', '4h', '1d']
           "
           sudo journalctl -u hltrader -n 15 --no-pager
-      - name: control panel - token required, pause, mode switch, safe fallback
+      - name: control panel - token, live-only page, connect checks a key with Hyperliquid, start refused
         run: |
           /opt/hltrader/app/.venv/bin/python -c "import hyperliquid, eth_account; print('order-signing libraries installed')"
           TOKEN="$(sudo cat /opt/hltrader/app/data/control_token)"
           test "$(sudo stat -c %a /opt/hltrader/app/data/control_token)" = 600
+          curl -fsS http://127.0.0.1:8787/ > /tmp/page
+          grep -q "Start trading" /tmp/page && grep -q "Connect and fetch balance" /tmp/page
+          ! grep -qE "Paper|Shadow|Testnet|I_UNDERSTAND" /tmp/page
           call() { curl -sS -o /tmp/out -w '%{http_code}' -H "X-Control-Token: $1" -H 'Content-Type: application/json' -X POST "http://127.0.0.1:8787/api/control/$2" -d "$3"; }
-          test "$(call wrong-token pause '{"paused":true}')" = 401
-          test "$(call "$TOKEN" pause '{"paused":true}')" = 200 && cat /tmp/out && echo
-          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; assert json.load(sys.stdin)['health']['paused'] is True"
-          test "$(call "$TOKEN" mode '{"mode":"testnet"}')" = 400 && cat /tmp/out && echo    # no credentials saved
-          test "$(call "$TOKEN" mode '{"mode":"live","confirm":"I_UNDERSTAND_REAL_MONEY"}')" = 400   # still no credentials
-          test "$(call "$TOKEN" mode '{"mode":"shadow"}')" = 200 && cat /tmp/out && echo
+          test "$(call wrong-token start '{}')" = 401
+          test "$(call "$TOKEN" start '{}')" = 400 && cat /tmp/out && echo                 # no account connected
+          KEY="0x$(openssl rand -hex 32)"                                                 # a throwaway key nobody has authorised
+          test "$(call "$TOKEN" connect "{\"api_secret_key\":\"$KEY\"}")" = 400 && cat /tmp/out && echo
+          grep -q "does not recognise this API wallet" /tmp/out                           # checked against the real exchange
+          test "$(call "$TOKEN" connect '{"api_secret_key":"hello"}')" = 400
+          ! sudo grep -q api_secret_key /opt/hltrader/app/data/control.json 2>/dev/null   # refused keys are never stored
+          test "$(call "$TOKEN" preferences '{"max_leverage":"5"}')" = 200 && cat /tmp/out && echo
           sleep 12
-          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "
+          curl -fsS -H "X-Control-Token: $TOKEN" http://127.0.0.1:8787/api/control | python3 -c "
           import sys, json
-          s = json.load(sys.stdin)
-          print('after switch:', s['engine']['mode'], 'paused', s['health']['paused'])
-          assert s['engine']['mode'] == 'shadow' and s['health']['paused'] is True
+          c = json.load(sys.stdin)
+          print(c)
+          assert c['connected'] is False and c['running'] is False and c['effective']['max_leverage'] == 5.0
           "
           systemctl is-active hltrader
           test "$(sudo stat -c %a /opt/hltrader/app/data/control.json)" = 600
-          test "$(call "$TOKEN" mode '{"mode":"paper"}')" = 200
-          test "$(call "$TOKEN" pause '{"paused":false}')" = 200 || { sleep 6; test "$(call "$TOKEN" pause '{"paused":false}')" = 200; }
-          sleep 8
-      - name: re-running the installer keeps configuration and learned state
+      - name: re-running the installer keeps settings and learned state, and migrates an old paper-mode install
         run: |
+          sudo sed -i 's/^HL_MODE=.*/HL_MODE=paper/' /opt/hltrader/app/.env
           echo "HL_PAPER_EQUITY=777" | sudo tee -a /opt/hltrader/app/.env >/dev/null
           sudo HL_SRC="$PWD" bash deploy/install.sh
           sudo grep -q "HL_PAPER_EQUITY=777" /opt/hltrader/app/.env
+          sudo grep -q "^HL_MODE=live$" /opt/hltrader/app/.env
           sudo test -f /opt/hltrader/app/data/state/engine-BTC.pkl
           sudo ls /opt/hltrader/app/data
           sleep 15
-          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; e = json.load(sys.stdin)['engine']; print(e['mode'], e['ticks']); assert e['mode'] == 'paper'"
+          curl -fsS http://127.0.0.1:8787/api/state | python3 -c "import sys, json; h = json.load(sys.stdin)['health']; print(h['connected'], h['running']); assert h['connected'] is False and h['running'] is False"
           sudo journalctl -u hltrader --since "-2min" --no-pager | grep -E "stop requested|learned state"
           sudo journalctl -u hltrader --since "-2min" --no-pager | grep -q "stop requested: shutting down"
           sudo journalctl -u hltrader --since "-2min" --no-pager | grep -q "learned state: restored"

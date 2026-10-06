@@ -18,4 +18,6 @@
 - Learned state is stored with Python `pickle` (`data/state/*.pkl`). Unpickling runs code, so treat
   that directory like the program itself: writable only by the service user, and never load a
   state file obtained from someone else.
-- LIVE mode refuses to start without `HL_LIVE_CONFIRM`.
+- Live trading needs two operator actions in the control panel: connecting an account, and pressing
+  Start. Connecting never starts trading. A main-wallet private key (which could withdraw funds) is
+  detected and refused; only API wallet keys are stored.

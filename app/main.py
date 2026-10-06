@@ -1,4 +1,7 @@
-"""Process entry point: `python -m app.main [--duration SECONDS]`. Mode comes from HL_MODE."""
+"""Process entry point: `python -m app.main [--duration SECONDS]`.
+
+Live trading is the one mode: it needs an account connected and Start pressed in the control panel.
+"""
 
 from __future__ import annotations
 
@@ -13,61 +16,63 @@ from typing import Any
 
 from app.brain.engine import Engine
 from app.config.settings import Mode
-from app.control import ControlStore, Startup, load_startup
+from app.control import ControlError, ControlStore, Startup, load_startup, verify_credentials
 from app.exchange.base import Venue
 from app.exchange.hyperliquid import HyperliquidData, HyperliquidLive, parse_event
 from app.exchange.paper import PaperVenue
 from app.models.chart import TIMEFRAMES, ChartModel
-from app.monitoring.dashboard import serve
+from app.monitoring.dashboard import Handler, serve
 from app.news.monitor import NewsMonitor, RssSource
 from app.persistence.sink import JsonlSink, PostgresSink
 
 log = logging.getLogger("app")
 
 
-async def run(st: Startup, duration: float | None) -> bool:
+async def run(st: Startup, duration: float | None, stop: asyncio.Event | None = None) -> bool:
     """Run the engine until stopped. Returns True if the control panel asked for a restart."""
     s = st.settings
     if s.mode in (Mode.RESEARCH, Mode.BACKTEST):
         raise SystemExit("use `python -m backtest.run` for backtest/research")
     store = ControlStore(s.data_dir)
     startup_error = st.error
+    connected = st.connected
     data = HyperliquidData(s.api_url)
     meta = await data.meta(s.coin)
     if s.max_leverage_cap > 0:
         meta = dataclasses.replace(meta, max_leverage=min(meta.max_leverage, s.max_leverage_cap))
-    fees = await data.fees(s.account_address)
+    fees = await data.fees(s.account_address) if connected else None
     if fees:
         s = dataclasses.replace(s, taker_fee=fees[0], maker_fee=fees[1])
-    log.info("mode=%s coin=%s maxLeverage=%s taker=%.5f maker=%.5f", s.mode.value, s.coin,
-             meta.max_leverage, s.taker_fee, s.maker_fee)  # fmt: skip
 
     venue: Venue
     live: HyperliquidLive | None = None
-    if s.mode in (Mode.TESTNET, Mode.LIVE):
+    if connected:
         try:
-            live = HyperliquidLive(s.api_url, s.account_address, st.secret_key, meta)
-            await asyncio.to_thread(live.set_max_cross_leverage)
-            await asyncio.to_thread(live.refresh)  # reconcile before the first decision
+            # The SDK does blocking network calls in its constructor: keep them off the event loop.
+            live = await asyncio.to_thread(HyperliquidLive, s.api_url, s.account_address, st.secret_key, meta)
+            await asyncio.to_thread(live.refresh)  # reconcile before anything else
             if not live.account(time.time()).known:
-                raise RuntimeError("the exchange did not return this account's state")
-        except Exception as e:  # noqa: BLE001 - never crash-loop on a bad key or missing library
-            log.error("could not start %s mode (%s: %s); falling back to paper", s.mode.value, type(e).__name__, e)
-            startup_error = (f"Could not start {s.mode.value} mode: {type(e).__name__}: {e}. "
-                             "Running in paper mode instead.")  # fmt: skip
-            live = None
-            if s.mode is Mode.TESTNET:  # paper mode should watch the real market, not testnet
-                s = dataclasses.replace(s, mode=Mode.PAPER)
-                data = HyperliquidData(s.api_url)
+                raise RuntimeError("Hyperliquid did not return this account's state")
+            await asyncio.to_thread(live.set_max_cross_leverage)
+        except Exception as e:  # noqa: BLE001 - a bad key or an outage must not crash-loop the service
+            log.error("could not connect the account (%s: %s); nothing will be traded", type(e).__name__, e)
+            startup_error = (f"Could not connect to your Hyperliquid account ({type(e).__name__}: {e}). "
+                             "Nothing is being traded. Check the API wallet in Hyperliquid, then connect again below.")  # fmt: skip
+            live, connected = None, False
             s = dataclasses.replace(s, mode=Mode.PAPER)
     if live is not None:
         venue = live
     else:
+        # Internal simulator. When no account is connected it is held stopped, so it never trades;
+        # it only gives the engine something to watch the market and learn against.
         venue = PaperVenue(s.paper_equity, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
+    developer_mode = s.mode in (Mode.PAPER, Mode.SHADOW) and not st.connected and st.running
+    log.info("coin=%s connected=%s running=%s maxLeverage=%s taker=%.5f maker=%.5f", s.coin, connected,
+             st.running and connected, meta.max_leverage, s.taker_fee, s.maker_fee)  # fmt: skip
 
     sink = PostgresSink(s.database_url) if s.database_url else JsonlSink(s.data_dir)
     engine = Engine(s, venue, meta, sink)
-    engine.paused = st.paused
+    engine.paused = not ((st.running and connected) or developer_mode)
     state_file = Path(s.state_file)
     if state_file.is_file():
         why = engine.load_state(state_file.read_bytes())
@@ -103,7 +108,8 @@ async def run(st: Startup, duration: float | None) -> bool:
         age = time.time() - engine.market.feed_ts if b else None
         faults = engine.last.get("faults", ["starting"])
         chart_info = {"loaded": list(charts), "scores": engine.market.chart_scores}
-        health = {"ok": not faults, "paused": engine.paused, "startup_error": startup_error, "chart": chart_info,
+        health = {"ok": not faults, "connected": connected, "running": connected and not engine.paused,
+                  "startup_error": startup_error, "chart": chart_info,
                   "faults": faults, "feed_age_s": age,
                   "ws_reconnects": data.reconnects,
                   "sink_dropped": sink.dropped, "loop_lag_ms": loop_lag}  # fmt: skip
@@ -187,53 +193,90 @@ async def run(st: Startup, duration: float | None) -> bool:
         asyncio.get_running_loop().call_later(0.5, restart.set)  # let the reply go out first
         return {"message": message}
 
+    def explain() -> str:
+        """Plain-language reason for what the engine is (not) doing right now."""
+        last = engine.last
+        if not last:
+            return "Starting up."
+        if last.get("faults"):
+            return "Not trading: " + ", ".join(last["faults"]).replace("_", " ") + "."
+        if last.get("warmup"):
+            return "Warming up: it needs five minutes of market data after every start."
+        n = engine.arena.champ.model.n_obs
+        if last.get("extra", {}).get("beta") == 0:
+            return (f"Watching, no trade: none of its forecasts has yet proven accurate enough to beat trading costs "
+                    f"({n:,} forecasts checked so far). It trades only when one does.")  # fmt: skip
+        return str(last.get("reason", ""))
+
     def c_get(_: dict[str, Any]) -> dict[str, Any]:
-        eff = {"risk_aversion": s.risk_aversion, "max_leverage": meta.max_leverage, "paper_equity": s.paper_equity}
-        return store.public() | {"mode": s.mode.value, "paused": engine.paused, "effective": eff,
-                                 "startup_error": startup_error}  # fmt: skip
+        eff = {"risk_aversion": s.risk_aversion, "max_leverage": meta.max_leverage}
+        return store.public() | {
+            "connected": connected, "running": connected and not engine.paused, "coin": s.coin,
+            "account": live.snapshot if live is not None else {}, "effective": eff, "reason": explain(),
+            "startup_error": startup_error,
+        }  # fmt: skip
 
-    def c_mode(b: dict[str, Any]) -> dict[str, Any]:
-        store.set_mode(str(b.get("mode", "")), str(b.get("confirm", "")))
-        log.warning("control panel: mode change to %s requested", b.get("mode"))
-        return restart_soon(f"switching to {b.get('mode')}; the engine is restarting")
+    async def c_connect(b: dict[str, Any]) -> dict[str, Any]:
+        lookup = HyperliquidData(dataclasses.replace(s, mode=Mode.LIVE).api_url)  # the real venue, whatever we watch now
+        try:
+            acc = await verify_credentials(lookup, str(b.get("api_secret_key", "")), str(b.get("account_address", "")), s.coin)
+        except ControlError:
+            raise
+        except Exception as e:  # noqa: BLE001
+            raise ControlError(f"Could not reach Hyperliquid to check the key ({type(e).__name__}). Try again.") from None
+        store.save_credentials(acc["address"], acc["key"])
+        log.warning("control panel: account %s connected", acc["address"])
+        return restart_soon(f"Connected to {acc['address']}. Balance ${acc['equity']:,.2f}. Press Start trading when you are ready.")
 
-    def c_pause(b: dict[str, Any]) -> dict[str, Any]:
-        engine.paused = bool(b.get("paused"))
-        store.set_paused(engine.paused)
-        log.warning("control panel: trading %s", "paused" if engine.paused else "resumed")
-        return {"message": "trading paused: no orders will be sent" if engine.paused else "trading resumed"}
+    async def c_refresh(_: dict[str, Any]) -> dict[str, Any]:
+        if live is None:
+            raise ControlError("No account is connected.")
+        await asyncio.to_thread(live.refresh)
+        if not live.account(time.time()).known:
+            raise ControlError("Hyperliquid did not answer. Try again in a moment.")
+        return {"message": f"Balance ${live.snapshot.get('equity', 0.0):,.2f}"}
+
+    def c_disconnect(_: dict[str, Any]) -> dict[str, Any]:
+        engine.paused = True
+        store.disconnect()
+        log.warning("control panel: account disconnected")
+        return restart_soon("Disconnected. The key has been removed from this server.")
+
+    def c_start(_: dict[str, Any]) -> dict[str, Any]:
+        if live is None or not connected:
+            raise ControlError("Connect your Hyperliquid account first.")
+        acct = live.account(time.time())
+        if not acct.known:
+            raise ControlError("The account balance could not be read just now. Press Refresh balance and try again.")
+        if acct.equity <= 0:
+            raise ControlError("There is no balance to trade with. Deposit USDC to Hyperliquid, press Refresh balance, then Start.")
+        engine.paused = False
+        store.set_running(True)
+        log.warning("control panel: trading STARTED (balance %.2f)", acct.equity)
+        return {"message": "Trading started. Real orders will be sent when the engine finds a trade it trusts."}
+
+    def c_stop(_: dict[str, Any]) -> dict[str, Any]:
+        engine.paused = True
+        store.set_running(False)
+        log.warning("control panel: trading STOPPED")
+        return {"message": "Trading stopped. No orders will be sent. Any open position is still open."}
 
     def c_flatten(_: dict[str, Any]) -> dict[str, Any]:
         message = engine.flatten(time.time())
-        store.set_paused(True)
-        log.warning("control panel: flatten requested -> %s", message)
+        store.set_running(False)
+        log.warning("control panel: close position requested -> %s", message)
         return {"message": message}
 
-    def c_credentials(b: dict[str, Any]) -> dict[str, Any]:
-        store.set_credentials(str(b.get("account_address", "")), str(b.get("api_secret_key", "")))
-        log.warning("control panel: credentials saved")
-        if s.mode in (Mode.TESTNET, Mode.LIVE):
-            return restart_soon("credentials saved; the engine is restarting to use them")
-        return {"message": "credentials saved; you can now choose Testnet or Live"}
-
-    def c_credentials_clear(_: dict[str, Any]) -> dict[str, Any]:
-        was_trading = s.mode in (Mode.TESTNET, Mode.LIVE)
-        store.clear_credentials()
-        log.warning("control panel: credentials removed")
-        if was_trading:
-            return restart_soon("credentials removed; restarting in paper mode")
-        return {"message": "credentials removed"}
-
     def c_preferences(b: dict[str, Any]) -> dict[str, Any]:
-        store.set_preferences(b.get("risk_aversion"), b.get("max_leverage"), b.get("paper_equity"))
-        return restart_soon("preferences saved; the engine is restarting")
+        store.set_preferences(b.get("risk_aversion"), b.get("max_leverage"))
+        return restart_soon("Saved. The engine is restarting with the new settings.")
 
-    control = {"get": c_get, "mode": c_mode, "pause": c_pause, "flatten": c_flatten, "credentials": c_credentials,
-               "credentials_clear": c_credentials_clear, "preferences": c_preferences}  # fmt: skip
+    control: dict[str, Handler] = {"get": c_get, "connect": c_connect, "refresh": c_refresh, "disconnect": c_disconnect, "start": c_start,
+               "stop": c_stop, "flatten": c_flatten, "preferences": c_preferences}  # fmt: skip
     runner = await serve(state, s.dashboard_host, s.dashboard_port, store.token(), control)
     log.info("dashboard and control panel: http://%s:%d (token in %s)", s.dashboard_host, s.dashboard_port, store.token_path)
     # systemd stops the service with SIGTERM: shut down cleanly so the learned state is saved.
-    stop = asyncio.Event()
+    stop = stop or asyncio.Event()
     for sig in (signal.SIGTERM, signal.SIGINT):
         try:
             asyncio.get_running_loop().add_signal_handler(sig, stop.set)

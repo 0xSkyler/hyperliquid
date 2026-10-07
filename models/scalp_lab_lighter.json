@@ -1,0 +1,2958 @@
+{
+ "settings": {
+  "maker_fee": 0.0,
+  "taker_fee": 0.0,
+  "equity": 1000.0,
+  "latency_ms": 350.0,
+  "taker_latency_ms": 450.0,
+  "caveat": "short recordings; simulated fills (see module docstring)"
+ },
+ "results": [
+  {
+   "market": "lighter:BTC",
+   "file": "lighter_BTC-20261007.jsonl",
+   "gross": {
+    "hours": 1.1738338852590984,
+    "median_spread_bps": 0.023731886637178568,
+    "fills": 188,
+    "fills_per_hour": 160.1589478382651,
+    "maker_ratio": 1.0,
+    "volume_usd": 93440.83120300007,
+    "spread_capture_bps": 0.2574555359301572,
+    "move_after_fill_bps": {
+     "1s": -0.3048681893459227,
+     "5s": -0.3377940653209429,
+     "30s": -0.350912160177992
+    },
+    "edge_per_fill_bps_before_fees": -0.08033852939078573,
+    "fees_usd": 0.0,
+    "pnl_usd": -0.49767730930454945,
+    "pnl_pct": -0.04976773093045006,
+    "max_drawdown_pct": 0.08358078093040344,
+    "max_inventory_x": 1.0002598246476195,
+    "quote_uptime_pct": 56.85323931247245,
+    "orders_placed": 910,
+    "orders_cancelled": 762,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.21170621677613033,
+     "oos_ic": 0.141588631683506,
+     "scored": 4219.0,
+     "weights": {
+      "imbalance_l1": 0.0016,
+      "microprice_bps": 0.414,
+      "ofi_1s": 0.0256,
+      "tfi_5s": -0.011,
+      "ret_1s_bps": 0.015,
+      "bias": 0.0473
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 4,
+    "practice": {
+     "fills": 405,
+     "edge_bps_5s": -0.024804985571204106,
+     "edge_lower_bound_bps": -0.12124402108085897,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": -0.3496240999990352
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1434,
+       "hits": 1360,
+       "hit_rate": 0.9483290281091636,
+       "worth_per_hit_bps": -0.12393499563534406,
+       "worth_lower_bound_bps": -0.1693244748784594,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1434,
+       "hits": 1017,
+       "hit_rate": 0.7092750742408109,
+       "worth_per_hit_bps": 0.11718185773033694,
+       "worth_lower_bound_bps": 0.06216570289558655,
+       "verdict": "quote here"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1434,
+       "hits": 525,
+       "hit_rate": 0.36578522146630266,
+       "worth_per_hit_bps": 0.03923717230874744,
+       "worth_lower_bound_bps": -0.046277581197543015,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1434,
+       "hits": 141,
+       "hit_rate": 0.0979885049781951,
+       "worth_per_hit_bps": -0.11490819647876598,
+       "worth_lower_bound_bps": -0.2942914924986465,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1434,
+       "hits": 20,
+       "hit_rate": 0.014050154526795202,
+       "worth_per_hit_bps": 0.4185293647873089,
+       "worth_lower_bound_bps": 0.05931836371120264,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1434,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1442,
+       "hits": 1290,
+       "hit_rate": 0.8943239459291685,
+       "worth_per_hit_bps": -0.04031280755039606,
+       "worth_lower_bound_bps": -0.08940890667914135,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1442,
+       "hits": 880,
+       "hit_rate": 0.6105995899852422,
+       "worth_per_hit_bps": 0.15308461065538603,
+       "worth_lower_bound_bps": 0.09382240775425513,
+       "verdict": "quote here"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1442,
+       "hits": 379,
+       "hit_rate": 0.2628425997966808,
+       "worth_per_hit_bps": -0.018597536673461177,
+       "worth_lower_bound_bps": -0.12292527592917533,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1442,
+       "hits": 113,
+       "hit_rate": 0.07803565000661099,
+       "worth_per_hit_bps": -0.030334828447833192,
+       "worth_lower_bound_bps": -0.2438109613262302,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1442,
+       "hits": 17,
+       "hit_rate": 0.012027378787042745,
+       "worth_per_hit_bps": 0.29887203368683946,
+       "worth_lower_bound_bps": 0.037235498642259,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1442,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 932,
+       "hits": 787,
+       "hit_rate": 0.8450293562551017,
+       "worth_per_hit_bps": 0.007402573696958805,
+       "worth_lower_bound_bps": -0.054465349857350444,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 932,
+       "hits": 469,
+       "hit_rate": 0.5029094685046986,
+       "worth_per_hit_bps": 0.03532769084230907,
+       "worth_lower_bound_bps": -0.04649745523303898,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 932,
+       "hits": 224,
+       "hit_rate": 0.24003995501389763,
+       "worth_per_hit_bps": -0.0858179717549095,
+       "worth_lower_bound_bps": -0.21808776381420236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 932,
+       "hits": 73,
+       "hit_rate": 0.07818712975136677,
+       "worth_per_hit_bps": -0.09524279881356837,
+       "worth_lower_bound_bps": -0.3231088407635595,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 932,
+       "hits": 17,
+       "hit_rate": 0.01776657552038556,
+       "worth_per_hit_bps": 1.0448121303120563,
+       "worth_lower_bound_bps": 0.6805746950156607,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 932,
+       "hits": 709,
+       "hit_rate": 0.7612992528536012,
+       "worth_per_hit_bps": -0.17295963830919894,
+       "worth_lower_bound_bps": -0.24159817496560704,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 932,
+       "hits": 299,
+       "hit_rate": 0.32111784662349546,
+       "worth_per_hit_bps": -0.15235660497017914,
+       "worth_lower_bound_bps": -0.2829179668234175,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 932,
+       "hits": 164,
+       "hit_rate": 0.1759129481973838,
+       "worth_per_hit_bps": -0.09992513952745312,
+       "worth_lower_bound_bps": -0.25353142180366794,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 932,
+       "hits": 40,
+       "hit_rate": 0.04299737907602124,
+       "worth_per_hit_bps": 0.3351220309840451,
+       "worth_lower_bound_bps": -0.03346706251548481,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1442,
+       "hits": 1065,
+       "hit_rate": 0.7387553607208102,
+       "worth_per_hit_bps": -0.19568584364671565,
+       "worth_lower_bound_bps": -0.25495678367978886,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1442,
+       "hits": 439,
+       "hit_rate": 0.3042951919853656,
+       "worth_per_hit_bps": -0.37697967940015564,
+       "worth_lower_bound_bps": -0.4908810031000648,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1442,
+       "hits": 236,
+       "hit_rate": 0.16362506047021325,
+       "worth_per_hit_bps": -0.4205865278176705,
+       "worth_lower_bound_bps": -0.5899213909658884,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1442,
+       "hits": 69,
+       "hit_rate": 0.048133611413731535,
+       "worth_per_hit_bps": -0.5645422379736694,
+       "worth_lower_bound_bps": -0.929917436650944,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1442,
+       "hits": 8,
+       "hit_rate": 0.005617546008929256,
+       "worth_per_hit_bps": -1.6125398166134488,
+       "worth_lower_bound_bps": -2.170885482802806,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1442,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1434,
+       "hits": 966,
+       "hit_rate": 0.6733929130973886,
+       "worth_per_hit_bps": -0.1780325208582671,
+       "worth_lower_bound_bps": -0.2402110448455909,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1434,
+       "hits": 355,
+       "hit_rate": 0.24763224247643215,
+       "worth_per_hit_bps": -0.434496767175792,
+       "worth_lower_bound_bps": -0.5656612043645768,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1434,
+       "hits": 209,
+       "hit_rate": 0.1455679217164464,
+       "worth_per_hit_bps": -0.445842175732716,
+       "worth_lower_bound_bps": -0.636435970901132,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1434,
+       "hits": 63,
+       "hit_rate": 0.04411507704766714,
+       "worth_per_hit_bps": -0.6947473658945694,
+       "worth_lower_bound_bps": -1.0636309764362066,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1434,
+       "hits": 10,
+       "hit_rate": 0.006780197836089625,
+       "worth_per_hit_bps": -0.7913501617274763,
+       "worth_lower_bound_bps": -1.4983816829445322,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1434,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 2104,
+       "worth_bps": -0.07977782326149756,
+       "worth_lower_bound_bps": -0.11380518366905129,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 1189,
+       "worth_bps": 0.05433169605655188,
+       "worth_lower_bound_bps": 0.013552996852058907,
+       "verdict": "take"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 492,
+       "worth_bps": 0.05492815628316937,
+       "worth_lower_bound_bps": -0.02491959863499668,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 14,
+       "worth_bps": 0.4493237130074168,
+       "worth_lower_bound_bps": 0.00818832675837644,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": -0.2798887364543714,
+     "taker": 0.0
+    }
+   },
+   "net": {
+    "hours": 1.1738338852590984,
+    "median_spread_bps": 0.023731886637178568,
+    "fills": 188,
+    "fills_per_hour": 160.1589478382651,
+    "maker_ratio": 1.0,
+    "volume_usd": 93440.83120300007,
+    "spread_capture_bps": 0.2574555359301572,
+    "move_after_fill_bps": {
+     "1s": -0.3048681893459227,
+     "5s": -0.3377940653209429,
+     "30s": -0.350912160177992
+    },
+    "edge_per_fill_bps_before_fees": -0.08033852939078573,
+    "fees_usd": 0.0,
+    "pnl_usd": -0.49767730930454945,
+    "pnl_pct": -0.04976773093045006,
+    "max_drawdown_pct": 0.08358078093040344,
+    "max_inventory_x": 1.0002598246476195,
+    "quote_uptime_pct": 56.85323931247245,
+    "orders_placed": 910,
+    "orders_cancelled": 762,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.21170621677613033,
+     "oos_ic": 0.141588631683506,
+     "scored": 4219.0,
+     "weights": {
+      "imbalance_l1": 0.0016,
+      "microprice_bps": 0.414,
+      "ofi_1s": 0.0256,
+      "tfi_5s": -0.011,
+      "ret_1s_bps": 0.015,
+      "bias": 0.0473
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 4,
+    "practice": {
+     "fills": 405,
+     "edge_bps_5s": -0.024804985571204106,
+     "edge_lower_bound_bps": -0.12124402108085897,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": -0.3496240999990352
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1434,
+       "hits": 1360,
+       "hit_rate": 0.9483290281091636,
+       "worth_per_hit_bps": -0.12393499563534406,
+       "worth_lower_bound_bps": -0.1693244748784594,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1434,
+       "hits": 1017,
+       "hit_rate": 0.7092750742408109,
+       "worth_per_hit_bps": 0.11718185773033694,
+       "worth_lower_bound_bps": 0.06216570289558655,
+       "verdict": "quote here"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1434,
+       "hits": 525,
+       "hit_rate": 0.36578522146630266,
+       "worth_per_hit_bps": 0.03923717230874744,
+       "worth_lower_bound_bps": -0.046277581197543015,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1434,
+       "hits": 141,
+       "hit_rate": 0.0979885049781951,
+       "worth_per_hit_bps": -0.11490819647876598,
+       "worth_lower_bound_bps": -0.2942914924986465,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1434,
+       "hits": 20,
+       "hit_rate": 0.014050154526795202,
+       "worth_per_hit_bps": 0.4185293647873089,
+       "worth_lower_bound_bps": 0.05931836371120264,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1434,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1442,
+       "hits": 1290,
+       "hit_rate": 0.8943239459291685,
+       "worth_per_hit_bps": -0.04031280755039606,
+       "worth_lower_bound_bps": -0.08940890667914135,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1442,
+       "hits": 880,
+       "hit_rate": 0.6105995899852422,
+       "worth_per_hit_bps": 0.15308461065538603,
+       "worth_lower_bound_bps": 0.09382240775425513,
+       "verdict": "quote here"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1442,
+       "hits": 379,
+       "hit_rate": 0.2628425997966808,
+       "worth_per_hit_bps": -0.018597536673461177,
+       "worth_lower_bound_bps": -0.12292527592917533,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1442,
+       "hits": 113,
+       "hit_rate": 0.07803565000661099,
+       "worth_per_hit_bps": -0.030334828447833192,
+       "worth_lower_bound_bps": -0.2438109613262302,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1442,
+       "hits": 17,
+       "hit_rate": 0.012027378787042745,
+       "worth_per_hit_bps": 0.29887203368683946,
+       "worth_lower_bound_bps": 0.037235498642259,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1442,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 932,
+       "hits": 787,
+       "hit_rate": 0.8450293562551017,
+       "worth_per_hit_bps": 0.007402573696958805,
+       "worth_lower_bound_bps": -0.054465349857350444,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 932,
+       "hits": 469,
+       "hit_rate": 0.5029094685046986,
+       "worth_per_hit_bps": 0.03532769084230907,
+       "worth_lower_bound_bps": -0.04649745523303898,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 932,
+       "hits": 224,
+       "hit_rate": 0.24003995501389763,
+       "worth_per_hit_bps": -0.0858179717549095,
+       "worth_lower_bound_bps": -0.21808776381420236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 932,
+       "hits": 73,
+       "hit_rate": 0.07818712975136677,
+       "worth_per_hit_bps": -0.09524279881356837,
+       "worth_lower_bound_bps": -0.3231088407635595,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 932,
+       "hits": 17,
+       "hit_rate": 0.01776657552038556,
+       "worth_per_hit_bps": 1.0448121303120563,
+       "worth_lower_bound_bps": 0.6805746950156607,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 932,
+       "hits": 709,
+       "hit_rate": 0.7612992528536012,
+       "worth_per_hit_bps": -0.17295963830919894,
+       "worth_lower_bound_bps": -0.24159817496560704,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 932,
+       "hits": 299,
+       "hit_rate": 0.32111784662349546,
+       "worth_per_hit_bps": -0.15235660497017914,
+       "worth_lower_bound_bps": -0.2829179668234175,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 932,
+       "hits": 164,
+       "hit_rate": 0.1759129481973838,
+       "worth_per_hit_bps": -0.09992513952745312,
+       "worth_lower_bound_bps": -0.25353142180366794,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 932,
+       "hits": 40,
+       "hit_rate": 0.04299737907602124,
+       "worth_per_hit_bps": 0.3351220309840451,
+       "worth_lower_bound_bps": -0.03346706251548481,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 932,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1442,
+       "hits": 1065,
+       "hit_rate": 0.7387553607208102,
+       "worth_per_hit_bps": -0.19568584364671565,
+       "worth_lower_bound_bps": -0.25495678367978886,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1442,
+       "hits": 439,
+       "hit_rate": 0.3042951919853656,
+       "worth_per_hit_bps": -0.37697967940015564,
+       "worth_lower_bound_bps": -0.4908810031000648,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1442,
+       "hits": 236,
+       "hit_rate": 0.16362506047021325,
+       "worth_per_hit_bps": -0.4205865278176705,
+       "worth_lower_bound_bps": -0.5899213909658884,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1442,
+       "hits": 69,
+       "hit_rate": 0.048133611413731535,
+       "worth_per_hit_bps": -0.5645422379736694,
+       "worth_lower_bound_bps": -0.929917436650944,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1442,
+       "hits": 8,
+       "hit_rate": 0.005617546008929256,
+       "worth_per_hit_bps": -1.6125398166134488,
+       "worth_lower_bound_bps": -2.170885482802806,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1442,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1434,
+       "hits": 966,
+       "hit_rate": 0.6733929130973886,
+       "worth_per_hit_bps": -0.1780325208582671,
+       "worth_lower_bound_bps": -0.2402110448455909,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1434,
+       "hits": 355,
+       "hit_rate": 0.24763224247643215,
+       "worth_per_hit_bps": -0.434496767175792,
+       "worth_lower_bound_bps": -0.5656612043645768,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1434,
+       "hits": 209,
+       "hit_rate": 0.1455679217164464,
+       "worth_per_hit_bps": -0.445842175732716,
+       "worth_lower_bound_bps": -0.636435970901132,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1434,
+       "hits": 63,
+       "hit_rate": 0.04411507704766714,
+       "worth_per_hit_bps": -0.6947473658945694,
+       "worth_lower_bound_bps": -1.0636309764362066,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1434,
+       "hits": 10,
+       "hit_rate": 0.006780197836089625,
+       "worth_per_hit_bps": -0.7913501617274763,
+       "worth_lower_bound_bps": -1.4983816829445322,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1434,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 2104,
+       "worth_bps": -0.07977782326149756,
+       "worth_lower_bound_bps": -0.11380518366905129,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 1189,
+       "worth_bps": 0.05433169605655188,
+       "worth_lower_bound_bps": 0.013552996852058907,
+       "verdict": "take"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 492,
+       "worth_bps": 0.05492815628316937,
+       "worth_lower_bound_bps": -0.02491959863499668,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 14,
+       "worth_bps": 0.4493237130074168,
+       "worth_lower_bound_bps": 0.00818832675837644,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": -0.2798887364543714,
+     "taker": 0.0
+    }
+   }
+  },
+  {
+   "market": "lighter:ETH",
+   "file": "lighter_ETH-20261007.jsonl",
+   "gross": {
+    "hours": 1.1738899258772533,
+    "median_spread_bps": 0.4201464019239929,
+    "fills": 0,
+    "fills_per_hour": 0.0,
+    "maker_ratio": 0.0,
+    "volume_usd": 0.0,
+    "spread_capture_bps": 0.0,
+    "move_after_fill_bps": {
+     "1s": 0.0,
+     "5s": 0.0,
+     "30s": 0.0
+    },
+    "edge_per_fill_bps_before_fees": 0.0,
+    "fees_usd": 0.0,
+    "pnl_usd": 0.0,
+    "pnl_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "max_inventory_x": 0.0,
+    "quote_uptime_pct": 0.0,
+    "orders_placed": 0,
+    "orders_cancelled": 0,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.19544565295757654,
+     "oos_ic": 0.1355191369318233,
+     "scored": 4220.0,
+     "weights": {
+      "imbalance_l1": -0.3358,
+      "microprice_bps": 0.9891,
+      "ofi_1s": 0.0283,
+      "tfi_5s": 0.0144,
+      "ret_1s_bps": 0.0545,
+      "bias": -0.0231
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 0,
+    "practice": {
+     "fills": 325,
+     "edge_bps_5s": -0.056015593545197855,
+     "edge_lower_bound_bps": -0.1743876829086762,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": -0.12113309999992605
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1274,
+       "hits": 866,
+       "hit_rate": 0.6796384418293645,
+       "worth_per_hit_bps": -0.28148932529161136,
+       "worth_lower_bound_bps": -0.35779238271652375,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1274,
+       "hits": 377,
+       "hit_rate": 0.2961388195277512,
+       "worth_per_hit_bps": -0.46303572890769745,
+       "worth_lower_bound_bps": -0.5937376712550679,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1274,
+       "hits": 223,
+       "hit_rate": 0.17509044134499777,
+       "worth_per_hit_bps": -0.5728182424499767,
+       "worth_lower_bound_bps": -0.7419714085134828,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1274,
+       "hits": 108,
+       "hit_rate": 0.0848756622701699,
+       "worth_per_hit_bps": -0.5279029321963985,
+       "worth_lower_bound_bps": -0.8106991395312422,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1274,
+       "hits": 22,
+       "hit_rate": 0.01695537990681254,
+       "worth_per_hit_bps": -0.6818013935281227,
+       "worth_lower_bound_bps": -1.3446763264763408,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1274,
+       "hits": 2,
+       "hit_rate": 0.0013540714103375878,
+       "worth_per_hit_bps": -0.15844978093419673,
+       "worth_lower_bound_bps": -2.134741776034488,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1565,
+       "hits": 1051,
+       "hit_rate": 0.6715332974417945,
+       "worth_per_hit_bps": -0.2597928384598624,
+       "worth_lower_bound_bps": -0.32290818320987036,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1565,
+       "hits": 455,
+       "hit_rate": 0.29044537483626687,
+       "worth_per_hit_bps": -0.4751460320231207,
+       "worth_lower_bound_bps": -0.5873552311863767,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1565,
+       "hits": 259,
+       "hit_rate": 0.16577945566291533,
+       "worth_per_hit_bps": -0.4873424852646243,
+       "worth_lower_bound_bps": -0.6564986418579781,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1565,
+       "hits": 91,
+       "hit_rate": 0.05818937306417434,
+       "worth_per_hit_bps": -0.6401423637551166,
+       "worth_lower_bound_bps": -0.9774542517645843,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1565,
+       "hits": 15,
+       "hit_rate": 0.009812001202097844,
+       "worth_per_hit_bps": -1.6371792801785774,
+       "worth_lower_bound_bps": -2.350596450639969,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1565,
+       "hits": 4,
+       "hit_rate": 0.002250593907881624,
+       "worth_per_hit_bps": 0.277262589013038,
+       "worth_lower_bound_bps": -0.6981076357481854,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 969,
+       "hits": 594,
+       "hit_rate": 0.6132817991400306,
+       "worth_per_hit_bps": -0.17314164902088794,
+       "worth_lower_bound_bps": -0.25528752313535935,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 969,
+       "hits": 253,
+       "hit_rate": 0.26128089333591026,
+       "worth_per_hit_bps": -0.42206690906089456,
+       "worth_lower_bound_bps": -0.5611740235125005,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 969,
+       "hits": 147,
+       "hit_rate": 0.1515317431744193,
+       "worth_per_hit_bps": -0.3070289992167445,
+       "worth_lower_bound_bps": -0.5174121577955197,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 969,
+       "hits": 41,
+       "hit_rate": 0.04273786377516944,
+       "worth_per_hit_bps": -0.33835288474486525,
+       "worth_lower_bound_bps": -0.8120597627591277,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 969,
+       "hits": 4,
+       "hit_rate": 0.003633357792624648,
+       "worth_per_hit_bps": -2.2174394742094865,
+       "worth_lower_bound_bps": -3.13713164717863,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 969,
+       "hits": 3,
+       "hit_rate": 0.002707058050614747,
+       "worth_per_hit_bps": 0.3918048085504958,
+       "worth_lower_bound_bps": -1.1218044003638812,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 969,
+       "hits": 736,
+       "hit_rate": 0.7595347140136374,
+       "worth_per_hit_bps": -0.142667685800536,
+       "worth_lower_bound_bps": -0.21546820248976722,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 969,
+       "hits": 359,
+       "hit_rate": 0.3703655603202993,
+       "worth_per_hit_bps": -0.21007663729003145,
+       "worth_lower_bound_bps": -0.33229236356716463,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 969,
+       "hits": 210,
+       "hit_rate": 0.21713109159946592,
+       "worth_per_hit_bps": -0.14654433792373583,
+       "worth_lower_bound_bps": -0.31722523811723236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 969,
+       "hits": 62,
+       "hit_rate": 0.06357411602947191,
+       "worth_per_hit_bps": -0.019590034429367575,
+       "worth_lower_bound_bps": -0.3602458313730852,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 969,
+       "hits": 4,
+       "hit_rate": 0.0037205946367291362,
+       "worth_per_hit_bps": -0.39943588871984204,
+       "worth_lower_bound_bps": -0.7020196164592576,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 969,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1565,
+       "hits": 1095,
+       "hit_rate": 0.7000319370104439,
+       "worth_per_hit_bps": -0.04121903561701651,
+       "worth_lower_bound_bps": -0.1036619332158556,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1565,
+       "hits": 434,
+       "hit_rate": 0.2770302744511597,
+       "worth_per_hit_bps": -0.1629219834199526,
+       "worth_lower_bound_bps": -0.2985580433191339,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1565,
+       "hits": 211,
+       "hit_rate": 0.13489913603285703,
+       "worth_per_hit_bps": -0.1282949012947735,
+       "worth_lower_bound_bps": -0.36826556463807997,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1565,
+       "hits": 66,
+       "hit_rate": 0.042178545083744017,
+       "worth_per_hit_bps": -0.15037548259342706,
+       "worth_lower_bound_bps": -0.734141659040236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1565,
+       "hits": 10,
+       "hit_rate": 0.006263212208058893,
+       "worth_per_hit_bps": -0.8037896540714338,
+       "worth_lower_bound_bps": -1.4037907610126898,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1565,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1274,
+       "hits": 876,
+       "hit_rate": 0.6875822941332037,
+       "worth_per_hit_bps": -0.22790401228407595,
+       "worth_lower_bound_bps": -0.3053939833689088,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1274,
+       "hits": 398,
+       "hit_rate": 0.3122543634490621,
+       "worth_per_hit_bps": -0.4427783850614517,
+       "worth_lower_bound_bps": -0.5848243041932667,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1274,
+       "hits": 219,
+       "hit_rate": 0.1718145238457758,
+       "worth_per_hit_bps": -0.44662148512772526,
+       "worth_lower_bound_bps": -0.6856347703942025,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1274,
+       "hits": 90,
+       "hit_rate": 0.0703557764172118,
+       "worth_per_hit_bps": -0.5969969939055725,
+       "worth_lower_bound_bps": -0.9550209057494398,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1274,
+       "hits": 14,
+       "hit_rate": 0.011061692314693117,
+       "worth_per_hit_bps": -0.6291311526668341,
+       "worth_lower_bound_bps": -1.2365553612514617,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1274,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 2434,
+       "worth_bps": -0.222317440441347,
+       "worth_lower_bound_bps": -0.25796960660905555,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 989,
+       "worth_bps": -0.09848880411511444,
+       "worth_lower_bound_bps": -0.1525230395618116,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 342,
+       "worth_bps": 0.026093856407495133,
+       "worth_lower_bound_bps": -0.09137810916707748,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 34,
+       "worth_bps": 0.411584344579924,
+       "worth_lower_bound_bps": -0.11566010430845053,
+       "verdict": "not enough yet"
+      },
+      {
+       "forecast_bps": "0.8-1.6",
+       "times": 2,
+       "worth_bps": -1.881482549194887,
+       "worth_lower_bound_bps": -3.0952553206999083,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": 0.0,
+     "taker": 0.0
+    }
+   },
+   "net": {
+    "hours": 1.1738899258772533,
+    "median_spread_bps": 0.4201464019239929,
+    "fills": 0,
+    "fills_per_hour": 0.0,
+    "maker_ratio": 0.0,
+    "volume_usd": 0.0,
+    "spread_capture_bps": 0.0,
+    "move_after_fill_bps": {
+     "1s": 0.0,
+     "5s": 0.0,
+     "30s": 0.0
+    },
+    "edge_per_fill_bps_before_fees": 0.0,
+    "fees_usd": 0.0,
+    "pnl_usd": 0.0,
+    "pnl_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "max_inventory_x": 0.0,
+    "quote_uptime_pct": 0.0,
+    "orders_placed": 0,
+    "orders_cancelled": 0,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.19544565295757654,
+     "oos_ic": 0.1355191369318233,
+     "scored": 4220.0,
+     "weights": {
+      "imbalance_l1": -0.3358,
+      "microprice_bps": 0.9891,
+      "ofi_1s": 0.0283,
+      "tfi_5s": 0.0144,
+      "ret_1s_bps": 0.0545,
+      "bias": -0.0231
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 0,
+    "practice": {
+     "fills": 325,
+     "edge_bps_5s": -0.056015593545197855,
+     "edge_lower_bound_bps": -0.1743876829086762,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": -0.12113309999992605
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1274,
+       "hits": 866,
+       "hit_rate": 0.6796384418293645,
+       "worth_per_hit_bps": -0.28148932529161136,
+       "worth_lower_bound_bps": -0.35779238271652375,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1274,
+       "hits": 377,
+       "hit_rate": 0.2961388195277512,
+       "worth_per_hit_bps": -0.46303572890769745,
+       "worth_lower_bound_bps": -0.5937376712550679,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1274,
+       "hits": 223,
+       "hit_rate": 0.17509044134499777,
+       "worth_per_hit_bps": -0.5728182424499767,
+       "worth_lower_bound_bps": -0.7419714085134828,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1274,
+       "hits": 108,
+       "hit_rate": 0.0848756622701699,
+       "worth_per_hit_bps": -0.5279029321963985,
+       "worth_lower_bound_bps": -0.8106991395312422,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1274,
+       "hits": 22,
+       "hit_rate": 0.01695537990681254,
+       "worth_per_hit_bps": -0.6818013935281227,
+       "worth_lower_bound_bps": -1.3446763264763408,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1274,
+       "hits": 2,
+       "hit_rate": 0.0013540714103375878,
+       "worth_per_hit_bps": -0.15844978093419673,
+       "worth_lower_bound_bps": -2.134741776034488,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1565,
+       "hits": 1051,
+       "hit_rate": 0.6715332974417945,
+       "worth_per_hit_bps": -0.2597928384598624,
+       "worth_lower_bound_bps": -0.32290818320987036,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1565,
+       "hits": 455,
+       "hit_rate": 0.29044537483626687,
+       "worth_per_hit_bps": -0.4751460320231207,
+       "worth_lower_bound_bps": -0.5873552311863767,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1565,
+       "hits": 259,
+       "hit_rate": 0.16577945566291533,
+       "worth_per_hit_bps": -0.4873424852646243,
+       "worth_lower_bound_bps": -0.6564986418579781,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1565,
+       "hits": 91,
+       "hit_rate": 0.05818937306417434,
+       "worth_per_hit_bps": -0.6401423637551166,
+       "worth_lower_bound_bps": -0.9774542517645843,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1565,
+       "hits": 15,
+       "hit_rate": 0.009812001202097844,
+       "worth_per_hit_bps": -1.6371792801785774,
+       "worth_lower_bound_bps": -2.350596450639969,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1565,
+       "hits": 4,
+       "hit_rate": 0.002250593907881624,
+       "worth_per_hit_bps": 0.277262589013038,
+       "worth_lower_bound_bps": -0.6981076357481854,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 969,
+       "hits": 594,
+       "hit_rate": 0.6132817991400306,
+       "worth_per_hit_bps": -0.17314164902088794,
+       "worth_lower_bound_bps": -0.25528752313535935,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 969,
+       "hits": 253,
+       "hit_rate": 0.26128089333591026,
+       "worth_per_hit_bps": -0.42206690906089456,
+       "worth_lower_bound_bps": -0.5611740235125005,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 969,
+       "hits": 147,
+       "hit_rate": 0.1515317431744193,
+       "worth_per_hit_bps": -0.3070289992167445,
+       "worth_lower_bound_bps": -0.5174121577955197,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 969,
+       "hits": 41,
+       "hit_rate": 0.04273786377516944,
+       "worth_per_hit_bps": -0.33835288474486525,
+       "worth_lower_bound_bps": -0.8120597627591277,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 969,
+       "hits": 4,
+       "hit_rate": 0.003633357792624648,
+       "worth_per_hit_bps": -2.2174394742094865,
+       "worth_lower_bound_bps": -3.13713164717863,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 969,
+       "hits": 3,
+       "hit_rate": 0.002707058050614747,
+       "worth_per_hit_bps": 0.3918048085504958,
+       "worth_lower_bound_bps": -1.1218044003638812,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 969,
+       "hits": 736,
+       "hit_rate": 0.7595347140136374,
+       "worth_per_hit_bps": -0.142667685800536,
+       "worth_lower_bound_bps": -0.21546820248976722,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 969,
+       "hits": 359,
+       "hit_rate": 0.3703655603202993,
+       "worth_per_hit_bps": -0.21007663729003145,
+       "worth_lower_bound_bps": -0.33229236356716463,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 969,
+       "hits": 210,
+       "hit_rate": 0.21713109159946592,
+       "worth_per_hit_bps": -0.14654433792373583,
+       "worth_lower_bound_bps": -0.31722523811723236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 969,
+       "hits": 62,
+       "hit_rate": 0.06357411602947191,
+       "worth_per_hit_bps": -0.019590034429367575,
+       "worth_lower_bound_bps": -0.3602458313730852,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 969,
+       "hits": 4,
+       "hit_rate": 0.0037205946367291362,
+       "worth_per_hit_bps": -0.39943588871984204,
+       "worth_lower_bound_bps": -0.7020196164592576,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 969,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1565,
+       "hits": 1095,
+       "hit_rate": 0.7000319370104439,
+       "worth_per_hit_bps": -0.04121903561701651,
+       "worth_lower_bound_bps": -0.1036619332158556,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1565,
+       "hits": 434,
+       "hit_rate": 0.2770302744511597,
+       "worth_per_hit_bps": -0.1629219834199526,
+       "worth_lower_bound_bps": -0.2985580433191339,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1565,
+       "hits": 211,
+       "hit_rate": 0.13489913603285703,
+       "worth_per_hit_bps": -0.1282949012947735,
+       "worth_lower_bound_bps": -0.36826556463807997,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1565,
+       "hits": 66,
+       "hit_rate": 0.042178545083744017,
+       "worth_per_hit_bps": -0.15037548259342706,
+       "worth_lower_bound_bps": -0.734141659040236,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1565,
+       "hits": 10,
+       "hit_rate": 0.006263212208058893,
+       "worth_per_hit_bps": -0.8037896540714338,
+       "worth_lower_bound_bps": -1.4037907610126898,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1565,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1274,
+       "hits": 876,
+       "hit_rate": 0.6875822941332037,
+       "worth_per_hit_bps": -0.22790401228407595,
+       "worth_lower_bound_bps": -0.3053939833689088,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1274,
+       "hits": 398,
+       "hit_rate": 0.3122543634490621,
+       "worth_per_hit_bps": -0.4427783850614517,
+       "worth_lower_bound_bps": -0.5848243041932667,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1274,
+       "hits": 219,
+       "hit_rate": 0.1718145238457758,
+       "worth_per_hit_bps": -0.44662148512772526,
+       "worth_lower_bound_bps": -0.6856347703942025,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1274,
+       "hits": 90,
+       "hit_rate": 0.0703557764172118,
+       "worth_per_hit_bps": -0.5969969939055725,
+       "worth_lower_bound_bps": -0.9550209057494398,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1274,
+       "hits": 14,
+       "hit_rate": 0.011061692314693117,
+       "worth_per_hit_bps": -0.6291311526668341,
+       "worth_lower_bound_bps": -1.2365553612514617,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1274,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 2434,
+       "worth_bps": -0.222317440441347,
+       "worth_lower_bound_bps": -0.25796960660905555,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 989,
+       "worth_bps": -0.09848880411511444,
+       "worth_lower_bound_bps": -0.1525230395618116,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 342,
+       "worth_bps": 0.026093856407495133,
+       "worth_lower_bound_bps": -0.09137810916707748,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 34,
+       "worth_bps": 0.411584344579924,
+       "worth_lower_bound_bps": -0.11566010430845053,
+       "verdict": "not enough yet"
+      },
+      {
+       "forecast_bps": "0.8-1.6",
+       "times": 2,
+       "worth_bps": -1.881482549194887,
+       "worth_lower_bound_bps": -3.0952553206999083,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": 0.0,
+     "taker": 0.0
+    }
+   }
+  },
+  {
+   "market": "lighter:SOL",
+   "file": "lighter_SOL-20261007.jsonl",
+   "gross": {
+    "hours": 1.17522036380238,
+    "median_spread_bps": 0.5051057775682715,
+    "fills": 0,
+    "fills_per_hour": 0.0,
+    "maker_ratio": 0.0,
+    "volume_usd": 0.0,
+    "spread_capture_bps": 0.0,
+    "move_after_fill_bps": {
+     "1s": 0.0,
+     "5s": 0.0,
+     "30s": 0.0
+    },
+    "edge_per_fill_bps_before_fees": 0.0,
+    "fees_usd": 0.0,
+    "pnl_usd": 0.0,
+    "pnl_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "max_inventory_x": 0.0,
+    "quote_uptime_pct": 0.0,
+    "orders_placed": 0,
+    "orders_cancelled": 0,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.0712305868167018,
+     "oos_ic": 0.11898150933114335,
+     "scored": 4224.0,
+     "weights": {
+      "imbalance_l1": -0.5148,
+      "microprice_bps": 0.7683,
+      "ofi_1s": 0.0663,
+      "tfi_5s": -0.0001,
+      "ret_1s_bps": -0.0616,
+      "bias": -0.0302
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 0,
+    "practice": {
+     "fills": 0,
+     "edge_bps_5s": 0.0,
+     "edge_lower_bound_bps": 0.0,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": 0.0
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1061,
+       "hits": 519,
+       "hit_rate": 0.4889581112372295,
+       "worth_per_hit_bps": -0.6559229061084437,
+       "worth_lower_bound_bps": -0.7797134575132998,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1061,
+       "hits": 332,
+       "hit_rate": 0.31235169660185563,
+       "worth_per_hit_bps": -0.5999025762319673,
+       "worth_lower_bound_bps": -0.7582729048219825,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1061,
+       "hits": 205,
+       "hit_rate": 0.19356679317189676,
+       "worth_per_hit_bps": -0.6921395113701113,
+       "worth_lower_bound_bps": -0.8863121301384533,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1061,
+       "hits": 103,
+       "hit_rate": 0.09693320082460549,
+       "worth_per_hit_bps": -0.6218487276719507,
+       "worth_lower_bound_bps": -0.8726435677229686,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1061,
+       "hits": 13,
+       "hit_rate": 0.012018040184791983,
+       "worth_per_hit_bps": -0.3697409500307198,
+       "worth_lower_bound_bps": -1.14291355962779,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1061,
+       "hits": 1,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1443,
+       "hits": 706,
+       "hit_rate": 0.48882901247037086,
+       "worth_per_hit_bps": -0.6195107333798054,
+       "worth_lower_bound_bps": -0.7263459699052605,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1443,
+       "hits": 427,
+       "hit_rate": 0.29554498144678776,
+       "worth_per_hit_bps": -0.7024179158863967,
+       "worth_lower_bound_bps": -0.8516520940837955,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1443,
+       "hits": 282,
+       "hit_rate": 0.1951646694449796,
+       "worth_per_hit_bps": -0.7004594653251281,
+       "worth_lower_bound_bps": -0.8880100599871072,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1443,
+       "hits": 149,
+       "hit_rate": 0.10329350493934775,
+       "worth_per_hit_bps": -0.5843503822824603,
+       "worth_lower_bound_bps": -0.8437313348423452,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1443,
+       "hits": 25,
+       "hit_rate": 0.017555968980881395,
+       "worth_per_hit_bps": -0.6873528437016325,
+       "worth_lower_bound_bps": -1.1365832115965353,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1443,
+       "hits": 1,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1307,
+       "hits": 579,
+       "hit_rate": 0.4429480851775338,
+       "worth_per_hit_bps": -0.6987814831939264,
+       "worth_lower_bound_bps": -0.8412501666099836,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1307,
+       "hits": 355,
+       "hit_rate": 0.27136353759881005,
+       "worth_per_hit_bps": -0.9347969794033629,
+       "worth_lower_bound_bps": -1.1064860314273257,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1307,
+       "hits": 251,
+       "hit_rate": 0.19222675640780568,
+       "worth_per_hit_bps": -1.0087084672630868,
+       "worth_lower_bound_bps": -1.2211627427645169,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1307,
+       "hits": 130,
+       "hit_rate": 0.09969146623249357,
+       "worth_per_hit_bps": -0.8832366423595656,
+       "worth_lower_bound_bps": -1.148784786998237,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1307,
+       "hits": 20,
+       "hit_rate": 0.015134374215502408,
+       "worth_per_hit_bps": -1.2664126292819566,
+       "worth_lower_bound_bps": -2.038795839478526,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1307,
+       "hits": 5,
+       "hit_rate": 0.004121952621355698,
+       "worth_per_hit_bps": -0.16825045871540859,
+       "worth_lower_bound_bps": -0.5023718894340212,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1307,
+       "hits": 884,
+       "hit_rate": 0.676125264663279,
+       "worth_per_hit_bps": -0.535443345200101,
+       "worth_lower_bound_bps": -0.654855334397678,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1307,
+       "hits": 604,
+       "hit_rate": 0.46197906984523146,
+       "worth_per_hit_bps": -0.5505936106982011,
+       "worth_lower_bound_bps": -0.7028587872347433,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1307,
+       "hits": 402,
+       "hit_rate": 0.30735742678871625,
+       "worth_per_hit_bps": -0.5514946349851205,
+       "worth_lower_bound_bps": -0.7594452922986143,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1307,
+       "hits": 173,
+       "hit_rate": 0.13211524382270962,
+       "worth_per_hit_bps": -0.5741996457114293,
+       "worth_lower_bound_bps": -0.8895322373666212,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1307,
+       "hits": 24,
+       "hit_rate": 0.018398608811158262,
+       "worth_per_hit_bps": -1.5415686751250708,
+       "worth_lower_bound_bps": -2.6449427448329623,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1307,
+       "hits": 6,
+       "hit_rate": 0.004515545930215327,
+       "worth_per_hit_bps": -2.1944747635293553,
+       "worth_lower_bound_bps": -2.1944747635293553,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1443,
+       "hits": 876,
+       "hit_rate": 0.6070064753877716,
+       "worth_per_hit_bps": -0.3769504053663409,
+       "worth_lower_bound_bps": -0.4807760148503716,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1443,
+       "hits": 494,
+       "hit_rate": 0.3420543356050517,
+       "worth_per_hit_bps": -0.49249159056425357,
+       "worth_lower_bound_bps": -0.648375321949269,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1443,
+       "hits": 299,
+       "hit_rate": 0.20702156011143427,
+       "worth_per_hit_bps": -0.6104935589059018,
+       "worth_lower_bound_bps": -0.8215425384464539,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1443,
+       "hits": 128,
+       "hit_rate": 0.08844801684620703,
+       "worth_per_hit_bps": -0.5762813222468205,
+       "worth_lower_bound_bps": -0.96536767696412,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1443,
+       "hits": 23,
+       "hit_rate": 0.01563964604021427,
+       "worth_per_hit_bps": -0.514312559515114,
+       "worth_lower_bound_bps": -1.7151561622831686,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1443,
+       "hits": 3,
+       "hit_rate": 0.001752595526337905,
+       "worth_per_hit_bps": -2.19447476352933,
+       "worth_lower_bound_bps": -2.19447476352933,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1061,
+       "hits": 667,
+       "hit_rate": 0.6284967139119269,
+       "worth_per_hit_bps": -0.27035588037279884,
+       "worth_lower_bound_bps": -0.37575066257832845,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1061,
+       "hits": 366,
+       "hit_rate": 0.34483877706848487,
+       "worth_per_hit_bps": -0.4211208471810636,
+       "worth_lower_bound_bps": -0.569889833762672,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1061,
+       "hits": 207,
+       "hit_rate": 0.19480408726006423,
+       "worth_per_hit_bps": -0.4151278067814438,
+       "worth_lower_bound_bps": -0.6572408365398432,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1061,
+       "hits": 76,
+       "hit_rate": 0.07160002019406479,
+       "worth_per_hit_bps": -0.6719187911937319,
+       "worth_lower_bound_bps": -1.0423325265128722,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1061,
+       "hits": 15,
+       "hit_rate": 0.014373603409968747,
+       "worth_per_hit_bps": 1.1250972840842195,
+       "worth_lower_bound_bps": -0.8409164839024792,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1061,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 1529,
+       "worth_bps": -0.22571799311819293,
+       "worth_lower_bound_bps": -0.2860889884371612,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 1056,
+       "worth_bps": -0.22915326997670699,
+       "worth_lower_bound_bps": -0.3076330605801728,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 874,
+       "worth_bps": -0.016893387176980825,
+       "worth_lower_bound_bps": -0.1020201653775346,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 299,
+       "worth_bps": -0.03197050362308603,
+       "worth_lower_bound_bps": -0.18876609126420715,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.8-1.6",
+       "times": 44,
+       "worth_bps": 0.549579305903348,
+       "worth_lower_bound_bps": 0.17653982081930858,
+       "verdict": "not enough yet"
+      },
+      {
+       "forecast_bps": "3.2+",
+       "times": 2,
+       "worth_bps": 3.2119068214459987,
+       "worth_lower_bound_bps": -8.193781453181185,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": 0.0,
+     "taker": 0.0
+    }
+   },
+   "net": {
+    "hours": 1.17522036380238,
+    "median_spread_bps": 0.5051057775682715,
+    "fills": 0,
+    "fills_per_hour": 0.0,
+    "maker_ratio": 0.0,
+    "volume_usd": 0.0,
+    "spread_capture_bps": 0.0,
+    "move_after_fill_bps": {
+     "1s": 0.0,
+     "5s": 0.0,
+     "30s": 0.0
+    },
+    "edge_per_fill_bps_before_fees": 0.0,
+    "fees_usd": 0.0,
+    "pnl_usd": 0.0,
+    "pnl_pct": 0.0,
+    "max_drawdown_pct": 0.0,
+    "max_inventory_x": 0.0,
+    "quote_uptime_pct": 0.0,
+    "orders_placed": 0,
+    "orders_cancelled": 0,
+    "liquidations": 0,
+    "fast_alpha": {
+     "trusted_beta": 0.0712305868167018,
+     "oos_ic": 0.11898150933114335,
+     "scored": 4224.0,
+     "weights": {
+      "imbalance_l1": -0.5148,
+      "microprice_bps": 0.7683,
+      "ofi_1s": 0.0663,
+      "tfi_5s": -0.0001,
+      "ret_1s_bps": -0.0616,
+      "bias": -0.0302
+     }
+    },
+    "takes": 0,
+    "making_timeouts": 0,
+    "practice": {
+     "fills": 0,
+     "edge_bps_5s": 0.0,
+     "edge_lower_bound_bps": 0.0,
+     "needed_bps": 0.0,
+     "fills_needed": 20,
+     "pnl_pct": 0.0
+    },
+    "making_allowed_at_end": false,
+    "lessons": {
+     "quotes": [
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1061,
+       "hits": 519,
+       "hit_rate": 0.4889581112372295,
+       "worth_per_hit_bps": -0.6559229061084437,
+       "worth_lower_bound_bps": -0.7797134575132998,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1061,
+       "hits": 332,
+       "hit_rate": 0.31235169660185563,
+       "worth_per_hit_bps": -0.5999025762319673,
+       "worth_lower_bound_bps": -0.7582729048219825,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1061,
+       "hits": 205,
+       "hit_rate": 0.19356679317189676,
+       "worth_per_hit_bps": -0.6921395113701113,
+       "worth_lower_bound_bps": -0.8863121301384533,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1061,
+       "hits": 103,
+       "hit_rate": 0.09693320082460549,
+       "worth_per_hit_bps": -0.6218487276719507,
+       "worth_lower_bound_bps": -0.8726435677229686,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1061,
+       "hits": 13,
+       "hit_rate": 0.012018040184791983,
+       "worth_per_hit_bps": -0.3697409500307198,
+       "worth_lower_bound_bps": -1.14291355962779,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1061,
+       "hits": 1,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1443,
+       "hits": 706,
+       "hit_rate": 0.48882901247037086,
+       "worth_per_hit_bps": -0.6195107333798054,
+       "worth_lower_bound_bps": -0.7263459699052605,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1443,
+       "hits": 427,
+       "hit_rate": 0.29554498144678776,
+       "worth_per_hit_bps": -0.7024179158863967,
+       "worth_lower_bound_bps": -0.8516520940837955,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1443,
+       "hits": 282,
+       "hit_rate": 0.1951646694449796,
+       "worth_per_hit_bps": -0.7004594653251281,
+       "worth_lower_bound_bps": -0.8880100599871072,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1443,
+       "hits": 149,
+       "hit_rate": 0.10329350493934775,
+       "worth_per_hit_bps": -0.5843503822824603,
+       "worth_lower_bound_bps": -0.8437313348423452,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1443,
+       "hits": 25,
+       "hit_rate": 0.017555968980881395,
+       "worth_per_hit_bps": -0.6873528437016325,
+       "worth_lower_bound_bps": -1.1365832115965353,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1443,
+       "hits": 1,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1307,
+       "hits": 579,
+       "hit_rate": 0.4429480851775338,
+       "worth_per_hit_bps": -0.6987814831939264,
+       "worth_lower_bound_bps": -0.8412501666099836,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1307,
+       "hits": 355,
+       "hit_rate": 0.27136353759881005,
+       "worth_per_hit_bps": -0.9347969794033629,
+       "worth_lower_bound_bps": -1.1064860314273257,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1307,
+       "hits": 251,
+       "hit_rate": 0.19222675640780568,
+       "worth_per_hit_bps": -1.0087084672630868,
+       "worth_lower_bound_bps": -1.2211627427645169,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1307,
+       "hits": 130,
+       "hit_rate": 0.09969146623249357,
+       "worth_per_hit_bps": -0.8832366423595656,
+       "worth_lower_bound_bps": -1.148784786998237,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1307,
+       "hits": 20,
+       "hit_rate": 0.015134374215502408,
+       "worth_per_hit_bps": -1.2664126292819566,
+       "worth_lower_bound_bps": -2.038795839478526,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "bid",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1307,
+       "hits": 5,
+       "hit_rate": 0.004121952621355698,
+       "worth_per_hit_bps": -0.16825045871540859,
+       "worth_lower_bound_bps": -0.5023718894340212,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.0,
+       "quotes": 1307,
+       "hits": 884,
+       "hit_rate": 0.676125264663279,
+       "worth_per_hit_bps": -0.535443345200101,
+       "worth_lower_bound_bps": -0.654855334397678,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 0.5,
+       "quotes": 1307,
+       "hits": 604,
+       "hit_rate": 0.46197906984523146,
+       "worth_per_hit_bps": -0.5505936106982011,
+       "worth_lower_bound_bps": -0.7028587872347433,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 1.0,
+       "quotes": 1307,
+       "hits": 402,
+       "hit_rate": 0.30735742678871625,
+       "worth_per_hit_bps": -0.5514946349851205,
+       "worth_lower_bound_bps": -0.7594452922986143,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 2.0,
+       "quotes": 1307,
+       "hits": 173,
+       "hit_rate": 0.13211524382270962,
+       "worth_per_hit_bps": -0.5741996457114293,
+       "worth_lower_bound_bps": -0.8895322373666212,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 4.0,
+       "quotes": 1307,
+       "hits": 24,
+       "hit_rate": 0.018398608811158262,
+       "worth_per_hit_bps": -1.5415686751250708,
+       "worth_lower_bound_bps": -2.6449427448329623,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast against",
+       "bps_behind_touch": 8.0,
+       "quotes": 1307,
+       "hits": 6,
+       "hit_rate": 0.004515545930215327,
+       "worth_per_hit_bps": -2.1944747635293553,
+       "worth_lower_bound_bps": -2.1944747635293553,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.0,
+       "quotes": 1443,
+       "hits": 876,
+       "hit_rate": 0.6070064753877716,
+       "worth_per_hit_bps": -0.3769504053663409,
+       "worth_lower_bound_bps": -0.4807760148503716,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 0.5,
+       "quotes": 1443,
+       "hits": 494,
+       "hit_rate": 0.3420543356050517,
+       "worth_per_hit_bps": -0.49249159056425357,
+       "worth_lower_bound_bps": -0.648375321949269,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 1.0,
+       "quotes": 1443,
+       "hits": 299,
+       "hit_rate": 0.20702156011143427,
+       "worth_per_hit_bps": -0.6104935589059018,
+       "worth_lower_bound_bps": -0.8215425384464539,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 2.0,
+       "quotes": 1443,
+       "hits": 128,
+       "hit_rate": 0.08844801684620703,
+       "worth_per_hit_bps": -0.5762813222468205,
+       "worth_lower_bound_bps": -0.96536767696412,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 4.0,
+       "quotes": 1443,
+       "hits": 23,
+       "hit_rate": 0.01563964604021427,
+       "worth_per_hit_bps": -0.514312559515114,
+       "worth_lower_bound_bps": -1.7151561622831686,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "neutral",
+       "bps_behind_touch": 8.0,
+       "quotes": 1443,
+       "hits": 3,
+       "hit_rate": 0.001752595526337905,
+       "worth_per_hit_bps": -2.19447476352933,
+       "worth_lower_bound_bps": -2.19447476352933,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.0,
+       "quotes": 1061,
+       "hits": 667,
+       "hit_rate": 0.6284967139119269,
+       "worth_per_hit_bps": -0.27035588037279884,
+       "worth_lower_bound_bps": -0.37575066257832845,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 0.5,
+       "quotes": 1061,
+       "hits": 366,
+       "hit_rate": 0.34483877706848487,
+       "worth_per_hit_bps": -0.4211208471810636,
+       "worth_lower_bound_bps": -0.569889833762672,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 1.0,
+       "quotes": 1061,
+       "hits": 207,
+       "hit_rate": 0.19480408726006423,
+       "worth_per_hit_bps": -0.4151278067814438,
+       "worth_lower_bound_bps": -0.6572408365398432,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 2.0,
+       "quotes": 1061,
+       "hits": 76,
+       "hit_rate": 0.07160002019406479,
+       "worth_per_hit_bps": -0.6719187911937319,
+       "worth_lower_bound_bps": -1.0423325265128722,
+       "verdict": "avoid: loses after the fee"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 4.0,
+       "quotes": 1061,
+       "hits": 15,
+       "hit_rate": 0.014373603409968747,
+       "worth_per_hit_bps": 1.1250972840842195,
+       "worth_lower_bound_bps": -0.8409164839024792,
+       "verdict": "not enough hits yet"
+      },
+      {
+       "side": "ask",
+       "situation": "forecast with",
+       "bps_behind_touch": 8.0,
+       "quotes": 1061,
+       "hits": 0,
+       "hit_rate": 0.0,
+       "worth_per_hit_bps": 0.0,
+       "worth_lower_bound_bps": null,
+       "verdict": "not enough hits yet"
+      }
+     ],
+     "takes": [
+      {
+       "forecast_bps": "0-0.1",
+       "times": 1529,
+       "worth_bps": -0.22571799311819293,
+       "worth_lower_bound_bps": -0.2860889884371612,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.1-0.2",
+       "times": 1056,
+       "worth_bps": -0.22915326997670699,
+       "worth_lower_bound_bps": -0.3076330605801728,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.2-0.4",
+       "times": 874,
+       "worth_bps": -0.016893387176980825,
+       "worth_lower_bound_bps": -0.1020201653775346,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.4-0.8",
+       "times": 299,
+       "worth_bps": -0.03197050362308603,
+       "worth_lower_bound_bps": -0.18876609126420715,
+       "verdict": "avoid: less than the fee"
+      },
+      {
+       "forecast_bps": "0.8-1.6",
+       "times": 44,
+       "worth_bps": 0.549579305903348,
+       "worth_lower_bound_bps": 0.17653982081930858,
+       "verdict": "not enough yet"
+      },
+      {
+       "forecast_bps": "3.2+",
+       "times": 2,
+       "worth_bps": 3.2119068214459987,
+       "worth_lower_bound_bps": -8.193781453181185,
+       "verdict": "not enough yet"
+      }
+     ]
+    },
+    "markout_5s_vs_fill_bps": {
+     "maker": 0.0,
+     "taker": 0.0
+    }
+   }
+  }
+ ]
+}

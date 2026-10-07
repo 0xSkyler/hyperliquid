@@ -129,8 +129,22 @@ Measured so far, on real Hyperliquid data:
   4.5 bps taker fee, and resting quotes are picked off. See "The scalper" above.
 - **Scalping on reduced-fee markets: not shown.** Builder-deployed markets in "growth mode" (for example
   `xyz:SP500`, `xyz:XYZ100`) charge about a tenth of the standard fee. The scalp lab accepts them and
-  their fee level (`--maker-bps 0.3 --taker-bps 0.9`). In a first quiet-hours sample the forecast there
-  was too small to beat even that fee. The engine cannot trade these markets yet.
+  their fee level (`--maker-bps 0.3 --taker-bps 0.9`). In an hour of quiet-hours data on eight of them
+  (`models/scalp_lab_reduced_fee.json`) the best forecast bucket was worth 0.3 bps against a 0.9 bps fee,
+  and no real trade was made. The engine cannot trade these markets yet.
+- **Scalping on a zero-fee exchange (Lighter): about break-even, not shown profitable.** Lighter charges
+  no maker or taker fee on its default account and delays those accounts' orders instead (about 300 ms
+  for orders that take liquidity). `app/exchange/lighter.py` reads its public feed into the same record
+  format, so the whole research stack runs on it:
+  `python scripts/record.py --venue lighter --coins BTC,ETH,SOL --minutes 60 --out data/rec_lighter`, then
+  `python -m app.research.scalp_lab "data/rec_lighter/*.jsonl" --maker-bps 0 --taker-bps 0 --latency-ms 350 --taker-latency-ms 450`.
+  On 70 minutes of BTC, ETH and SOL (`models/scalp_lab_lighter.json`): resting quotes on BTC were worth
+  about -0.02 bps per fill instead of the -1 bps seen on Hyperliquid, and the lessons found two quoting
+  situations that paid about +0.1 bps; the engine made 188 passive fills on BTC and finished at -0.05%.
+  ETH and SOL showed nothing positive, taking on the forecast was worth about zero, and Hyperliquid's
+  price did not lead Lighter's in the simultaneous recordings. That is far closer than anything at
+  Hyperliquid's fees, and still not an edge. There is no Lighter order placement; it would be built
+  only if longer recordings show a profit at the lower confidence bound.
 - **Collecting funding: yes, modestly.** `python -m app.research.carry_lab` takes a year of real funding
   payments and prices a position that holds the coin on spot and shorts the same amount on the perp, so
   it has no price exposure and earns funding. After 23 bps of round-trip fees, holding all year earned

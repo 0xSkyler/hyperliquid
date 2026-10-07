@@ -40,7 +40,8 @@ SPECS = {"BTC": (5, 40), "ETH": (4, 25), "SOL": (2, 20), "HYPE": (2, 10), "ENA":
 
 def replay(path: str, s: Settings, meta: AssetMeta, equity: float) -> dict[str, Any]:
     s = dataclasses.replace(s, mode=Mode.BACKTEST, strategy="maker", coin=meta.coin, models=("ridge",))
-    venue = PaperVenue(equity, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
+    venue = PaperVenue(equity, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000,
+                       s.taker_latency_ms / 1000 if s.taker_latency_ms > 0 else None)  # fmt: skip
     eng = Engine(s, venue, meta)
     next_tick: float | None = None
     first = last = 0.0
@@ -89,20 +90,29 @@ def coin_of(path: str) -> str:
     return f"{dex}:{rest}" if rest and dex.islower() else stem.upper()
 
 
-def live_specs(coins: list[str]) -> dict[str, tuple[int, float]]:
-    """(size decimals, max leverage) for each coin from the exchange; empty if it cannot be reached."""
+def live_specs(coins: list[str]) -> dict[str, AssetMeta]:
+    """Market details for each coin from its exchange; coins that cannot be looked up are left out."""
     import urllib.request
 
-    out: dict[str, tuple[int, float]] = {}
-    for dex in sorted({c.split(":")[0] if ":" in c else "" for c in coins}):
-        try:
-            req = urllib.request.Request("https://api.hyperliquid.xyz/info", data=json.dumps({"type": "meta", "dex": dex}).encode(),
-                                         headers={"Content-Type": "application/json"})  # noqa: S310 - fixed https URL
-            with urllib.request.urlopen(req, timeout=15) as r:  # noqa: S310
-                for u in json.load(r)["universe"]:
-                    out[u["name"]] = (int(u["szDecimals"]), float(u["maxLeverage"]))
-        except Exception:  # noqa: BLE001, S112 - offline: fall back to the built-in table
-            continue
+    out: dict[str, AssetMeta] = {}
+
+    def fetch(url: str, body: dict[str, Any] | None = None) -> Any:
+        data = json.dumps(body).encode() if body is not None else None
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})  # noqa: S310 - fixed https URLs
+        with urllib.request.urlopen(req, timeout=15) as r:  # noqa: S310
+            return json.load(r)
+
+    try:
+        if any(c.startswith("lighter:") for c in coins):
+            from app.exchange.lighter import API, PREFIX, asset_meta
+
+            for m in fetch(API + "/api/v1/orderBookDetails")["order_book_details"]:
+                out[PREFIX + m["symbol"]] = asset_meta(m["symbol"], m)
+        for dex in sorted({c.split(":")[0] if ":" in c else "" for c in coins if not c.startswith("lighter:")}):
+            for u in fetch("https://api.hyperliquid.xyz/info", {"type": "meta", "dex": dex})["universe"]:
+                out[u["name"]] = AssetMeta(u["name"], int(u["szDecimals"]), float(u["maxLeverage"]))
+    except Exception as e:  # noqa: BLE001 - offline: fall back to the built-in table
+        print(f"could not fetch live market details ({type(e).__name__}); using built-in values")
     return out
 
 
@@ -113,12 +123,18 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     ap.add_argument("--maker-bps", type=float, default=None, help="maker fee per trade in bps (default: the standard 1.5)")
     ap.add_argument("--taker-bps", type=float, default=None, help="taker fee per trade in bps (default: the standard 4.5)")
+    ap.add_argument("--latency-ms", type=float, default=None, help="order and cancel latency (default 150)")
+    ap.add_argument("--taker-latency-ms", type=float, default=None, help="latency of orders that take liquidity, if the venue delays them")
     args = ap.parse_args()
     s = Settings.from_env()
     if args.maker_bps is not None:
         s = dataclasses.replace(s, maker_fee=args.maker_bps * 1e-4)
     if args.taker_bps is not None:
         s = dataclasses.replace(s, taker_fee=args.taker_bps * 1e-4)
+    if args.latency_ms is not None:
+        s = dataclasses.replace(s, latency_ms=args.latency_ms)
+    if args.taker_latency_ms is not None:
+        s = dataclasses.replace(s, taker_latency_ms=args.taker_latency_ms)
     rows = []
     paths = expand_paths(args.paths)
     specs = live_specs([coin_of(p) for p in paths])
@@ -128,8 +144,8 @@ def main() -> None:
         coin = coin_of(path)
         if Path(path).stat().st_size == 0:
             continue
-        dec, lev = specs.get(coin) or SPECS.get(coin, (1, 5))
-        meta = AssetMeta(coin, dec, float(lev))
+        dec, lev = SPECS.get(coin, (1, 5))
+        meta = specs.get(coin) or AssetMeta(coin, dec, float(lev))
         gross = replay(path, dataclasses.replace(s, maker_fee=0.0, taker_fee=0.0), meta, args.equity)
         net = replay(path, s, meta, args.equity)
         rows.append({"market": coin, "file": Path(path).name, "gross": gross, "net": net})
@@ -140,7 +156,8 @@ def main() -> None:
               f"{net['quote_uptime_pct']:8.1f}")  # fmt: skip
     out = Path(args.out or Path(s.chart_model_dir) / "scalp_lab.json")
     out.parent.mkdir(parents=True, exist_ok=True)
-    note = {"maker_fee": s.maker_fee, "taker_fee": s.taker_fee, "equity": args.equity,
+    note = {"maker_fee": s.maker_fee, "taker_fee": s.taker_fee, "equity": args.equity, "latency_ms": s.latency_ms,
+            "taker_latency_ms": s.taker_latency_ms or s.latency_ms,
             "caveat": "short recordings; simulated fills (see module docstring)"}  # fmt: skip
     out.write_text(json.dumps({"settings": note, "results": rows}, indent=1, default=lambda x: None if math.isnan(x) else x), encoding="utf-8")
     print(f"wrote {out}")

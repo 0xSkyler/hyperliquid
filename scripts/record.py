@@ -1,6 +1,7 @@
 """Record raw market data for several coins at once, in the format the research tools replay.
 
     python scripts/record.py --coins BTC,ETH,ENA --minutes 60
+    python scripts/record.py --venue lighter --coins BTC,ETH,SOL --minutes 60 --out data/rec_lighter
 
 Writes data/rec/<COIN>-<UTC date>.jsonl (appending). Each file replays through
 `python -m app.research.scalp_lab` and `python -m backtest.run`.
@@ -59,13 +60,46 @@ async def record(coins: list[str], minutes: float, out_dir: Path) -> dict[str, i
     return counts
 
 
+async def record_lighter(symbols: list[str], minutes: float, out_dir: Path) -> dict[str, int]:
+    """Same file format, from Lighter's feed re-shaped by app.exchange.lighter. Files are lighter_<SYMBOL>-<date>.jsonl."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from app.exchange.lighter import PREFIX, raw_stream
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    day = time.strftime("%Y%m%d", time.gmtime())
+    files = {PREFIX + c: open(out_dir / f"lighter_{c}-{day}.jsonl", "a", encoding="utf-8") for c in symbols}  # noqa: SIM115
+    counts = dict.fromkeys(files, 0)
+    end = time.time() + minutes * 60
+    last_flush = time.time()
+    try:
+        async for ts, ch, d in raw_stream(symbols):
+            coin = d[0]["coin"] if isinstance(d, list) else d["coin"]
+            files[coin].write(json.dumps({"t": ts, "ch": ch, "d": d}, separators=(",", ":")) + "\n")
+            counts[coin] += 1
+            if ts - last_flush > 5:
+                last_flush = ts
+                for f in files.values():
+                    f.flush()
+            if ts >= end:
+                break
+    finally:
+        for f in files.values():
+            f.close()
+    return counts
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--coins", default="BTC,ETH,SOL")
     ap.add_argument("--minutes", type=float, default=60)
     ap.add_argument("--out", default="data/rec")
+    ap.add_argument("--venue", default="hyperliquid", choices=("hyperliquid", "lighter"))
     args = ap.parse_args()
-    counts = asyncio.run(record([c.strip() for c in args.coins.split(",") if c.strip()], args.minutes, Path(args.out)))
+    coins = [c.strip() for c in args.coins.split(",") if c.strip()]
+    run = record_lighter if args.venue == "lighter" else record
+    counts = asyncio.run(run(coins, args.minutes, Path(args.out)))
     print(json.dumps(counts))
 
 

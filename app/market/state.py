@@ -43,6 +43,9 @@ class MarketState:
         self.ctx: AssetCtx | None = None
         # Chart models' forecasts for the current bar of each timeframe; 0 where there is no model.
         self.chart_scores = {"5m": 0.0, "1h": 0.0, "4h": 0.0, "1d": 0.0}
+        # How many levels count as "the touch" for the fast forecast. 1 where each price level holds real size
+        # (Hyperliquid's coarse ticks); several on fine-tick books, where the best level is often dust.
+        self.touch_levels = 1
         self.news_score = 0.0  # decayed LLM-scored news pressure; 0 unless HL_LLM_NEWS is enabled
         self.feed_ts = 0.0  # last message of any kind: liveness of the market-data connection
         self.mids: deque[float] = deque(maxlen=self.n_look + 1)
@@ -95,11 +98,14 @@ class MarketState:
         b = self.book
         if b is None or not b.valid() or len(self.mids) < 2:
             return None
-        bq, aq = float(b.bids[0, 1]), float(b.asks[0, 1])
-        if bq + aq <= 0:
+        n = max(1, min(self.touch_levels, len(b.bids), len(b.asks)))
+        bq, aq = float(b.bids[:n, 1].sum()), float(b.asks[:n, 1].sum())
+        if bq <= 0 or aq <= 0:
             return None
         mid = b.mid
-        micro = (b.best_ask * bq + b.best_bid * aq) / (bq + aq)
+        bid_px = float(b.bids[:n, 0] @ b.bids[:n, 1]) / bq  # size-weighted price of the levels counted as the touch
+        ask_px = float(b.asks[:n, 0] @ b.asks[:n, 1]) / aq
+        micro = (ask_px * bq + bid_px * aq) / (bq + aq)
         k = min(5, len(b.bids), len(b.asks))
         depth = float(b.bids[:k, 1].sum() + b.asks[:k, 1].sum()) / 2.0
         ofi1 = sum(self._window(self._ofi, now, 1.0)) / depth if depth > 0 else 0.0

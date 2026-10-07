@@ -37,6 +37,8 @@ class Engine:
         self.s, self.venue, self.meta, self.sink = s, venue, meta, sink
         n = len(FEATURE_NAMES)
         self.market = MarketState(s.decision_interval_s)
+        if meta.price_tick > 0:  # a fine fixed price grid: look a few levels deep for the real size
+            self.market.touch_levels = 5
         self.std = Standardizer(n - 1)
         self.arena = build_arena(s, FEATURE_NAMES[:-1], len(REGIMES), async_fit=s.mode is not Mode.BACKTEST)
         self.arena.on_promotion = self._on_promotion
@@ -65,7 +67,8 @@ class Engine:
         # Practice book: the same quoting logic runs against a simulator on the live feed, with pretend
         # money, all the time. Real passive quotes are allowed only while this practice shows that resting
         # quotes are worth more than their fee. The scalper earns the right to quote before it risks a cent.
-        self.practice_venue = PaperVenue(1000.0, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000)
+        self.practice_venue = PaperVenue(1000.0, meta, s.taker_fee, s.maker_fee, s.latency_ms / 1000,
+                                         s.taker_latency_ms / 1000 if s.taker_latency_ms > 0 else None)  # fmt: skip
         self.practice_quotes = QuoteManager(meta.coin, s.scalp_min_requote_s, actions_per_min=s.scalp_actions_per_min)
         self.practice = Journal()
         self.making_allowed = False

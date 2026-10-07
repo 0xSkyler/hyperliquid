@@ -22,12 +22,15 @@ class _Resting:
 
 class PaperVenue:
     def __init__(
-        self, equity: float, meta: AssetMeta, taker_fee: float, maker_fee: float, latency_s: float = 0.15
+        self, equity: float, meta: AssetMeta, taker_fee: float, maker_fee: float, latency_s: float = 0.15,
+        taker_latency_s: float | None = None,
     ) -> None:
         self.meta = meta
         self.taker_fee = taker_fee
         self.maker_fee = maker_fee
         self.latency_s = latency_s
+        # Some venues deliberately delay orders that take liquidity (Lighter's zero-fee accounts): model it separately.
+        self.taker_latency_s = latency_s if taker_latency_s is None else taker_latency_s
         self.cash = equity  # realized equity
         self.pos = 0.0
         self.entry = 0.0
@@ -45,7 +48,7 @@ class PaperVenue:
 
     # --- Venue protocol -------------------------------------------------
     def submit(self, intent: OrderIntent, now: float) -> None:
-        self._pending.append((now + self.latency_s, intent))
+        self._pending.append((now + (self.taker_latency_s if intent.tif == "Ioc" else self.latency_s), intent))
 
     def cancel_all(self, now: float) -> None:
         self._resting.clear()

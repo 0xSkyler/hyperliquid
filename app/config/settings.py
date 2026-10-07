@@ -75,6 +75,7 @@ class Settings:
     taker_fee: float = 0.00045
     maker_fee: float = 0.00015
     latency_ms: float = 150.0  # simulated order latency for paper/backtest
+    taker_latency_ms: float = 0.0  # > 0: orders that take liquidity are this slow instead (venues with a taker speed bump)
 
     # Safety kernel: instrumentation checks only
     stale_book_s: float = 3.0  # no market-data message of any kind for this long
@@ -127,6 +128,7 @@ class Settings:
             max_leverage_cap=float(env.get("HL_MAX_LEVERAGE", d.max_leverage_cap)),
             api_url_override=env.get("HL_API_URL", "").rstrip("/"),
             latency_ms=float(env.get("HL_LATENCY_MS", d.latency_ms)),
+            taker_latency_ms=float(env.get("HL_TAKER_LATENCY_MS", d.taker_latency_ms)),
             strategy=env.get("HL_STRATEGY", "maker").lower(),
             scalp_inventory_x=float(env.get("HL_SCALP_INVENTORY_X", d.scalp_inventory_x)),
             scalp_clip_x=float(env.get("HL_SCALP_CLIP_X", d.scalp_clip_x)),

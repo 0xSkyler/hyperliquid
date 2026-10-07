@@ -97,6 +97,7 @@ class AssetMeta:
     sz_decimals: int
     max_leverage: float
     min_notional: float = 10.0
+    price_tick: float = 0.0  # > 0: prices sit on this fixed grid (e.g. Lighter); 0: Hyperliquid's significant-figure rule
 
     @property
     def maintenance_margin(self) -> float:
@@ -105,6 +106,8 @@ class AssetMeta:
 
     def tick(self, px: float) -> float:
         """Smallest price step at this price: 5 significant figures, at most (6 - szDecimals) decimals."""
+        if self.price_tick > 0:
+            return self.price_tick
         return max(min(10.0 ** (math.floor(math.log10(px)) - 4), 1.0), 10.0 ** -(6 - self.sz_decimals))  # integers always valid
 
     def round_sz(self, sz: float) -> float:
@@ -112,6 +115,8 @@ class AssetMeta:
         return math.floor(sz * q + 1e-9) / q
 
     def round_px(self, px: float) -> float:
+        if self.price_tick > 0:
+            return round(round(px / self.price_tick) * self.price_tick, 10)
         # Perp prices: at most 5 significant figures and (6 - szDecimals) decimals; integers always ok.
         if px >= 100_000:
             return float(round(px))

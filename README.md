@@ -121,6 +121,25 @@ So the skill is there and it is roughly a tenth of the fee. Closing that gap tak
 or a faster connection to the exchange, not a better model. The panel's **Scan all markets** ranks
 every perpetual by spread minus fees; `HL_STRATEGY=taker` restores the older directional behaviour.
 
+## Can anything here pay its fees?
+
+Measured so far, on real Hyperliquid data:
+
+- **Scalping at standard fees: no.** The fast forecast's best trades are worth about 0.5 bps against a
+  4.5 bps taker fee, and resting quotes are picked off. See "The scalper" above.
+- **Scalping on reduced-fee markets: not shown.** Builder-deployed markets in "growth mode" (for example
+  `xyz:SP500`, `xyz:XYZ100`) charge about a tenth of the standard fee. The scalp lab accepts them and
+  their fee level (`--maker-bps 0.3 --taker-bps 0.9`). In a first quiet-hours sample the forecast there
+  was too small to beat even that fee. The engine cannot trade these markets yet.
+- **Collecting funding: yes, modestly.** `python -m app.research.carry_lab` takes a year of real funding
+  payments and prices a position that holds the coin on spot and shorts the same amount on the perp, so
+  it has no price exposure and earns funding. After 23 bps of round-trip fees, holding all year earned
+  about 4% a year on the capital tied up for BTC and ETH and about 7% for HYPE; SOL was negative. This
+  is slow income, not scalping, and it has risks the study does not model (the spot and perp prices
+  drifting apart, the short being liquidated in a fast rally if under-margined, the bridged spot asset
+  losing its peg, funding turning negative for longer than last year). Results: `models/carry_lab.json`.
+  The engine does not trade this strategy; it is a measurement.
+
 ## Champion / challenger
 
 All models are scored on the same resolved forecasts. A challenger replaces the champion when its

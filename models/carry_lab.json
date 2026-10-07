@@ -1,0 +1,108 @@
+{
+ "round_trip_fees_bps": 23.0,
+ "capital_per_dollar_of_position": 1.3333333333333333,
+ "not_modelled": [
+  "spot-perp basis",
+  "liquidation of the short",
+  "spot asset peg",
+  "funding regime change"
+ ],
+ "coins": {
+  "BTC": {
+   "hours": 8760,
+   "hours_funding_positive_pct": 80.94748858447488,
+   "funding_apr_pct": 5.883782850000001,
+   "worst_run_of_negative_funding_pct": 0.1485520600000092,
+   "always_in": {
+    "net_pct_of_position_per_year": 5.653782850000002,
+    "net_pct_of_capital_per_year": 4.240337137500001,
+    "fees_pct": 0.22999999999999998
+   },
+   "rule_trailing_week_positive": {
+    "net_pct_of_position_per_year": 3.0592010800000016,
+    "net_pct_of_capital_per_year": 2.2944008100000013,
+    "time_held_pct": 86.27853881278538,
+    "opens_and_closes": 22,
+    "fees_pct": 2.53
+   },
+   "by_quarter_apr_pct": [
+    8.22356676,
+    2.5722876000000006,
+    3.9251697200000004,
+    8.81410732
+   ]
+  },
+  "ETH": {
+   "hours": 8760,
+   "hours_funding_positive_pct": 83.75570776255708,
+   "funding_apr_pct": 6.3421607700000004,
+   "worst_run_of_negative_funding_pct": 0.23700025000000027,
+   "always_in": {
+    "net_pct_of_position_per_year": 6.112160770000001,
+    "net_pct_of_capital_per_year": 4.584120577500001,
+    "fees_pct": 0.22999999999999998
+   },
+   "rule_trailing_week_positive": {
+    "net_pct_of_position_per_year": 3.88710949,
+    "net_pct_of_capital_per_year": 2.9153321175,
+    "time_held_pct": 89.68036529680366,
+    "opens_and_closes": 22,
+    "fees_pct": 2.53
+   },
+   "by_quarter_apr_pct": [
+    7.825800440000001,
+    3.84525228,
+    4.19708372,
+    9.500506640000001
+   ]
+  },
+  "SOL": {
+   "hours": 8760,
+   "hours_funding_positive_pct": 62.956621004566216,
+   "funding_apr_pct": -0.2016246399999994,
+   "worst_run_of_negative_funding_pct": 2.4429147200000205,
+   "always_in": {
+    "net_pct_of_position_per_year": -0.43162463999999945,
+    "net_pct_of_capital_per_year": -0.3237184799999996,
+    "fees_pct": 0.22999999999999998
+   },
+   "rule_trailing_week_positive": {
+    "net_pct_of_position_per_year": 0.33464185000000035,
+    "net_pct_of_capital_per_year": 0.25098138750000026,
+    "time_held_pct": 59.33789954337899,
+    "opens_and_closes": 24,
+    "fees_pct": 2.76
+   },
+   "by_quarter_apr_pct": [
+    -0.6617536,
+    -8.43208228,
+    1.3311599200000004,
+    6.9561774000000005
+   ]
+  },
+  "HYPE": {
+   "hours": 8760,
+   "hours_funding_positive_pct": 90.60502283105023,
+   "funding_apr_pct": 9.482990350000001,
+   "worst_run_of_negative_funding_pct": 0.2675778699999999,
+   "always_in": {
+    "net_pct_of_position_per_year": 9.252990350000001,
+    "net_pct_of_capital_per_year": 6.939742762500001,
+    "fees_pct": 0.22999999999999998
+   },
+   "rule_trailing_week_positive": {
+    "net_pct_of_position_per_year": 8.752450370000002,
+    "net_pct_of_capital_per_year": 6.564337777500002,
+    "time_held_pct": 95.45662100456622,
+    "opens_and_closes": 6,
+    "fees_pct": 0.69
+   },
+   "by_quarter_apr_pct": [
+    10.567840480000001,
+    8.325867000000002,
+    9.0372122,
+    10.00104172
+   ]
+  }
+ }
+}

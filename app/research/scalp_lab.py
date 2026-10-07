@@ -82,27 +82,59 @@ def replay(path: str, s: Settings, meta: AssetMeta, equity: float) -> dict[str, 
     }  # fmt: skip
 
 
+def coin_of(path: str) -> str:
+    """BTC-20261006.jsonl -> BTC; xyz_SP500-20261007.jsonl -> xyz:SP500 (a builder-deployed market)."""
+    stem = Path(path).name.split("-")[0]
+    dex, _, rest = stem.partition("_")
+    return f"{dex}:{rest}" if rest and dex.islower() else stem.upper()
+
+
+def live_specs(coins: list[str]) -> dict[str, tuple[int, float]]:
+    """(size decimals, max leverage) for each coin from the exchange; empty if it cannot be reached."""
+    import urllib.request
+
+    out: dict[str, tuple[int, float]] = {}
+    for dex in sorted({c.split(":")[0] if ":" in c else "" for c in coins}):
+        try:
+            req = urllib.request.Request("https://api.hyperliquid.xyz/info", data=json.dumps({"type": "meta", "dex": dex}).encode(),
+                                         headers={"Content-Type": "application/json"})  # noqa: S310 - fixed https URL
+            with urllib.request.urlopen(req, timeout=15) as r:  # noqa: S310
+                for u in json.load(r)["universe"]:
+                    out[u["name"]] = (int(u["szDecimals"]), float(u["maxLeverage"]))
+        except Exception:  # noqa: BLE001, S112 - offline: fall back to the built-in table
+            continue
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("paths", nargs="+", help="recordings (globs allowed); the coin is the file name before the first '-'")
     ap.add_argument("--equity", type=float, default=1000.0)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--maker-bps", type=float, default=None, help="maker fee per trade in bps (default: the standard 1.5)")
+    ap.add_argument("--taker-bps", type=float, default=None, help="taker fee per trade in bps (default: the standard 4.5)")
     args = ap.parse_args()
     s = Settings.from_env()
+    if args.maker_bps is not None:
+        s = dataclasses.replace(s, maker_fee=args.maker_bps * 1e-4)
+    if args.taker_bps is not None:
+        s = dataclasses.replace(s, taker_fee=args.taker_bps * 1e-4)
     rows = []
-    print(f"{'market':7s} {'hours':>5s} {'spread':>7s} | {'GROSS fills':>11s} {'capture':>8s} {'move 5s':>8s} {'edge/fill':>9s} {'pnl %':>7s} | "
+    paths = expand_paths(args.paths)
+    specs = live_specs([coin_of(p) for p in paths])
+    print(f"{'market':12s} {'hours':>5s} {'spread':>7s} | {'GROSS fills':>11s} {'capture':>8s} {'move 5s':>8s} {'edge/fill':>9s} {'pnl %':>7s} | "
           f"{'NET fills':>9s} {'pnl %':>7s} {'uptime %':>8s}")
-    for path in expand_paths(args.paths):
-        coin = Path(path).name.split("-")[0].upper()
+    for path in paths:
+        coin = coin_of(path)
         if Path(path).stat().st_size == 0:
             continue
-        dec, lev = SPECS.get(coin, (1, 5))
+        dec, lev = specs.get(coin) or SPECS.get(coin, (1, 5))
         meta = AssetMeta(coin, dec, float(lev))
         gross = replay(path, dataclasses.replace(s, maker_fee=0.0, taker_fee=0.0), meta, args.equity)
         net = replay(path, s, meta, args.equity)
         rows.append({"market": coin, "file": Path(path).name, "gross": gross, "net": net})
         sp = gross["median_spread_bps"]
-        print(f"{coin:7s} {gross['hours']:5.2f} {sp if sp is None else round(sp, 2)!s:>7s} | {gross['fills']:11d} "
+        print(f"{coin:12s} {gross['hours']:5.2f} {sp if sp is None else round(sp, 2)!s:>7s} | {gross['fills']:11d} "
               f"{gross['spread_capture_bps']:8.2f} {gross['move_after_fill_bps']['5s']:8.2f} "
               f"{gross['edge_per_fill_bps_before_fees']:9.2f} {gross['pnl_pct']:7.3f} | {net['fills']:9d} {net['pnl_pct']:7.3f} "
               f"{net['quote_uptime_pct']:8.1f}")  # fmt: skip

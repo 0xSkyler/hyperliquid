@@ -23,7 +23,8 @@ CHANNELS = ("l2Book", "bbo", "trades", "activeAssetCtx")
 async def record(coins: list[str], minutes: float, out_dir: Path) -> dict[str, int]:
     out_dir.mkdir(parents=True, exist_ok=True)
     day = time.strftime("%Y%m%d", time.gmtime())
-    files = {c: open(out_dir / f"{c}-{day}.jsonl", "a", encoding="utf-8") for c in coins}  # noqa: SIM115
+    # Builder-deployed markets are named "dex:COIN"; a colon is not allowed in Windows file names.
+    files = {c: open(out_dir / f"{c.replace(':', '_')}-{day}.jsonl", "a", encoding="utf-8") for c in coins}  # noqa: SIM115
     counts = dict.fromkeys(coins, 0)
     end = time.time() + minutes * 60
     try:

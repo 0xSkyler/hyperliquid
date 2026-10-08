@@ -1,0 +1,292 @@
+{
+ "hours": 24.0,
+ "restarts": {
+  "BTC": 1,
+  "ETH": 1,
+  "SOL": 1
+ },
+ "markets": [
+  {
+   "coin": "BTC",
+   "up": true,
+   "seconds_learned": 71711,
+   "faults": [],
+   "forecast_accuracy": 0.06555092741976812,
+   "forecast_trust": 0.0,
+   "forecasts_scored": 72165.0,
+   "practice_fills": 0,
+   "practice_edge_bps": 0.0,
+   "real_quoting_earned": false,
+   "take_lessons": [
+    {
+     "forecast_bps": "0-0.1",
+     "times": 1762,
+     "worth_bps": -0.07087023956420659,
+     "worth_lower_bound_bps": -0.11208677000854733,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.1-0.2",
+     "times": 1794,
+     "worth_bps": 0.0119089019321747,
+     "worth_lower_bound_bps": -0.031242987393230864,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.2-0.4",
+     "times": 4059,
+     "worth_bps": 0.1465662762043969,
+     "worth_lower_bound_bps": 0.1166063285837508,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.4-0.8",
+     "times": 4580,
+     "worth_bps": 0.43874206669553334,
+     "worth_lower_bound_bps": 0.40123776399173866,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.8-1.6",
+     "times": 951,
+     "worth_bps": 0.5551059534816183,
+     "worth_lower_bound_bps": 0.44797271781414094,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "1.6-3.2",
+     "times": 262,
+     "worth_bps": 0.000702834880737595,
+     "worth_lower_bound_bps": -0.06835145098260671,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "3.2+",
+     "times": 6050,
+     "worth_bps": -0.089086094820126,
+     "worth_lower_bound_bps": -0.1061246229995011,
+     "verdict": "avoid: less than the fee"
+    }
+   ],
+   "best_take_bps": 0.44797271781414094,
+   "quote_situations_judged": 30,
+   "quote_situations_that_pay": 0,
+   "champion": "ridge",
+   "promotions": 0,
+   "slow_models": [
+    {
+     "name": "ridge",
+     "oos_ic": 0.21451500667546822,
+     "max_trusted_beta": 0.0,
+     "resolved": 71456
+    },
+    {
+     "name": "mlp",
+     "oos_ic": -0.1268252093305674,
+     "max_trusted_beta": 0.0,
+     "resolved": 71456
+    },
+    {
+     "name": "tree",
+     "oos_ic": 0.10173121496132902,
+     "max_trusted_beta": 0.0,
+     "resolved": 71456
+    },
+    {
+     "name": "flow_pretrained",
+     "oos_ic": 0.12416653168763979,
+     "max_trusted_beta": 0.0,
+     "resolved": 71456
+    }
+   ]
+  },
+  {
+   "coin": "ETH",
+   "up": true,
+   "seconds_learned": 71703,
+   "faults": [],
+   "forecast_accuracy": 0.02393407233706012,
+   "forecast_trust": 0.0,
+   "forecasts_scored": 72152.0,
+   "practice_fills": 87,
+   "practice_edge_bps": -1.55996771788544,
+   "real_quoting_earned": false,
+   "take_lessons": [
+    {
+     "forecast_bps": "0-0.1",
+     "times": 1433,
+     "worth_bps": -0.18779974465461416,
+     "worth_lower_bound_bps": -0.2585068902161411,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.1-0.2",
+     "times": 1555,
+     "worth_bps": -0.060378417232838634,
+     "worth_lower_bound_bps": -0.12202203964004307,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.2-0.4",
+     "times": 3154,
+     "worth_bps": 0.013049462719355297,
+     "worth_lower_bound_bps": -0.032123578693759584,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.4-0.8",
+     "times": 4712,
+     "worth_bps": 0.31953720890644194,
+     "worth_lower_bound_bps": 0.27091763519083306,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.8-1.6",
+     "times": 1494,
+     "worth_bps": 0.7564367845222937,
+     "worth_lower_bound_bps": 0.6277733038779543,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "1.6-3.2",
+     "times": 175,
+     "worth_bps": 0.008176839270692198,
+     "worth_lower_bound_bps": -0.45705717044574995,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "3.2+",
+     "times": 6935,
+     "worth_bps": -0.17730812001209958,
+     "worth_lower_bound_bps": -0.1948172192865907,
+     "verdict": "avoid: less than the fee"
+    }
+   ],
+   "best_take_bps": 0.6277733038779543,
+   "quote_situations_judged": 32,
+   "quote_situations_that_pay": 0,
+   "champion": "ridge",
+   "promotions": 0,
+   "slow_models": [
+    {
+     "name": "ridge",
+     "oos_ic": 0.17576056233666879,
+     "max_trusted_beta": 0.0,
+     "resolved": 71390
+    },
+    {
+     "name": "mlp",
+     "oos_ic": -0.024413807407810757,
+     "max_trusted_beta": 0.0,
+     "resolved": 71390
+    },
+    {
+     "name": "tree",
+     "oos_ic": 0.067710162277316,
+     "max_trusted_beta": 0.0,
+     "resolved": 71390
+    },
+    {
+     "name": "flow_pretrained",
+     "oos_ic": 0.08290528822635389,
+     "max_trusted_beta": 0.0,
+     "resolved": 71390
+    }
+   ]
+  },
+  {
+   "coin": "SOL",
+   "up": true,
+   "seconds_learned": 71697,
+   "faults": [],
+   "forecast_accuracy": -0.010256730445055711,
+   "forecast_trust": 0.0,
+   "forecasts_scored": 72150.0,
+   "practice_fills": 0,
+   "practice_edge_bps": 0.0,
+   "real_quoting_earned": false,
+   "take_lessons": [
+    {
+     "forecast_bps": "0-0.1",
+     "times": 1281,
+     "worth_bps": -0.4152330121962013,
+     "worth_lower_bound_bps": -0.4920997365691537,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.1-0.2",
+     "times": 1305,
+     "worth_bps": -0.3756763214294449,
+     "worth_lower_bound_bps": -0.4518043556254233,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.2-0.4",
+     "times": 3079,
+     "worth_bps": -0.2111149395007418,
+     "worth_lower_bound_bps": -0.2589985060520504,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.4-0.8",
+     "times": 4713,
+     "worth_bps": 0.06990386998583001,
+     "worth_lower_bound_bps": 0.025352682317956364,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "0.8-1.6",
+     "times": 1883,
+     "worth_bps": 0.564384382395608,
+     "worth_lower_bound_bps": 0.46851593220999055,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "1.6-3.2",
+     "times": 92,
+     "worth_bps": 0.7147412762462464,
+     "worth_lower_bound_bps": 0.14756605986002236,
+     "verdict": "avoid: less than the fee"
+    },
+    {
+     "forecast_bps": "3.2+",
+     "times": 7104,
+     "worth_bps": -0.46351329016840104,
+     "worth_lower_bound_bps": -0.49055106460162573,
+     "verdict": "avoid: less than the fee"
+    }
+   ],
+   "best_take_bps": 0.46851593220999055,
+   "quote_situations_judged": 31,
+   "quote_situations_that_pay": 0,
+   "champion": "ridge",
+   "promotions": 0,
+   "slow_models": [
+    {
+     "name": "ridge",
+     "oos_ic": 0.15599798016171237,
+     "max_trusted_beta": 0.0,
+     "resolved": 71442
+    },
+    {
+     "name": "mlp",
+     "oos_ic": 0.025155219487595283,
+     "max_trusted_beta": 0.0,
+     "resolved": 71442
+    },
+    {
+     "name": "tree",
+     "oos_ic": 0.08383787966011368,
+     "max_trusted_beta": 0.0,
+     "resolved": 71442
+    },
+    {
+     "name": "flow_pretrained",
+     "oos_ic": 0.09217493291636915,
+     "max_trusted_beta": 0.0,
+     "resolved": 71442
+    }
+   ]
+  }
+ ]
+}
